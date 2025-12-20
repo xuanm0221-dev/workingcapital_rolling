@@ -736,22 +736,11 @@ export function calculateCF(data: FinancialData[], year2024Values: Map<string, n
   const 자산성지출 = getAccountValues(map, '자산성지출');
   const 투자활동 = 자산성지출;
   
-  // 기말현금 계산
-  const 기초현금 = new Array(12).fill(0);
-  const 기말현금 = new Array(12).fill(0);
-  기초현금[0] = INITIAL_CASH;
-  기말현금[0] = 기초현금[0] + 영업활동[0] + 재무활동[0] + 투자활동[0];
-  
-  for (let i = 1; i < 12; i++) {
-    기초현금[i] = 기말현금[i - 1];
-    기말현금[i] = 기초현금[i] + 영업활동[i] + 재무활동[i] + 투자활동[i];
-  }
-  
   // 합계 계산 (12개월)
-  const sumArray = (arr: number[]) => arr.reduce((sum, v) => sum + v, 0);
+  const sumArray = (arr: number[]) => arr.reduce((sum: number, v) => sum + v, 0);
   
-  // 2024년 기초현금 (고정값)
-  const 기초현금2024 = 140853827.859988;
+  // 2024년 데이터 계산
+  const 기초현금2024 = 140853827.859988; // 2024년 1월 기초현금 (고정값)
   const 영업활동2024 = sum2024Values(['MLB', 'KIDS', 'Discovery', 'Duvetica', 'Supra', '대리상선금', '대리상보증금', '정부보조금', '기타수익', '본사', '위탁생산', '본사선급금', '운영비']);
   const 입금2024 = sum2024Values(['MLB', 'KIDS', 'Discovery', 'Duvetica', 'Supra', '대리상선금', '대리상보증금', '정부보조금', '기타수익']);
   const 매출수금2024 = sum2024Values(['MLB', 'KIDS', 'Discovery', 'Duvetica', 'Supra']);
@@ -762,6 +751,18 @@ export function calculateCF(data: FinancialData[], year2024Values: Map<string, n
   const 투자활동2024 = sum2024Values(['자산성지출']);
   // 2024년 기말현금 계산 (기초현금 + 영업활동 + 재무활동 + 투자활동)
   const 기말현금2024 = 기초현금2024 + (영업활동2024 ?? 0) + (재무활동2024 ?? 0) + (투자활동2024 ?? 0);
+  
+  // 2025년 기말현금 계산
+  // 2025년 1월 기초현금 = 2024년 기말현금
+  const 기초현금 = new Array(12).fill(0);
+  const 기말현금 = new Array(12).fill(0);
+  기초현금[0] = 기말현금2024; // 2024년 기말현금을 2025년 1월 기초현금으로
+  기말현금[0] = 기초현금[0] + 영업활동[0] + 재무활동[0] + 투자활동[0];
+  
+  for (let i = 1; i < 12; i++) {
+    기초현금[i] = 기말현금[i - 1];
+    기말현금[i] = 기초현금[i] + 영업활동[i] + 재무활동[i] + 투자활동[i];
+  }
 
   const rows: TableRow[] = [
     {
