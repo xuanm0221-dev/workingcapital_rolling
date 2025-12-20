@@ -36,11 +36,5 @@ next-env.d.ts
 # cursor
 .cursor/
 
-# CSV data files (민감한 재무 데이터)
-PL/
-BS/
-CF/
-*.csv
-
 # plans
 plans/
