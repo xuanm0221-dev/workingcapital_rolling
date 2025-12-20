@@ -249,8 +249,8 @@ export function calculateComparisonData(
     const ytdYoY = calculateYoY(currYearYTD, prevYearYTD);
     
     // 연간 합계
-    const prevYearAnnual = prev2024.reduce((sum, v) => sum + (v || 0), 0);
-    const currYearAnnual = curr2025.reduce((sum, v) => sum + (v || 0), 0);
+    const prevYearAnnual = prev2024.reduce((sum: number, v) => sum + (v || 0), 0);
+    const currYearAnnual = curr2025.reduce((sum: number, v) => sum + (v || 0), 0);
     const annualYoY = calculateYoY(currYearAnnual, prevYearAnnual);
     
     const comparisons: ComparisonData = {
