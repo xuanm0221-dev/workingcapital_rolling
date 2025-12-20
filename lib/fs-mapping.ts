@@ -750,8 +750,8 @@ export function calculateCF(data: FinancialData[], year2024Values: Map<string, n
   // 합계 계산 (12개월)
   const sumArray = (arr: number[]) => arr.reduce((sum, v) => sum + v, 0);
   
-  // 2024년 기초현금 계산 (기말현금과 동일하게 처리, 없으면 null)
-  const 기초현금2024 = get2024Value('기초현금');
+  // 2024년 기초현금 (고정값)
+  const 기초현금2024 = 140853827.859988;
   const 영업활동2024 = sum2024Values(['MLB', 'KIDS', 'Discovery', 'Duvetica', 'Supra', '대리상선금', '대리상보증금', '정부보조금', '기타수익', '본사', '위탁생산', '본사선급금', '운영비']);
   const 입금2024 = sum2024Values(['MLB', 'KIDS', 'Discovery', 'Duvetica', 'Supra', '대리상선금', '대리상보증금', '정부보조금', '기타수익']);
   const 매출수금2024 = sum2024Values(['MLB', 'KIDS', 'Discovery', 'Duvetica', 'Supra']);
@@ -760,7 +760,8 @@ export function calculateCF(data: FinancialData[], year2024Values: Map<string, n
   const 상품대2024 = sum2024Values(['본사', '위탁생산']);
   const 재무활동2024 = sum2024Values(['차입금입금', '차입금상환']);
   const 투자활동2024 = sum2024Values(['자산성지출']);
-  const 기말현금2024 = get2024Value('기말현금');
+  // 2024년 기말현금 계산 (기초현금 + 영업활동 + 재무활동 + 투자활동)
+  const 기말현금2024 = 기초현금2024 + (영업활동2024 ?? 0) + (재무활동2024 ?? 0) + (투자활동2024 ?? 0);
 
   const rows: TableRow[] = [
     {
