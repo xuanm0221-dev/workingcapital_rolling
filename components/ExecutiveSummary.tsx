@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ExecutiveSummaryData } from '@/lib/types';
 
 interface ExecutiveSummaryProps {
@@ -10,6 +10,17 @@ interface ExecutiveSummaryProps {
 
 export default function ExecutiveSummary({ data, onChange, onReset }: ExecutiveSummaryProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // data가 변경될 때마다 localStorage에 자동 저장
+  useEffect(() => {
+    if (data) {
+      try {
+        localStorage.setItem('executive-summary', JSON.stringify(data));
+      } catch (err) {
+        console.error('localStorage 저장 실패:', err);
+      }
+    }
+  }, [data]);
 
   if (!data) {
     return (
@@ -38,16 +49,27 @@ export default function ExecutiveSummary({ data, onChange, onReset }: ExecutiveS
     });
   };
 
-  // JSON 다운로드
-  const handleDownload = () => {
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `경영요약_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  // 저장 (localStorage + JSON 백업 다운로드)
+  const handleSave = () => {
+    try {
+      // localStorage에 저장
+      localStorage.setItem('executive-summary', JSON.stringify(data));
+      
+      // JSON 파일로도 백업 다운로드
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `경영요약_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert('저장되었습니다! (브라우저 저장소 + JSON 파일 백업)');
+    } catch (err) {
+      console.error('저장 실패:', err);
+      alert('저장에 실패했습니다.');
+    }
   };
 
   // JSON 업로드
@@ -80,10 +102,10 @@ export default function ExecutiveSummary({ data, onChange, onReset }: ExecutiveS
         <h1 className="text-2xl font-bold text-gray-800">{data.title}</h1>
         <div className="flex gap-2">
           <button
-            onClick={handleDownload}
+            onClick={handleSave}
             className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
           >
-            💾 저장 (JSON)
+            💾 저장하기
           </button>
           <input
             type="file"
@@ -96,7 +118,7 @@ export default function ExecutiveSummary({ data, onChange, onReset }: ExecutiveS
             onClick={() => fileInputRef.current?.click()}
             className="px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors shadow-sm"
           >
-            📁 불러오기
+            📁 JSON 불러오기
           </button>
           <button
             onClick={onReset}

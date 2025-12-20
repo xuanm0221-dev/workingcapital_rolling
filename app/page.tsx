@@ -106,12 +106,30 @@ export default function Home() {
   const loadSummaryData = async () => {
     try {
       setLoading(true);
+      
+      // 먼저 localStorage에서 확인
+      const savedData = localStorage.getItem('executive-summary');
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          setSummaryData(parsed);
+          setLoading(false);
+          return; // localStorage에 데이터가 있으면 API 호출 안함
+        } catch (parseErr) {
+          console.error('localStorage 파싱 실패:', parseErr);
+          // 파싱 실패하면 API에서 불러오기
+        }
+      }
+      
+      // localStorage에 없으면 API에서 불러오기
       const response = await fetch('/api/fs/summary');
       if (!response.ok) {
         throw new Error('경영요약 데이터를 불러올 수 없습니다.');
       }
       const result = await response.json();
       setSummaryData(result);
+      // 첫 로드 시 localStorage에도 저장
+      localStorage.setItem('executive-summary', JSON.stringify(result));
     } catch (err) {
       console.error(err);
       setError('경영요약 데이터를 불러오는데 실패했습니다.');
@@ -121,9 +139,29 @@ export default function Home() {
   };
 
   // 경영요약 초기값으로 리셋
-  const resetSummaryData = () => {
-    setSummaryData(null);
-    loadSummaryData();
+  const resetSummaryData = async () => {
+    try {
+      // localStorage 초기화
+      localStorage.removeItem('executive-summary');
+      
+      // API에서 새로 불러오기
+      setSummaryData(null);
+      setLoading(true);
+      const response = await fetch('/api/fs/summary');
+      if (!response.ok) {
+        throw new Error('경영요약 데이터를 불러올 수 없습니다.');
+      }
+      const result = await response.json();
+      setSummaryData(result);
+      // localStorage에도 저장
+      localStorage.setItem('executive-summary', JSON.stringify(result));
+      alert('초기값으로 리셋되었습니다.');
+    } catch (err) {
+      console.error(err);
+      setError('초기값 불러오기에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 탭 변경 시 데이터 로드
