@@ -82,9 +82,9 @@ export default function CreditStatus({ data }: CreditStatusProps) {
       {/* 테이블 */}
       <div className="relative overflow-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
         <table className="w-full border-collapse text-sm">
-          <thead className="sticky top-0 z-10 bg-navy text-white">
+          <thead className="sticky top-0 z-30 bg-navy text-white">
             <tr>
-              <th className="border border-gray-300 py-3 px-4 text-center sticky left-0 z-20 bg-navy min-w-[60px]">
+              <th className="border border-gray-300 py-3 px-4 text-center sticky top-0 left-0 z-40 bg-navy min-w-[60px]">
                 <button
                   onClick={() => setCollapsed(!collapsed)}
                   className="text-white hover:text-yellow-300 transition-colors"
@@ -109,7 +109,7 @@ export default function CreditStatus({ data }: CreditStatusProps) {
           <tbody>
             {/* 1. 합계 행 (맨 위, 연한 하늘색) */}
             <tr className="bg-sky-100 font-bold">
-              <td className="border border-gray-300 py-3 px-4 text-center sticky left-0 z-10 bg-sky-100">
+              <td className="border border-gray-300 py-3 px-4 text-center sticky left-0 z-20 bg-sky-100">
                 ▼ 합계
               </td>
               <td className="border border-gray-300 py-3 px-4"></td>
@@ -163,7 +163,7 @@ export default function CreditStatus({ data }: CreditStatusProps) {
                   key={index} 
                   className={`${isWuhanModing ? 'bg-red-50' : ''} hover:bg-gray-50`}
                 >
-                  <td className="border border-gray-300 py-2 px-4 text-center sticky left-0 z-10 bg-white">
+                  <td className="border border-gray-300 py-2 px-4 text-center sticky left-0 z-20 bg-white">
                     {index + 1}
                   </td>
                   <td className="border border-gray-300 py-2 px-4">
@@ -214,7 +214,7 @@ export default function CreditStatus({ data }: CreditStatusProps) {
               <>
                 {/* 기타 합계 행 */}
                 <tr className="bg-gray-100">
-                  <td className="border border-gray-300 py-2 px-4 text-center sticky left-0 z-10 bg-gray-100">
+                  <td className="border border-gray-300 py-2 px-4 text-center sticky left-0 z-20 bg-gray-100">
                     <button
                       onClick={() => setOthersCollapsed(!othersCollapsed)}
                       className="text-gray-700 hover:text-gray-900 transition-colors"
@@ -239,7 +239,7 @@ export default function CreditStatus({ data }: CreditStatusProps) {
                 {/* 기타 개별 대리상 (펼쳤을 때만) */}
                 {!othersCollapsed && data.othersList && data.othersList.map((dealer, index) => (
                   <tr key={`other-${index}`} className="bg-gray-50 hover:bg-gray-100">
-                    <td className="border border-gray-300 py-2 px-4 text-center sticky left-0 z-10 bg-gray-50 text-sm text-gray-600">
+                    <td className="border border-gray-300 py-2 px-4 text-center sticky left-0 z-20 bg-gray-50 text-sm text-gray-600">
                       {17 + index + 1}
                     </td>
                     <td className="border border-gray-300 py-2 px-4 pl-8 text-sm text-gray-700">
@@ -273,7 +273,7 @@ export default function CreditStatus({ data }: CreditStatusProps) {
               <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
                 <li>
                   <strong>총 외상매출금:</strong> {formatNumber(data.total.외상매출금)} 
-                  (전체 {data.dealers.length + 1}개 대리상)
+                  (전체 {data.dealers.length}개 대리상)
                 </li>
                 <li>
                   <strong>총 선수금:</strong> {formatNumber(data.total.선수금)}
@@ -288,6 +288,11 @@ export default function CreditStatus({ data }: CreditStatusProps) {
                     <span> - {data.top17[0].name} 최대 거래처 ({data.analysis.top1Ratio.toFixed(1)}%)</span>
                   )}
                 </li>
+                {data.others.count > 0 && (
+                  <li>
+                    <strong>기타 대리상:</strong> {data.others.count}개, 외상매출금 {formatNumber(data.others.외상매출금)}, 순여신 {formatNumber(data.others.순여신)}
+                  </li>
+                )}
               </ul>
             </div>
           </div>
@@ -301,19 +306,28 @@ export default function CreditStatus({ data }: CreditStatusProps) {
               <h4 className="font-semibold text-orange-900 mb-2">여신 관리 포인트</h4>
               <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
                 <li>
-                  <strong>상위 10개 대리상의 집중도</strong>가 {data.analysis.top17Ratio > 70 ? '72.2%로 지속 위험 수준' : '적정 수준'}
+                  <strong>상위 17개 대리상의 집중도</strong>가 {data.analysis.top17Ratio.toFixed(1)}%로 {data.analysis.top17Ratio > 70 ? '지속 위험 수준' : '적정 수준'}
                   {data.top17[0] && data.analysis.top1Ratio > 20 && (
                     <span> - <strong>{data.top17[0].name}</strong> 최대 거래처 ({data.analysis.top1Ratio.toFixed(1)}%)의 회수 차질 시 영향 큼</span>
                   )}
                 </li>
                 <li>
-                  <strong>대리상 매출채권</strong> 10월 대비 18.2% 감소 (781M → 639M)
+                  <strong>총 외상매출금:</strong> {formatNumber(data.total.외상매출금)} (전체 {data.dealers.length}개 대리상)
                 </li>
                 <li>
-                  <strong>순여신</strong> 37.3% 개선 (372M → 233M), 회수 진행 양호
+                  <strong>순여신:</strong> {formatNumber(data.total.순여신)} 
+                  {data.total.순여신 > 0 && (
+                    <span className="text-red-600"> - 회수 진행 필요</span>
+                  )}
+                  {data.total.순여신 <= 0 && (
+                    <span className="text-green-600"> - 양호한 상태</span>
+                  )}
                 </li>
                 <li>
                   <strong>지속적인 신용평가</strong> 및 여신 회수 독촉 필요
+                  {data.analysis.riskLevel === '높음' && (
+                    <span className="text-red-600 font-semibold"> - 리스크 관리 강화 필요</span>
+                  )}
                 </li>
               </ul>
             </div>
