@@ -10,7 +10,7 @@ interface CreditStatusProps {
 
 export default function CreditStatus({ data }: CreditStatusProps) {
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [wuhanMemo, setWuhanMemo] = useState<string>('생태니스로 에스크로 계좌 운용중');
+  const [wuhanMemo, setWuhanMemo] = useState<string>('');
   const [editingWuhan, setEditingWuhan] = useState<boolean>(false);
   const [recoveryPlan, setRecoveryPlan] = useState<string>(
     '여신회수: 12월 258m(회수 실적 282m), 1월 330m, 2월 190m, 3월 107m, 4월 10m'
@@ -139,7 +139,7 @@ export default function CreditStatus({ data }: CreditStatusProps) {
       </div>
 
       {/* 테이블 */}
-      <div className="relative overflow-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
+      <div className="relative">
         <table className="w-full border-collapse text-sm">
           <thead className="sticky top-0 z-30 bg-navy text-white">
             <tr>
@@ -218,48 +218,16 @@ export default function CreditStatus({ data }: CreditStatusProps) {
 
             {/* 3. 상위 17개 대리상 (접기/펼치기 가능) */}
             {!collapsed && data.top17.map((dealer, index) => {
-              const isWuhanModing = dealer.name.includes('Wuhan Moding');
-              
               return (
                 <tr 
                   key={index} 
-                  className={`${isWuhanModing ? 'bg-red-50' : ''} hover:bg-gray-50`}
+                  className="hover:bg-gray-50"
                 >
                   <td className="border border-gray-300 py-2 px-4 text-center sticky left-0 z-20 bg-white">
                     {index + 1}
                   </td>
                   <td className="border border-gray-300 py-2 px-4">
                     {dealer.name}
-                    {isWuhanModing && (
-                      <span className="ml-2 text-xs text-red-600">
-                        (
-                        {editingWuhan ? (
-                          <input
-                            type="text"
-                            value={wuhanMemo}
-                            onChange={(e) => {
-                              setWuhanMemo(e.target.value);
-                              saveCreditRemarkDebounced('wuhanMemo', e.target.value);
-                            }}
-                            onBlur={() => setEditingWuhan(false)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') setEditingWuhan(false);
-                            }}
-                            className="inline-block w-64 px-1 border-b border-red-400 focus:outline-none bg-red-50"
-                            autoFocus
-                          />
-                        ) : (
-                          <span
-                            onClick={() => setEditingWuhan(true)}
-                            className="cursor-pointer hover:underline"
-                            title="클릭하여 편집"
-                          >
-                            {wuhanMemo}
-                          </span>
-                        )}
-                        )
-                      </span>
-                    )}
                   </td>
                   <td className="border border-gray-300 py-2 px-4 text-right">
                     {formatNumber(dealer.외상매출금)}
