@@ -793,10 +793,10 @@ export function calculateComparisonDataBS(
     let comparisons: ComparisonData;
     
     if (currentYear === 2026) {
-      // 2026년: 25년기말 vs 26년6월
+      // 2026년: 25년기말 vs 26년기말(12월)
       const prevYearAnnual = prevValues[11] ?? null; // 25년 12월 (index 11)
-      const currYearMonth = currValues[5] ?? null; // 26년 6월 (index 5)
-      const monthYoY = calculateYoY(currYearMonth, prevYearAnnual);
+      const currYearAnnual = currValues[11] ?? null; // 26년 12월 (index 11)
+      const annualYoY = calculateYoY(currYearAnnual, prevYearAnnual);
       
       comparisons = {
         prevYearMonth: null, // 사용 안 함
@@ -806,8 +806,8 @@ export function calculateComparisonDataBS(
         currYearYTD: null,
         ytdYoY: null,
         prevYearAnnual, // 25년기말
-        currYearAnnual: currYearMonth, // 26년6월
-        annualYoY: monthYoY,
+        currYearAnnual, // 26년기말
+        annualYoY,
       };
     } else {
       // 2025년: 전년(11월) 당년(11월) + 24년기말 25년기말

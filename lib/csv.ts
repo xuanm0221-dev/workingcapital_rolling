@@ -259,16 +259,16 @@ export async function readCreditCSV(filePath: string) {
     throw new Error('CSV 데이터가 부족합니다.');
   }
 
-  // 첫 행은 헤더, 둘째 행부터 데이터
+  // 첫 행은 헤더. 데이터 행: [0]=코드, [1]=중문명, [2]=영문명, [3]=외상매출금, [4]=선수금
   const dealers: Array<{ name: string; 외상매출금: number; 선수금: number }> = [];
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
-    if (row.length < 2) continue;
+    if (row.length < 5) continue;
 
-    const name = row[0]?.trim() || '';
-    const 외상매출금Str = row[1]?.trim() || '0';
-    const 선수금Str = row[2]?.trim() || '0';
+    const name = (row[2] ?? row[1] ?? row[0])?.trim() || ''; // 영문명 우선, 없으면 중문명·코드
+    const 외상매출금Str = row[3]?.trim() || '0';
+    const 선수금Str = row[4]?.trim() || '0';
 
     // 숫자 파싱 (콤마, 공백, 따옴표 제거)
     const parse = (str: string): number => {
@@ -286,5 +286,95 @@ export async function readCreditCSV(filePath: string) {
   }
 
   return dealers;
+}
+
+// 현금흐름표 계층형 CSV (대분류, 중분류, 소분류, 1월~12월)
+export interface CFHierarchyRow {
+  대분류: string;
+  중분류: string;
+  소분류: string;
+  values: number[]; // 1월~12월 순서
+}
+
+export async function readCFHierarchyCSV(
+  filePath: string,
+  year: number
+): Promise<{ year: number; rows: CFHierarchyRow[] }> {
+  let content: string;
+  try {
+    content = fs.readFileSync(filePath, 'utf-8');
+  } catch (err) {
+    try {
+      const buffer = fs.readFileSync(filePath);
+      content = iconv.decode(buffer, 'cp949');
+    } catch (err2) {
+      throw new Error(`CSV 파일을 읽을 수 없습니다: ${filePath}`);
+    }
+  }
+
+  const parsed = Papa.parse<string[]>(content, {
+    header: false,
+    skipEmptyLines: true,
+  });
+  const rows = parsed.data;
+  if (rows.length < 2) return { year, rows: [] };
+
+  const headers = rows[0];
+  const monthIndices: { month: number; index: number }[] = [];
+  for (let i = 3; i < headers.length; i++) {
+    const month = parseMonthColumn((headers[i] ?? '').trim());
+    if (month !== null) monthIndices.push({ month, index: i });
+  }
+  monthIndices.sort((a, b) => a.month - b.month);
+  if (monthIndices.length === 0) return { year, rows: [] };
+
+  const result: CFHierarchyRow[] = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const 대분류 = (row[0] ?? '').trim();
+    const 중분류 = (row[1] ?? '').trim();
+    const 소분류 = (row[2] ?? '').trim();
+    if (!대분류) continue;
+
+    const values = monthIndices.map(({ index }) =>
+      cleanNumericValue(row[index] ?? '0')
+    );
+    result.push({ 대분류, 중분류, 소분류, values });
+  }
+  return { year, rows: result };
+}
+
+// 현금잔액·차입금잔액 CSV (헤더: ,기초잔액, 1월..12월, 기말잔액 / 데이터: 현금잔액, 차입금잔액)
+export function readCashBorrowingCSV(filePath: string): { 현금잔액: number[]; 차입금잔액: number[] } {
+  let content: string;
+  try {
+    content = fs.readFileSync(filePath, 'utf-8');
+  } catch (err) {
+    try {
+      const buffer = fs.readFileSync(filePath);
+      content = iconv.decode(buffer, 'cp949');
+    } catch (err2) {
+      throw new Error(`CSV 파일을 읽을 수 없습니다: ${filePath}`);
+    }
+  }
+  const parsed = Papa.parse<string[]>(content, { header: false, skipEmptyLines: true });
+  const rows = parsed.data;
+  if (rows.length < 3) return { 현금잔액: [], 차입금잔액: [] };
+
+  const getValues = (row: string[]): number[] => {
+    const arr: number[] = [];
+    for (let i = 1; i <= 14; i++) arr.push(cleanNumericValue(row[i] ?? '0'));
+    return arr;
+  };
+
+  let 현금잔액: number[] = [];
+  let 차입금잔액: number[] = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const label = (row[0] ?? '').trim();
+    if (label === '현금잔액') 현금잔액 = getValues(row);
+    else if (label === '차입금잔액') 차입금잔액 = getValues(row);
+  }
+  return { 현금잔액, 차입금잔액 };
 }
 

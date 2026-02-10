@@ -152,10 +152,12 @@ export default function FinancialTable({
       const currYear = currentYear ? currentYear % 100 : 25;
       
       if (currentYear === 2026) {
-        // 2026년: 25년기말 vs 26년6월만
+        // 2026년 접힌 뷰: 2025년 기말 | 2026년1월 | 2026년6월 | 2026년기말 | YoY(연간)
         return [
-          `${prevYear}년기말`,
+          '2025년 기말',
+          `${currYear}년1월`,
           `${currYear}년6월`,
+          `${currYear}년기말`,
           'YoY(연간)',
         ];
       } else {
@@ -212,19 +214,21 @@ export default function FinancialTable({
       if (isBalanceSheet) {
         // 재무상태표
         if (currentYear === 2026) {
-          // 2026년: 1~6월 + 25년기말 26년6월 YoY
+          // 2026년 접힌: 2025년 기말 | 26년1월 | 26년6월 | 26년기말 | YoY(연간)
           if (monthsCollapsed) {
             return [
               ...accountCol,
               comparisonColumns[0], comparisonColumns[1], comparisonColumns[2],
+              comparisonColumns[3], comparisonColumns[4],
             ];
           } else {
-            const monthCols = columns.slice(1, 7); // 1월~6월만 (index 1~6)
+            // 2026년 펼침: 25년기말 | 1~12월 | 26년기말 | YoY(연간)
+            const monthCols = columns.slice(1, 13); // 1월~12월 (index 1~12)
             return [
               ...accountCol,
-              comparisonColumns[0], // 25년기말을 먼저
+              comparisonColumns[0], // 2025년 기말
               ...monthCols,
-              comparisonColumns[1], comparisonColumns[2],
+              comparisonColumns[3], comparisonColumns[4], // 26년기말, YoY(연간)
             ];
           }
         } else {
@@ -400,6 +404,8 @@ export default function FinancialTable({
                 
                 const isComparisonCol = showComparisons && comparisonColumns.includes(col);
                 const isBrandCol = showBrandBreakdown && brands.includes(col);
+                // 2026 재무상태표 접힌 뷰: 26년1월 열만 연한 버터색
+                const isBS2026JanCol = isBalanceSheet && currentYear === 2026 && monthsCollapsed && col === comparisonColumns[1];
                 
                 // CF: 기준월 개념 없음 (모든 월 동일하게 표시)
                 const isMonthCol = col.includes('월') && !col.includes('합계');
@@ -429,11 +435,12 @@ export default function FinancialTable({
                   <th
                     key={index}
                     className={`
-                      border border-gray-300 py-3 text-center font-semibold text-white
-                      ${isAccountCol ? 'sticky top-0 left-0 z-40 bg-navy min-w-[200px] px-4' : 'min-w-[100px] px-4'}
+                      border border-gray-300 py-3 text-center font-semibold
+                      ${isBS2026JanCol ? 'bg-amber-100 text-amber-900 min-w-[100px] px-4' : 'text-white'}
+                      ${isAccountCol ? 'sticky top-0 left-0 z-40 bg-navy min-w-[200px] px-4' : !isBS2026JanCol ? 'min-w-[100px] px-4' : ''}
                       ${isNonBaseMonthCol ? 'bg-gray-600' : ''}
-                      ${!isNonBaseMonthCol && isComparisonCol ? 'bg-navy-light' : ''}
-                      ${!isNonBaseMonthCol && !isComparisonCol && !isAccountCol && !isBrandCol ? 'bg-navy' : ''}
+                      ${!isNonBaseMonthCol && isComparisonCol && !isBS2026JanCol ? 'bg-navy-light' : ''}
+                      ${!isNonBaseMonthCol && !isComparisonCol && !isAccountCol && !isBrandCol && !isBS2026JanCol ? 'bg-navy' : ''}
                       ${isBrandCol ? 'bg-gray-700' : ''}
                       ${(isMonthGroupHeader || isYtdGroupHeader || isAnnualGroupHeader) ? 'cursor-pointer hover:bg-gray-700' : ''}
                     `}
@@ -549,8 +556,8 @@ export default function FinancialTable({
                   if (isCashFlow && colIndex >= 12) {
                     return null;
                   }
-                  // 2026년 재무상태표: 1~6월만 표시 (index 0~5)
-                  if (isBalanceSheet && currentYear === 2026 && colIndex > 5) {
+                  // 2026년 재무상태표: 1~12월 표시 (index 12 이상만 스킵)
+                  if (isBalanceSheet && currentYear === 2026 && colIndex > 11) {
                     return null;
                   }
                   const isValueOk = value === null || Math.abs(value) < 10;
@@ -632,27 +639,50 @@ export default function FinancialTable({
                       return 'month'; // 기본값 (안전장치)
                     };
                     
-                    // 2026년 재무상태표: 월별 비교 없이 기말 비교만
+                    // 2026년 재무상태표: 접힌 뷰 5컬럼(2025년기말|26년1월|26년6월|26년기말|YoY), 펼친 뷰는 26년기말+YoY만
                     if (isBalanceSheet && currentYear === 2026 && row.comparisons) {
-                      // 월별 데이터를 접었을 때는 prevYearAnnual도 여기서 렌더링
+                      const cellClass = (val: number | null) =>
+                        `border border-gray-300 px-4 py-2 text-right ${isBalanceCheck ? (val === null || Math.abs(val) < 10 ? 'bg-green-100' : 'bg-red-100') : getHighlightClass(row.isHighlight)} ${row.isBold ? 'font-semibold' : ''} ${isNegative(val) ? 'text-red-600' : ''}`;
                       if (monthsCollapsed) {
+                        // 접힌: 2025년 기말 | 2026년1월 | 2026년6월 | 2026년기말 | YoY(연간)
                         cells.push(
-                          <td key="prev-annual" className={`border border-gray-300 px-4 py-2 text-right ${isBalanceCheck ? (row.comparisons.prevYearAnnual === null || Math.abs(row.comparisons.prevYearAnnual) < 10 ? 'bg-green-100' : 'bg-red-100') : getHighlightClass(row.isHighlight)} ${row.isBold ? 'font-semibold' : ''} ${isNegative(row.comparisons.prevYearAnnual) ? 'text-red-600' : ''}`}>
+                          <td key="prev-annual" className={cellClass(row.comparisons.prevYearAnnual)}>
                             {formatValue(row.comparisons.prevYearAnnual, row.format, false, true)}
                           </td>
                         );
+                        cells.push(
+                          <td key="26-1" className={`${cellClass(row.values[0] ?? null)} bg-amber-50`}>
+                            {formatValue(row.values[0] ?? null, row.format, false, true)}
+                          </td>
+                        );
+                        cells.push(
+                          <td key="26-6" className={cellClass(row.values[5] ?? null)}>
+                            {formatValue(row.values[5] ?? null, row.format, false, true)}
+                          </td>
+                        );
+                        cells.push(
+                          <td key="curr-annual" className={cellClass(row.comparisons.currYearAnnual)}>
+                            {formatValue(row.comparisons.currYearAnnual, row.format, false, true)}
+                          </td>
+                        );
+                        cells.push(
+                          <td key="annual-yoy" className={cellClass(row.comparisons.annualYoY)}>
+                            {formatValue(row.comparisons.annualYoY, row.format, true, false)}
+                          </td>
+                        );
+                      } else {
+                        // 펼침: 25년기말·12개월은 이미 위에서 렌더됨 → 26년기말, YoY만
+                        cells.push(
+                          <td key="curr-annual" className={cellClass(row.comparisons.currYearAnnual)}>
+                            {formatValue(row.comparisons.currYearAnnual, row.format, false, true)}
+                          </td>
+                        );
+                        cells.push(
+                          <td key="annual-yoy" className={cellClass(row.comparisons.annualYoY)}>
+                            {formatValue(row.comparisons.annualYoY, row.format, true, false)}
+                          </td>
+                        );
                       }
-                      // 26년6월과 YoY는 항상 렌더링
-                      cells.push(
-                        <td key="curr-annual" className={`border border-gray-300 px-4 py-2 text-right ${isBalanceCheck ? (row.comparisons.currYearAnnual === null || Math.abs(row.comparisons.currYearAnnual) < 10 ? 'bg-green-100' : 'bg-red-100') : getHighlightClass(row.isHighlight)} ${row.isBold ? 'font-semibold' : ''} ${isNegative(row.comparisons.currYearAnnual) ? 'text-red-600' : ''}`}>
-                          {formatValue(row.comparisons.currYearAnnual, row.format, false, true)}
-                        </td>
-                      );
-                      cells.push(
-                        <td key="annual-yoy" className={`border border-gray-300 px-4 py-2 text-right ${isBalanceCheck ? (row.comparisons.annualYoY === null || Math.abs(row.comparisons.annualYoY) < 10 ? 'bg-green-100' : 'bg-red-100') : getHighlightClass(row.isHighlight)} ${row.isBold ? 'font-semibold' : ''} ${isNegative(row.comparisons.annualYoY) ? 'text-red-600' : ''}`}>
-                          {formatValue(row.comparisons.annualYoY, row.format, true, false)}
-                        </td>
-                      );
                       return cells;
                     }
                     

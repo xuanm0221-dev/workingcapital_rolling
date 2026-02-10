@@ -80,6 +80,24 @@ export function safeDivide(numerator: number, denominator: number): number | nul
   return isFinite(result) ? result : null;
 }
 
+// 억 원 단위로 포맷 (연간계획 분석용)
+export function formatMillionYuan(value: number | null | undefined): string {
+  if (value === null || value === undefined || isNaN(value)) {
+    return '-';
+  }
+  // 억 원 단위로 변환 (÷ 100,000,000)
+  const eokValue = value / 100000000;
+  const absValue = Math.abs(eokValue);
+  const formatted = absValue.toFixed(1);
+  
+  // 음수일 때 △ 기호 사용
+  if (value < 0) {
+    return `△${formatted}억원`;
+  }
+  
+  return `${formatted}억원`;
+}
+
 // 월 컬럼명 파싱 (Jan-24, 2024-01, 1월 등)
 export function parseMonthColumn(columnName: string): number | null {
   const col = columnName.trim();

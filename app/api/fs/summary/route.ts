@@ -179,10 +179,10 @@ function generateSummary(
 export async function GET() {
   try {
     // CSV 파일에서 직접 데이터 읽기
-    const pl2024Path = path.join(process.cwd(), 'PL', '2024.csv');
-    const pl2025Path = path.join(process.cwd(), 'PL', '2025.csv');
-    const bs2024Path = path.join(process.cwd(), 'BS', '2024.csv');
-    const bs2025Path = path.join(process.cwd(), 'BS', '2025.csv');
+    const pl2024Path = path.join(process.cwd(), '파일', 'PL', '2024.csv');
+    const pl2025Path = path.join(process.cwd(), '파일', 'PL', '2025.csv');
+    const bs2024Path = path.join(process.cwd(), '파일', 'BS', '2024.csv');
+    const bs2025Path = path.join(process.cwd(), '파일', 'BS', '2025.csv');
     
     const pl2024Data = await readCSV(pl2024Path, 2024);
     const pl2025Data = await readCSV(pl2025Path, 2025);

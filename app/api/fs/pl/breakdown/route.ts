@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
     const year = yearParam ? parseInt(yearParam, 10) : 2025;
     const baseMonth = baseMonthParam ? parseInt(baseMonthParam, 10) : 12;
     
-    if (![2024, 2025].includes(year)) {
+    if (![2024, 2025, 2026].includes(year)) {
       return NextResponse.json(
-        { error: '유효하지 않은 연도입니다. 2024 또는 2025를 선택하세요.' },
+        { error: '유효하지 않은 연도입니다. 2024, 2025 또는 2026을 선택하세요.' },
         { status: 400 }
       );
     }
@@ -30,16 +30,23 @@ export async function GET(request: NextRequest) {
     }
 
     // 법인 전체 데이터 로드
-    const corporateFilePath = path.join(process.cwd(), 'PL', `${year}.csv`);
+    const corporateFilePath = path.join(process.cwd(), '파일', 'PL', `${year}.csv`);
     const corporateData = await readCSV(corporateFilePath, year);
     let corporateRows = calculatePL(corporateData);
     
-    // 2025년인 경우 비교 데이터 추가
+    // 2025년인 경우 2024년 대비 비교 데이터 추가
     if (year === 2025) {
-      const corporateFilePath2024 = path.join(process.cwd(), 'PL', '2024.csv');
+      const corporateFilePath2024 = path.join(process.cwd(), '파일', 'PL', '2024.csv');
       const corporateData2024 = await readCSV(corporateFilePath2024, 2024);
       const corporateRows2024 = calculatePL(corporateData2024);
       corporateRows = calculateComparisonData(corporateRows, corporateRows2024, baseMonth);
+    }
+    // 2026년인 경우 2025년 대비 비교 데이터 추가
+    if (year === 2026) {
+      const corporateFilePath2025 = path.join(process.cwd(), '파일', 'PL', '2025.csv');
+      const corporateData2025 = await readCSV(corporateFilePath2025, 2025);
+      const corporateRows2025 = calculatePL(corporateData2025);
+      corporateRows = calculateComparisonData(corporateRows, corporateRows2025, baseMonth);
     }
 
     // 각 브랜드별 데이터 로드
@@ -47,16 +54,23 @@ export async function GET(request: NextRequest) {
     
     for (const brand of VALID_BRANDS) {
       try {
-        const brandFilePath = path.join(process.cwd(), 'PL_brand', brand, `${year}.csv`);
+        const brandFilePath = path.join(process.cwd(), '파일', 'PL_brand', brand, `${year}.csv`);
         const brandData = await readCSV(brandFilePath, year);
         let brandRows = calculatePL(brandData, true);
         
-        // 2025년인 경우 비교 데이터 추가
+        // 2025년인 경우 2024년 대비 비교 데이터 추가
         if (year === 2025) {
-          const brandFilePath2024 = path.join(process.cwd(), 'PL_brand', brand, '2024.csv');
+          const brandFilePath2024 = path.join(process.cwd(), '파일', 'PL_brand', brand, '2024.csv');
           const brandData2024 = await readCSV(brandFilePath2024, 2024);
           const brandRows2024 = calculatePL(brandData2024, true);
           brandRows = calculateComparisonData(brandRows, brandRows2024, baseMonth);
+        }
+        // 2026년인 경우 2025년 대비 비교 데이터 추가
+        if (year === 2026) {
+          const brandFilePath2025 = path.join(process.cwd(), '파일', 'PL_brand', brand, '2025.csv');
+          const brandData2025 = await readCSV(brandFilePath2025, 2025);
+          const brandRows2025 = calculatePL(brandData2025, true);
+          brandRows = calculateComparisonData(brandRows, brandRows2025, baseMonth);
         }
         
         brandRowsMap.set(brand, brandRows);
@@ -72,7 +86,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       year,
       type: 'PL',
-      baseMonth: year === 2025 ? baseMonth : undefined,
+      baseMonth: (year === 2025 || year === 2026) ? baseMonth : undefined,
       rows: resultRows,
     });
   } catch (error) {

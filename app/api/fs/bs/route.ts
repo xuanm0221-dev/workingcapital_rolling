@@ -14,7 +14,7 @@ function generateWCRemarks(
   // YoY 값 가져오기 (이미 계산된 값)
   const getYoYValue = (data: TableRow[], account: string) => {
     const row = data.find(r => r.account === account);
-    // annualYoY: 24년기말 vs 25년기말 (또는 25년기말 vs 26년6월)
+    // annualYoY: 24년기말 vs 25년기말 (또는 25년기말 vs 26년기말)
     return row?.comparisons?.annualYoY || 0;
   };
   
@@ -38,7 +38,7 @@ function generateWCRemarks(
   };
   
   const remarks: { [key: string]: string } = {};
-  const yearLabel = currentYear === 2026 ? '26.6월 vs 25.12월' : '25.12월 vs 24.12월';
+  const yearLabel = currentYear === 2026 ? '26.12월 vs 25.12월' : '25.12월 vs 24.12월';
   
   // 1. 운전자본
   const wcChanges: string[] = [];
@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const filePath = path.join(process.cwd(), 'BS', `${year}.csv`);
+    const filePath = path.join(process.cwd(), '파일', 'BS', `${year}.csv`);
     const data = await readCSV(filePath, year);
     let tableRows = calculateBS(data);
     let workingCapitalRows = calculateWorkingCapital(data);
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
     // 2025년 또는 2026년인 경우 전년 데이터와 비교
     if (year === 2025 || year === 2026) {
       const prevYear = year - 1;
-      const prevFilePath = path.join(process.cwd(), 'BS', `${prevYear}.csv`);
+      const prevFilePath = path.join(process.cwd(), '파일', 'BS', `${prevYear}.csv`);
       const prevData = await readCSV(prevFilePath, prevYear);
       const prevTableRows = calculateBS(prevData);
       const prevWorkingCapitalRows = calculateWorkingCapital(prevData);

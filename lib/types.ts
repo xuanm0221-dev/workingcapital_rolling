@@ -137,3 +137,50 @@ export interface ExecutiveSummaryData {
     };
   };
 }
+
+// 연간계획 분석 데이터 타입
+export interface EditableAnalysis {
+  year: number;
+  keyInsights: string[];
+  cfCategories: EditableCategoryAnalysis[];
+  wcCategories: EditableCategoryAnalysis[];
+  wcInsights: { [key: string]: string };
+  riskFactors: string[];
+  actionItems: string[];
+  lastModified: string;
+}
+
+// 현금차입금잔액 데이터 타입
+export interface BalanceData {
+  현금잔액: {
+    기초잔액: number;
+    monthly: number[];
+    기말잔액: number;
+  };
+  차입금잔액: {
+    기초잔액: number;
+    monthly: number[];
+    기말잔액: number;
+  };
+}
+
+// 여신회수계획 데이터 타입
+export interface CreditRecoveryData {
+  baseYearMonth: string;
+  대리상선수금: number;
+  대리상채권: number;
+  recoveries: number[];
+  headers: string[];
+}
+
+// 카테고리 분석 데이터 타입 (연간계획용)
+export interface EditableCategoryAnalysis {
+  account: string;
+  monthlyValues?: (number | null)[];
+  annualTotal: number;
+  yoyAbsolute: number | null;
+  yoyPercent: number | null;
+  prevYearTotal?: number | null;
+  year2023Total?: number | null;
+  customText?: string;
+}

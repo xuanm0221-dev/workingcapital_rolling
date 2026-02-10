@@ -16,14 +16,14 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const filePath = path.join(process.cwd(), 'CF', `${year}.csv`);
+    const filePath = path.join(process.cwd(), '파일', 'cashflow', `${year}.csv`);
     const { data, year2024Values } = await readCFCSV(filePath, year);
     
     // 2026년일 때 2025년 합계 계산
     let previousYearTotals: Map<string, number> | undefined = undefined;
     if (year === 2026) {
       try {
-        const prevFilePath = path.join(process.cwd(), 'CF', '2025.csv');
+        const prevFilePath = path.join(process.cwd(), '파일', 'cashflow', '2025.csv');
         const { data: prevData, year2024Values: prevYear2024Values } = await readCFCSV(prevFilePath, 2025);
         const prevRows = calculateCF(prevData, prevYear2024Values, 2025);
         

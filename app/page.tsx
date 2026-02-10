@@ -6,6 +6,8 @@ import YearTabs from '@/components/YearTabs';
 import BrandTabs from '@/components/BrandTabs';
 import BaseMonthSelector from '@/components/BaseMonthSelector';
 import FinancialTable from '@/components/FinancialTable';
+import CashFlowHierarchyTable from '@/components/CashFlowHierarchyTable';
+import CashBorrowingBalance from '@/components/CashBorrowingBalance';
 import CreditStatus from '@/components/CreditStatus';
 import BSAnalysis from '@/components/BSAnalysis';
 import ExecutiveSummary from '@/components/ExecutiveSummary';
@@ -13,11 +15,11 @@ import { TableRow, CreditData, TabType, ExecutiveSummaryData } from '@/lib/types
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [plYear, setPlYear] = useState<number>(2025);
+  const [plYear, setPlYear] = useState<number>(2026);
   const [plBrand, setPlBrand] = useState<string | null>(null); // null=법인, 'mlb', 'kids' 등
-  const [bsYear, setBsYear] = useState<number>(2025);
-  const [cfYear, setCfYear] = useState<number>(2025);
-  const [baseMonth, setBaseMonth] = useState<number>(12); // 기준월 (기본 12월)
+  const [bsYear, setBsYear] = useState<number>(2026);
+  const [cfYear, setCfYear] = useState<number>(2026);
+  const [baseMonth, setBaseMonth] = useState<number>(1); // 기준월 (기본 1월, 2026년 기본값)
   const [bsMonthsCollapsed, setBsMonthsCollapsed] = useState<boolean>(true); // 재무상태표 & 운전자본 월별 접기
   const [cfMonthsCollapsed, setCfMonthsCollapsed] = useState<boolean>(true); // 현금흐름표 월별 접기 (2025년 기본값: 접힘)
   // 브랜드별 손익 보기는 항상 활성화 (법인 선택 시)
@@ -28,6 +30,16 @@ export default function Home() {
   const [previousBsData, setPreviousBsData] = useState<TableRow[] | null>(null);
   const [workingCapitalData, setWorkingCapitalData] = useState<TableRow[] | null>(null);
   const [cfData, setCfData] = useState<TableRow[] | null>(null);
+  const [cfHierarchyData, setCfHierarchyData] = useState<{ rows: import('@/app/api/fs/cf-hierarchy/route').CFHierarchyApiRow[]; columns: string[] } | null>(null);
+  const [cfHierarchyLoading, setCfHierarchyLoading] = useState(false);
+  const [cashBorrowingData, setCashBorrowingData] = useState<{
+    year: number;
+    columns: string[];
+    cash: number[];
+    borrowing: number[];
+    prevCash?: number[];
+    prevBorrowing?: number[];
+  } | null>(null);
   const [creditData, setCreditData] = useState<CreditData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -122,12 +134,12 @@ export default function Home() {
         // 브랜드별 또는 법인 PL
         if (brand) {
           url = `/api/fs/pl/brand?brand=${brand}&year=${year}`;
-          if (year === 2025 && month !== undefined) {
+          if ((year === 2025 || year === 2026) && month !== undefined) {
             url += `&baseMonth=${month}`;
           }
         } else {
           url = `/api/fs/pl?year=${year}`;
-          if (year === 2025 && month !== undefined) {
+          if ((year === 2025 || year === 2026) && month !== undefined) {
             url += `&baseMonth=${month}`;
           }
         }
@@ -273,9 +285,7 @@ export default function Home() {
       }
     } else if (currentType === 'BS' && !bsData) {
       loadData('BS', bsYear);
-    } else if (currentType === 'CF' && !cfData) {
-      loadData('CF', cfYear);
-      // 2025년일 때는 접힌 상태, 2026년일 때는 펼쳐진 상태
+    } else if (currentType === 'CF') {
       setCfMonthsCollapsed(cfYear === 2025);
     } else if (currentType === 'CREDIT' && !creditData) {
       loadData('CREDIT');
@@ -301,15 +311,33 @@ export default function Home() {
 
   useEffect(() => {
     if (tabTypes[activeTab] === 'CF') {
-      loadData('CF', cfYear);
-      // 2025년일 때는 접힌 상태, 2026년일 때는 펼쳐진 상태
       setCfMonthsCollapsed(cfYear === 2025);
+      setCfHierarchyLoading(true);
+      Promise.all([
+        fetch(`/api/fs/cf-hierarchy?year=${cfYear}`).then((r) => (r.ok ? r.json() : null)),
+        fetch(`/api/fs/cash-borrowing?year=${cfYear}`).then((r) => (r.ok ? r.json() : null)),
+      ])
+        .then(([hierarchy, cashBorrowing]) => {
+          if (hierarchy?.rows) setCfHierarchyData({ rows: hierarchy.rows, columns: hierarchy.columns || [] });
+          if (cashBorrowing && (cashBorrowing.cash?.length > 0 || cashBorrowing.borrowing?.length > 0)) {
+            setCashBorrowingData({
+              year: cashBorrowing.year,
+              columns: cashBorrowing.columns || [],
+              cash: cashBorrowing.cash || [],
+              borrowing: cashBorrowing.borrowing || [],
+              prevCash: cashBorrowing.prevCash,
+              prevBorrowing: cashBorrowing.prevBorrowing,
+            });
+          } else setCashBorrowingData(null);
+        })
+        .catch(() => {})
+        .finally(() => setCfHierarchyLoading(false));
     }
-  }, [cfYear]);
+  }, [cfYear, activeTab]);
 
-  // 기준월 변경 시 데이터 리로드 (PL 2025년만)
+  // 기준월 변경 시 데이터 리로드 (PL 2025·2026년)
   useEffect(() => {
-    if (tabTypes[activeTab] === 'PL' && plYear === 2025) {
+    if (tabTypes[activeTab] === 'PL' && (plYear === 2025 || plYear === 2026)) {
       if (plBrand === null) {
         loadBrandBreakdownData();
       } else {
@@ -337,7 +365,7 @@ export default function Home() {
 
     try {
       let url = `/api/fs/pl/breakdown?year=${plYear}`;
-      if (plYear === 2025) {
+      if (plYear === 2025 || plYear === 2026) {
         url += `&baseMonth=${baseMonth}`;
       }
 
@@ -363,9 +391,6 @@ export default function Home() {
 
   // 월 컬럼 (1월~12월)
   const monthColumns = ['계정과목', '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-  
-  // CF 컬럼 (합계 포함) - 동적으로 생성
-  const cfColumns = [...monthColumns, `${cfYear}년(합계)`];
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -388,8 +413,8 @@ export default function Home() {
           <div>
             <div className="bg-gray-100 border-b border-gray-300">
               <div className="flex items-center gap-4 px-6 py-3">
-                <YearTabs years={[2024, 2025]} activeYear={plYear} onChange={setPlYear} />
-                {plYear === 2025 && (
+                <YearTabs years={[2024, 2025, 2026]} activeYear={plYear} onChange={setPlYear} />
+                {(plYear === 2025 || plYear === 2026) && (
                   <BaseMonthSelector baseMonth={baseMonth} onChange={setBaseMonth} />
                 )}
                 <div className="h-8 w-px bg-gray-400 mx-2"></div>
@@ -403,11 +428,11 @@ export default function Home() {
                 <FinancialTable 
                   data={plData} 
                   columns={monthColumns}
-                  showComparisons={plYear === 2025}
+                  showComparisons={plYear === 2025 || plYear === 2026}
                   baseMonth={baseMonth}
                   showBrandBreakdown={plBrand === null}
                   hideYtd={hideYtd}
-                  onHideYtdToggle={plYear === 2025 ? () => setHideYtd(!hideYtd) : undefined}
+                  onHideYtdToggle={(plYear === 2025 || plYear === 2026) ? () => setHideYtd(!hideYtd) : undefined}
                 />
               </div>
             )}
@@ -492,7 +517,7 @@ export default function Home() {
         {activeTab === 3 && (
           <div>
             <div className="bg-gray-100 border-b border-gray-300">
-              <div className="flex items-center gap-4 px-6 py-3">
+              <div className="flex items-center gap-3 px-6 py-3">
                 <YearTabs years={[2025, 2026]} activeYear={cfYear} onChange={setCfYear} />
                 <button
                   onClick={() => setCfMonthsCollapsed(!cfMonthsCollapsed)}
@@ -502,20 +527,27 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            {loading && <div className="p-6 text-center">로딩 중...</div>}
+            {cfHierarchyLoading && <div className="p-6 text-center">로딩 중...</div>}
             {error && <div className="p-6 text-center text-red-500">{error}</div>}
-            {cfData && !loading && (
+            {cfHierarchyData && cfHierarchyData.rows.length > 0 && !cfHierarchyLoading && (
               <div className="p-6">
-                <FinancialTable 
-                  data={cfData} 
-                  columns={cfColumns} 
-                  showTotal 
-                  isCashFlow={true}
-                  compactLayout={true}
+                <CashFlowHierarchyTable
+                  rows={cfHierarchyData.rows}
+                  columns={cfHierarchyData.columns}
                   monthsCollapsed={cfMonthsCollapsed}
                   onMonthsToggle={() => setCfMonthsCollapsed(!cfMonthsCollapsed)}
-                  currentYear={cfYear}
                 />
+                {cashBorrowingData && (
+                  <CashBorrowingBalance
+                    year={cashBorrowingData.year}
+                    columns={cashBorrowingData.columns}
+                    cash={cashBorrowingData.cash}
+                    borrowing={cashBorrowingData.borrowing}
+                    prevCash={cashBorrowingData.prevCash}
+                    prevBorrowing={cashBorrowingData.prevBorrowing}
+                    monthsCollapsed={cfMonthsCollapsed}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -525,7 +557,7 @@ export default function Home() {
         {activeTab === 4 && (
           <div>
             <div className="bg-gray-100 border-b border-gray-300 px-6 py-3">
-              <span className="text-sm font-medium text-gray-700">2025년 12월말 기준</span>
+              <span className="text-sm font-medium text-gray-700">2026년 1월말 기준</span>
             </div>
             {loading && <div className="p-6 text-center">로딩 중...</div>}
             {error && <div className="p-6 text-center text-red-500">{error}</div>}
