@@ -52,10 +52,8 @@ export async function GET(request: NextRequest) {
     
     for (let i = 2; i < data_row.length; i++) {
       const value = cleanNumericValue(data_row[i] || '0');
-      if (value !== 0) {
-        recoveries.push(value);
-        headers.push(headers_row[i] || `회수${i - 1}`);
-      }
+      recoveries.push(value);
+      headers.push(headers_row[i] || `회수${i - 1}`);
     }
     
     const creditRecoveryData: CreditRecoveryData = {

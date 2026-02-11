@@ -8,10 +8,13 @@ import BaseMonthSelector from '@/components/BaseMonthSelector';
 import FinancialTable from '@/components/FinancialTable';
 import CashFlowHierarchyTable from '@/components/CashFlowHierarchyTable';
 import CashBorrowingBalance from '@/components/CashBorrowingBalance';
+import CFWorkingCapitalTable from '@/components/CFWorkingCapitalTable';
+import DealerCreditRecoveryTable from '@/components/DealerCreditRecoveryTable';
+import CFExplanationPanel from '@/components/CFExplanationPanel';
 import CreditStatus from '@/components/CreditStatus';
 import BSAnalysis from '@/components/BSAnalysis';
 import ExecutiveSummary from '@/components/ExecutiveSummary';
-import { TableRow, CreditData, TabType, ExecutiveSummaryData } from '@/lib/types';
+import { TableRow, CreditData, CreditRecoveryData, TabType, ExecutiveSummaryData } from '@/lib/types';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -40,6 +43,8 @@ export default function Home() {
     prevCash?: number[];
     prevBorrowing?: number[];
   } | null>(null);
+  const [cfWorkingCapitalData, setCfWorkingCapitalData] = useState<TableRow[] | null>(null);
+  const [creditRecoveryData, setCreditRecoveryData] = useState<CreditRecoveryData | null>(null);
   const [creditData, setCreditData] = useState<CreditData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -196,13 +201,29 @@ export default function Home() {
     }
   };
 
-  // 경영요약 데이터 로드 (API 1순위 → 2026 기말 기준 우선)
+  // 경영요약 데이터 로드 (저장된 KV 1순위 → fs/summary → localStorage → 파일)
   const loadSummaryData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // 1순위: API에서 생성 (2026년 기말 기준)
+      // 1순위: 저장된 경영요약 (GET /api/executive-summary)
+      try {
+        const response = await fetch('/api/executive-summary');
+        if (response.ok) {
+          const result = await response.json();
+          if (result?.data && result.data.title) {
+            setSummaryData(result.data);
+            localStorage.setItem('executive-summary', JSON.stringify(result.data));
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (apiErr) {
+        console.log('경영요약 저장 API 실패, 다음 소스 시도:', apiErr);
+      }
+
+      // 2순위: API에서 생성 (2026년 기말 기준)
       try {
         const response = await fetch('/api/fs/summary');
         if (response.ok) {
@@ -218,7 +239,7 @@ export default function Home() {
         console.log('경영요약 API 실패, 캐시/파일에서 로드 시도:', apiErr);
       }
 
-      // 2순위: localStorage에서 확인
+      // 3순위: localStorage에서 확인
       const savedData = localStorage.getItem('executive-summary');
       if (savedData) {
         try {
@@ -231,7 +252,7 @@ export default function Home() {
         }
       }
 
-      // 3순위: 프로젝트 기본 파일에서 불러오기
+      // 4순위: 프로젝트 기본 파일에서 불러오기
       try {
         const fileResponse = await fetch('/data/executive-summary.json');
         if (fileResponse.ok) {
@@ -295,9 +316,17 @@ export default function Home() {
     } else if (currentType === 'BS' && !bsData) {
       loadData('BS', bsYear);
     } else if (currentType === 'CF') {
-      setCfMonthsCollapsed(cfYear === 2025);
-    } else if (currentType === 'CREDIT' && !creditData) {
-      loadData('CREDIT');
+      setCfMonthsCollapsed(true);
+    } else if (currentType === 'CREDIT') {
+      if (!creditData) loadData('CREDIT');
+      if (!creditRecoveryData) {
+        fetch('/api/annual-plan/credit-recovery?baseYearMonth=26.01')
+          .then((r) => (r.ok ? r.json() : null))
+          .then((res: { data?: CreditRecoveryData } | null) => {
+            if (res?.data) setCreditRecoveryData(res.data);
+          })
+          .catch(() => {});
+      }
     }
   }, [activeTab]);
 
@@ -320,17 +349,29 @@ export default function Home() {
 
   useEffect(() => {
     if (tabTypes[activeTab] === 'CF') {
-      setCfMonthsCollapsed(cfYear === 2025);
+      setCfMonthsCollapsed(true);
       setCfHierarchyLoading(true);
-      Promise.all([
+      if (cfYear !== 2026) {
+        setCfWorkingCapitalData(null);
+        setCreditRecoveryData(null);
+      }
+      const fetches: Promise<unknown>[] = [
         fetch(`/api/fs/cf-hierarchy?year=${cfYear}`).then((r) => (r.ok ? r.json() : null)),
         fetch(`/api/fs/cash-borrowing?year=${cfYear}`).then((r) => (r.ok ? r.json() : null)),
-      ])
-        .then(([hierarchy, cashBorrowing]) => {
+      ];
+      if (cfYear === 2026) {
+        fetches.push(fetch('/api/fs/bs?year=2026').then((r) => (r.ok ? r.json() : null)));
+        fetches.push(fetch('/api/annual-plan/credit-recovery?baseYearMonth=26.01').then((r) => (r.ok ? r.json() : null)));
+      }
+      Promise.all(fetches)
+        .then((results) => {
+          type CFHierarchyApiRow = import('@/app/api/fs/cf-hierarchy/route').CFHierarchyApiRow;
+          const hierarchy = results[0] as { rows?: CFHierarchyApiRow[]; columns?: string[] } | null;
+          const cashBorrowing = results[1] as { year?: number; columns?: string[]; cash?: number[]; borrowing?: number[]; prevCash?: number[]; prevBorrowing?: number[] } | null;
           if (hierarchy?.rows) setCfHierarchyData({ rows: hierarchy.rows, columns: hierarchy.columns || [] });
-          if (cashBorrowing && (cashBorrowing.cash?.length > 0 || cashBorrowing.borrowing?.length > 0)) {
+          if (cashBorrowing && ((cashBorrowing.cash?.length ?? 0) > 0 || (cashBorrowing.borrowing?.length ?? 0) > 0)) {
             setCashBorrowingData({
-              year: cashBorrowing.year,
+              year: cashBorrowing.year ?? cfYear,
               columns: cashBorrowing.columns || [],
               cash: cashBorrowing.cash || [],
               borrowing: cashBorrowing.borrowing || [],
@@ -338,6 +379,12 @@ export default function Home() {
               prevBorrowing: cashBorrowing.prevBorrowing,
             });
           } else setCashBorrowingData(null);
+          if (cfYear === 2026) {
+            const bsResult = results[2] as { workingCapital?: TableRow[] } | null;
+            const creditRecoveryRes = results[3] as { data?: CreditRecoveryData } | null;
+            setCfWorkingCapitalData(bsResult?.workingCapital ?? null);
+            setCreditRecoveryData(creditRecoveryRes?.data ?? null);
+          }
         })
         .catch(() => {})
         .finally(() => setCfHierarchyLoading(false));
@@ -414,6 +461,15 @@ export default function Home() {
             data={summaryData}
             onChange={setSummaryData}
             onReset={resetSummaryData}
+            onSaveToServer={async (data, password) => {
+              const res = await fetch('/api/executive-summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data, password }),
+              });
+              if (res.status === 401) return { ok: false, requirePassword: true };
+              return { ok: res.ok };
+            }}
           />
         )}
 
@@ -439,6 +495,7 @@ export default function Home() {
                   columns={monthColumns}
                   showComparisons={plYear === 2025 || plYear === 2026}
                   baseMonth={baseMonth}
+                  currentYear={plYear}
                   showBrandBreakdown={plBrand === null}
                   hideYtd={hideYtd}
                   onHideYtdToggle={(plYear === 2025 || plYear === 2026) ? () => setHideYtd(!hideYtd) : undefined}
@@ -539,25 +596,72 @@ export default function Home() {
             {cfHierarchyLoading && <div className="p-6 text-center">로딩 중...</div>}
             {error && <div className="p-6 text-center text-red-500">{error}</div>}
             {cfHierarchyData && cfHierarchyData.rows.length > 0 && !cfHierarchyLoading && (
-              <div className="p-6">
-                <CashFlowHierarchyTable
-                  rows={cfHierarchyData.rows}
-                  columns={cfHierarchyData.columns}
-                  monthsCollapsed={cfMonthsCollapsed}
-                  onMonthsToggle={() => setCfMonthsCollapsed(!cfMonthsCollapsed)}
-                />
-                {cashBorrowingData && (
-                  <CashBorrowingBalance
-                    year={cashBorrowingData.year}
-                    columns={cashBorrowingData.columns}
-                    cash={cashBorrowingData.cash}
-                    borrowing={cashBorrowingData.borrowing}
-                    prevCash={cashBorrowingData.prevCash}
-                    prevBorrowing={cashBorrowingData.prevBorrowing}
+              cfMonthsCollapsed ? (
+                <div className="flex flex-1 min-h-0">
+                  <div className="w-1/3 min-w-0 overflow-auto p-6">
+                    <CashFlowHierarchyTable
+                      rows={cfHierarchyData.rows}
+                      columns={cfHierarchyData.columns}
+                      monthsCollapsed={cfMonthsCollapsed}
+                      onMonthsToggle={() => setCfMonthsCollapsed(!cfMonthsCollapsed)}
+                    />
+                    {cashBorrowingData && (
+                      <CashBorrowingBalance
+                        year={cashBorrowingData.year}
+                        columns={cashBorrowingData.columns}
+                        cash={cashBorrowingData.cash}
+                        borrowing={cashBorrowingData.borrowing}
+                        prevCash={cashBorrowingData.prevCash}
+                        prevBorrowing={cashBorrowingData.prevBorrowing}
+                        monthsCollapsed={cfMonthsCollapsed}
+                      />
+                    )}
+                    {cfYear === 2026 && cfWorkingCapitalData && cfWorkingCapitalData.length > 0 && (
+                      <CFWorkingCapitalTable
+                        rows={cfWorkingCapitalData}
+                        monthsCollapsed={cfMonthsCollapsed}
+                        onMonthsToggle={() => setCfMonthsCollapsed(!cfMonthsCollapsed)}
+                      />
+                    )}
+                    {cfYear === 2026 && creditRecoveryData && (
+                      <DealerCreditRecoveryTable data={creditRecoveryData} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 overflow-auto p-6 border-l border-gray-200">
+                    <CFExplanationPanel year={cfYear} />
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6">
+                  <CashFlowHierarchyTable
+                    rows={cfHierarchyData.rows}
+                    columns={cfHierarchyData.columns}
                     monthsCollapsed={cfMonthsCollapsed}
+                    onMonthsToggle={() => setCfMonthsCollapsed(!cfMonthsCollapsed)}
                   />
-                )}
-              </div>
+                  {cashBorrowingData && (
+                    <CashBorrowingBalance
+                      year={cashBorrowingData.year}
+                      columns={cashBorrowingData.columns}
+                      cash={cashBorrowingData.cash}
+                      borrowing={cashBorrowingData.borrowing}
+                      prevCash={cashBorrowingData.prevCash}
+                      prevBorrowing={cashBorrowingData.prevBorrowing}
+                      monthsCollapsed={cfMonthsCollapsed}
+                    />
+                  )}
+                  {cfYear === 2026 && cfWorkingCapitalData && cfWorkingCapitalData.length > 0 && (
+                    <CFWorkingCapitalTable
+                      rows={cfWorkingCapitalData}
+                      monthsCollapsed={cfMonthsCollapsed}
+                      onMonthsToggle={() => setCfMonthsCollapsed(!cfMonthsCollapsed)}
+                    />
+                  )}
+                  {cfYear === 2026 && creditRecoveryData && (
+                    <DealerCreditRecoveryTable data={creditRecoveryData} />
+                  )}
+                </div>
+              )
             )}
           </div>
         )}
@@ -572,7 +676,7 @@ export default function Home() {
             {error && <div className="p-6 text-center text-red-500">{error}</div>}
             {creditData && !loading && (
               <div className="p-6">
-                <CreditStatus data={creditData} />
+                <CreditStatus data={creditData} creditRecoveryData={creditRecoveryData} />
               </div>
             )}
           </div>

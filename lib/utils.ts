@@ -130,3 +130,20 @@ export function parseMonthColumn(columnName: string): number | null {
   return null;
 }
 
+/** 기준월(예: 26.01) 다음달부터 "N월" 레이블 동적 생성. 회수1=다음달, 회수2=다다음달 … (하드코딩 없음) */
+export function getRecoveryMonthLabelsAsN월(baseYearMonth: string, count: number): string[] {
+  const parts = baseYearMonth.split('.');
+  let y = parseInt(parts[0] || '26', 10);
+  let m = parseInt(parts[1] || '1', 10);
+  const result: string[] = [];
+  for (let i = 0; i < count; i++) {
+    let month = m + i + 1;
+    let year = y;
+    while (month > 12) {
+      month -= 12;
+      year += 1;
+    }
+    result.push(`${month}월`);
+  }
+  return result;
+}

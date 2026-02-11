@@ -164,6 +164,14 @@ export interface BalanceData {
   };
 }
 
+// 현금흐름표 설명과 분석 콘텐츠 (KV 저장·편집용)
+export interface CFExplanationContent {
+  keyInsights: string[];
+  cashFlow: string[];
+  workingCapital: string[];
+  managementPoints: string[];
+}
+
 // 여신회수계획 데이터 타입
 export interface CreditRecoveryData {
   baseYearMonth: string;

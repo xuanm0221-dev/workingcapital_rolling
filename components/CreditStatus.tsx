@@ -1,46 +1,87 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { CreditData } from '@/lib/types';
-import { formatNumber } from '@/lib/utils';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { CreditData, CreditRecoveryData } from '@/lib/types';
+import { formatNumber, getRecoveryMonthLabelsAsN월 } from '@/lib/utils';
+
+const RECOVERY_PLAN_FALLBACK = '여신회수 계획: (데이터 없음)';
+
+function formatRecoveryValueM(value: number): string {
+  const abs = Math.abs(value);
+  const m = Math.round(abs / 1_000_000);
+  return value < 0 ? `△${m}M` : `${m}M`;
+}
+
+function formatCreditRecoveryToLine(d: CreditRecoveryData): string {
+  const labels = getRecoveryMonthLabelsAsN월(d.baseYearMonth, d.recoveries.length);
+  const recoveryParts = d.recoveries.map((v, i) => `${labels[i]} ${formatRecoveryValueM(v)}`);
+  return `여신회수 계획 (${d.baseYearMonth} 기준): ${recoveryParts.join(', ')}`;
+}
 
 interface CreditStatusProps {
   data: CreditData;
+  creditRecoveryData?: CreditRecoveryData | null;
 }
 
-export default function CreditStatus({ data }: CreditStatusProps) {
+export default function CreditStatus({ data, creditRecoveryData = null }: CreditStatusProps) {
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [wuhanMemo, setWuhanMemo] = useState<string>('');
   const [editingWuhan, setEditingWuhan] = useState<boolean>(false);
-  const [recoveryPlan, setRecoveryPlan] = useState<string>(
-    '여신회수: 12월 258m(회수 실적 282m), 1월 330m, 2월 190m, 3월 107m, 4월 10m'
-  );
+  const [recoveryPlan, setRecoveryPlan] = useState<string>(RECOVERY_PLAN_FALLBACK);
   const [editingRecovery, setEditingRecovery] = useState<boolean>(false);
   const [othersCollapsed, setOthersCollapsed] = useState<boolean>(true);
+  const recoveryPlanFromRemarksRef = useRef<string | undefined>(undefined);
+  const recoverySelfFetchedRef = useRef(false);
+  const [remarksLoaded, setRemarksLoaded] = useState(false);
 
-  // 비고 데이터 로드
+  // 비고 데이터 로드 (remarks에 recoveryPlan 있으면 우선 사용, 없거나 실패 시 API 데이터 사용)
   useEffect(() => {
     const loadCreditRemarks = async () => {
       try {
         const response = await fetch('/api/remarks?type=credit');
         if (response.ok) {
-          const data = await response.json();
-          if (data.remarks) {
-            if (data.remarks.wuhanMemo) {
-              setWuhanMemo(data.remarks.wuhanMemo);
-            }
-            if (data.remarks.recoveryPlan) {
-              setRecoveryPlan(data.remarks.recoveryPlan);
-            }
+          const res = await response.json();
+          if (res.remarks) {
+            if (res.remarks.wuhanMemo) setWuhanMemo(res.remarks.wuhanMemo);
+            const fromRemarks = res.remarks.recoveryPlan ?? '';
+            recoveryPlanFromRemarksRef.current = fromRemarks;
+            setRecoveryPlan(typeof res.remarks.recoveryPlan === 'string' ? res.remarks.recoveryPlan : RECOVERY_PLAN_FALLBACK);
+          } else {
+            recoveryPlanFromRemarksRef.current = '';
           }
+        } else {
+          recoveryPlanFromRemarksRef.current = '';
         }
       } catch (error) {
         console.error('여신 비고 로드 실패:', error);
+        recoveryPlanFromRemarksRef.current = '';
+      } finally {
+        setRemarksLoaded(true);
       }
     };
 
     loadCreditRemarks();
   }, []);
+
+  // remarks에 recoveryPlan 없을 때만 creditRecoveryData(CSV/현금흐름표 동일 소스)로 자동 표시
+  useEffect(() => {
+    if (!remarksLoaded) return;
+    if (recoveryPlanFromRemarksRef.current !== '') return;
+    if (creditRecoveryData) {
+      setRecoveryPlan(formatCreditRecoveryToLine(creditRecoveryData));
+      return;
+    }
+    // 상위에서 데이터가 아직 안 왔을 때만 한 번 직접 로드 (중복 요청 방지)
+    if (recoverySelfFetchedRef.current) return;
+    recoverySelfFetchedRef.current = true;
+    const baseYearMonth = '26.01';
+    fetch(`/api/annual-plan/credit-recovery?baseYearMonth=${baseYearMonth}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res: { data?: CreditRecoveryData } | null) => {
+        if (res?.data) setRecoveryPlan(formatCreditRecoveryToLine(res.data));
+      })
+      .catch(() => {});
+  }, [creditRecoveryData, remarksLoaded]);
 
   // 비고 저장 함수 (디바운스)
   const saveCreditRemarkDebounced = useMemo(() => {

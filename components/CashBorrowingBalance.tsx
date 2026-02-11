@@ -78,7 +78,7 @@ export default function CashBorrowingBalance({
         <table className="w-full border-collapse text-sm">
           <thead className="bg-navy text-white">
             <tr>
-              <th className="border border-gray-300 py-2.5 px-4 text-left sticky left-0 z-10 bg-navy min-w-[280px]">
+              <th className="border border-gray-300 py-2.5 px-4 text-left sticky left-0 z-10 bg-navy min-w-[200px]">
                 구분
               </th>
               {displayCols.map((col, i) => {

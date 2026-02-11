@@ -27,6 +27,7 @@ export default function CashFlowHierarchyTable({
         const groups = rows.filter((r) => r.isGroup).map((r) => r.account);
         if (groups.length) {
           const collapsedExcept영업활동 = new Set(groups.filter((g) => g !== '영업활동'));
+          collapsedExcept영업활동.add('자산성지출');
           setCollapsed(collapsedExcept영업활동);
         }
       }
@@ -51,7 +52,9 @@ export default function CashFlowHierarchyTable({
       setAllCollapsed(false);
     } else {
       const groups = rows.filter((r) => r.isGroup).map((r) => r.account);
-      setCollapsed(new Set(groups));
+      const toCollapse = new Set(groups);
+      toCollapse.add('자산성지출');
+      setCollapsed(toCollapse);
       setAllCollapsed(true);
     }
   };
@@ -69,8 +72,8 @@ export default function CashFlowHierarchyTable({
         continue;
       }
       if (row.isGroup && collapsed.has(row.account)) {
-        // 대분류(0) 접힌 상태: 중분류(1)까지 보이고 소분류(2)만 숨김. 중분류(1) 접힌 상태: 소분류(2)만 숨김.
-        skipLevel = row.level === 0 ? 1 : row.level;
+        // 대분류(0) 접힌 상태: 하위(level 1, 2) 전부 숨김. 중분류(1) 접힌 상태: 소분류(2)만 숨김.
+        skipLevel = row.level === 0 ? 0 : row.level;
         result.push(row);
         continue;
       }
@@ -125,7 +128,7 @@ export default function CashFlowHierarchyTable({
         <table className="w-full border-collapse text-sm">
           <thead className="sticky top-0 z-20 bg-navy text-white">
             <tr>
-              <th className="border border-gray-300 py-3 px-4 text-left sticky left-0 z-30 bg-navy min-w-[280px]">
+              <th className="border border-gray-300 py-3 px-4 text-left sticky left-0 z-30 bg-navy min-w-[200px]">
                 계정과목
               </th>
               {monthsCollapsed ? (

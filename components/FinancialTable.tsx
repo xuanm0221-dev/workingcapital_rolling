@@ -172,14 +172,16 @@ export default function FinancialTable({
         ];
       }
     } else {
-      // 손익계산서: 월별, YTD, 연간 (YoY 컬럼 제거 - 당년 컬럼에 통합)
+      // 손익계산서: 월별, YTD, 연간 (선택 연도에 따라 전년/당년 연간 라벨)
+      const prevYear = currentYear != null ? currentYear - 1 : 25;
+      const currYear = currentYear != null ? currentYear : 26;
       return [
         `전년(${baseMonth}월)`,
         `당년(${baseMonth}월)`,
         '전년YTD',
         '당년YTD',
-        '24년연간',
-        '25년연간',
+        `${prevYear}년연간`,
+        `${currYear}년연간`,
       ];
     }
   }, [showComparisons, isBalanceSheet, baseMonth, currentYear]);
