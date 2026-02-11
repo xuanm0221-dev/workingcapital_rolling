@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { formatNumber } from '@/lib/utils';
 import type { CFHierarchyApiRow } from '@/app/api/fs/cf-hierarchy/route';
 
@@ -17,15 +17,22 @@ export default function CashFlowHierarchyTable({
   monthsCollapsed = true,
   onMonthsToggle,
 }: CashFlowHierarchyTableProps) {
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(['자산성지출']));
   const [allCollapsed, setAllCollapsed] = useState(true);
+  const prevRowsLengthRef = useRef(0);
 
   useEffect(() => {
-    const groups = rows.filter((r) => r.isGroup).map((r) => r.account);
-    if (groups.length) {
-      // 접은 상태: 영업활동만 펼침(중분류까지 보임), 나머지 대분류(자산성지출 등)는 접힌 상태
-      const collapsedExcept영업활동 = new Set(groups.filter((g) => g !== '영업활동'));
-      setCollapsed(collapsedExcept영업활동);
+    if (rows.length > 0) {
+      if (prevRowsLengthRef.current === 0) {
+        const groups = rows.filter((r) => r.isGroup).map((r) => r.account);
+        if (groups.length) {
+          const collapsedExcept영업활동 = new Set(groups.filter((g) => g !== '영업활동'));
+          setCollapsed(collapsedExcept영업활동);
+        }
+      }
+      prevRowsLengthRef.current = rows.length;
+    } else {
+      prevRowsLengthRef.current = 0;
     }
   }, [rows.length]);
 
@@ -90,6 +97,18 @@ export default function CashFlowHierarchyTable({
   const cellClass = (value: number) =>
     value < 0 ? 'border border-gray-300 py-2 px-4 text-right text-red-600' : 'border border-gray-300 py-2 px-4 text-right';
 
+  // 2025·2026 합계 열 배경 (민트)
+  const isSumColumn = (colIndex: number): boolean => {
+    if (monthsCollapsed) {
+      if (is2025Layout) return colIndex <= 2; // 2023, 2024, 2025
+      return colIndex <= 1; // 2025합계, 2026합계
+    }
+    return colIndex === 0 || colIndex === currTotalIndex; // 2025합계, 2026합계
+  };
+
+  const sumColBg = 'bg-amber-50';
+  const sumColHeaderClass = 'bg-amber-50 text-amber-900';
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -112,15 +131,15 @@ export default function CashFlowHierarchyTable({
               {monthsCollapsed ? (
                 is2025Layout ? (
                   <>
-                    <th className="border border-gray-300 py-3 px-4 text-center min-w-[120px]">{columns[0]}</th>
-                    <th className="border border-gray-300 py-3 px-4 text-center min-w-[120px]">{columns[1]}</th>
-                    <th className="border border-gray-300 py-3 px-4 text-center min-w-[120px]">{columns[14]}</th>
+                    <th className={`border border-gray-300 py-3 px-4 text-center min-w-[120px] ${sumColHeaderClass}`}>{columns[0]}</th>
+                    <th className={`border border-gray-300 py-3 px-4 text-center min-w-[120px] ${sumColHeaderClass}`}>{columns[1]}</th>
+                    <th className={`border border-gray-300 py-3 px-4 text-center min-w-[120px] ${sumColHeaderClass}`}>{columns[14]}</th>
                     <th className="border border-gray-300 py-3 px-4 text-center min-w-[100px]">{columns[15]}</th>
                   </>
                 ) : (
                   <>
-                    <th className="border border-gray-300 py-3 px-4 text-center min-w-[120px]">{columns[0]}</th>
-                    <th className="border border-gray-300 py-3 px-4 text-center min-w-[120px]">{columns[13]}</th>
+                    <th className={`border border-gray-300 py-3 px-4 text-center min-w-[120px] ${sumColHeaderClass}`}>{columns[0]}</th>
+                    <th className={`border border-gray-300 py-3 px-4 text-center min-w-[120px] ${sumColHeaderClass}`}>{columns[13]}</th>
                     <th className="border border-gray-300 py-3 px-4 text-center min-w-[100px]">{columns[14]}</th>
                   </>
                 )
@@ -128,7 +147,7 @@ export default function CashFlowHierarchyTable({
                 columns.map((col, i) => (
                   <th
                     key={i}
-                    className="border border-gray-300 py-3 px-4 text-center min-w-[100px]"
+                    className={`border border-gray-300 py-3 px-4 text-center min-w-[100px] ${isSumColumn(i) ? sumColHeaderClass : ''}`}
                   >
                     {col}
                   </th>
@@ -184,13 +203,13 @@ export default function CashFlowHierarchyTable({
                   {monthsCollapsed
                     ? is2025Layout
                       ? [
-                          <td key="y23" className={cellClass(row.values[0])}>
+                          <td key="y23" className={`${cellClass(row.values[0])} ${sumColBg}`}>
                             {formatCell(row.values[0], 0)}
                           </td>,
-                          <td key="y24" className={cellClass(row.values[1])}>
+                          <td key="y24" className={`${cellClass(row.values[1])} ${sumColBg}`}>
                             {formatCell(row.values[1], 1)}
                           </td>,
-                          <td key="y25" className={cellClass(row.values[14])}>
+                          <td key="y25" className={`${cellClass(row.values[14])} ${sumColBg}`}>
                             {formatCell(row.values[14], 14)}
                           </td>,
                           <td key="yoy" className={cellClass(row.values[15])}>
@@ -198,10 +217,10 @@ export default function CashFlowHierarchyTable({
                           </td>,
                         ]
                       : [
-                          <td key="y25" className={cellClass(row.values[0])}>
+                          <td key="y25" className={`${cellClass(row.values[0])} ${sumColBg}`}>
                             {formatCell(row.values[0], 0)}
                           </td>,
-                          <td key="y26" className={cellClass(row.values[13])}>
+                          <td key="y26" className={`${cellClass(row.values[13])} ${sumColBg}`}>
                             {formatCell(row.values[13], 13)}
                           </td>,
                           <td key="yoy" className={cellClass(row.values[14])}>
@@ -209,7 +228,7 @@ export default function CashFlowHierarchyTable({
                           </td>,
                         ]
                     : row.values.map((v, vi) => (
-                        <td key={vi} className={cellClass(v)}>
+                        <td key={vi} className={`${cellClass(v)} ${isSumColumn(vi) ? sumColBg : ''}`}>
                           {formatCell(v, vi)}
                         </td>
                       ))}

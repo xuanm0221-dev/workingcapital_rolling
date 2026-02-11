@@ -196,12 +196,29 @@ export default function Home() {
     }
   };
 
-  // 경영요약 데이터 로드
+  // 경영요약 데이터 로드 (API 1순위 → 2026 기말 기준 우선)
   const loadSummaryData = async () => {
     try {
       setLoading(true);
-      
-      // 1순위: localStorage에서 확인 (개인 수정본)
+      setError(null);
+
+      // 1순위: API에서 생성 (2026년 기말 기준)
+      try {
+        const response = await fetch('/api/fs/summary');
+        if (response.ok) {
+          const result = await response.json();
+          if (result && result.title) {
+            setSummaryData(result);
+            localStorage.setItem('executive-summary', JSON.stringify(result));
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (apiErr) {
+        console.log('경영요약 API 실패, 캐시/파일에서 로드 시도:', apiErr);
+      }
+
+      // 2순위: localStorage에서 확인
       const savedData = localStorage.getItem('executive-summary');
       if (savedData) {
         try {
@@ -213,30 +230,22 @@ export default function Home() {
           console.error('localStorage 파싱 실패:', parseErr);
         }
       }
-      
-      // 2순위: 프로젝트 기본 파일에서 불러오기
+
+      // 3순위: 프로젝트 기본 파일에서 불러오기
       try {
         const fileResponse = await fetch('/data/executive-summary.json');
         if (fileResponse.ok) {
           const fileData = await fileResponse.json();
           setSummaryData(fileData);
-          // localStorage에도 저장 (다음부터는 여기서 로드)
           localStorage.setItem('executive-summary', JSON.stringify(fileData));
           setLoading(false);
           return;
         }
       } catch (fileErr) {
-        console.log('프로젝트 기본 파일 없음, API에서 생성합니다.');
+        console.log('프로젝트 기본 파일 없음.');
       }
-      
-      // 3순위: API에서 생성 (최초 1회)
-      const response = await fetch('/api/fs/summary');
-      if (!response.ok) {
-        throw new Error('경영요약 데이터를 불러올 수 없습니다.');
-      }
-      const result = await response.json();
-      setSummaryData(result);
-      localStorage.setItem('executive-summary', JSON.stringify(result));
+
+      setError('경영요약 데이터를 불러올 수 없습니다.');
     } catch (err) {
       console.error(err);
       setError('경영요약 데이터를 불러오는데 실패했습니다.');

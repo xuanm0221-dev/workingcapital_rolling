@@ -11,8 +11,8 @@ interface BSAnalysisProps {
 export default function BSAnalysis({ bsData, year, previousYearData }: BSAnalysisProps) {
   const [loanLimitOpen, setLoanLimitOpen] = useState(false);
   
-  // 월 인덱스
-  const month = year === 2026 ? 5 : 11; // 6월 또는 12월
+  // 월 인덱스 (26년·25년 모두 기말 12월 기준)
+  const month = 11; // 기말(12월)
   const prevMonth = 11; // 전년 12월
   
   // 값 추출 함수
@@ -91,7 +91,7 @@ export default function BSAnalysis({ bsData, year, previousYearData }: BSAnalysi
       {/* 제목 */}
       <div className="mb-4 border-t-2 border-gray-400 pt-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">
-          📊 재무비율 분석 ({year}년 {year === 2026 ? '6월' : '기말'} 기준)
+          📊 재무비율 분석 ({year}년 기말 기준)
         </h2>
       </div>
       
@@ -104,10 +104,10 @@ export default function BSAnalysis({ bsData, year, previousYearData }: BSAnalysi
             {부채비율.toFixed(0)}%
           </div>
           <div className="text-xs text-gray-500 mt-1">
-            (25년말 {전년부채비율.toFixed(0)}%)
+            ({year - 1}년말 {전년부채비율.toFixed(0)}%)
           </div>
           <div className="text-xs text-gray-600 mt-2">
-            25년말 대비 {Math.abs(부채비율 - 전년부채비율).toFixed(0)}%p {부채비율 < 전년부채비율 ? '개선' : '악화'}<br/>
+            {year - 1}년말 대비 {Math.abs(부채비율 - 전년부채비율).toFixed(0)}%p {부채비율 < 전년부채비율 ? '개선' : '악화'}<br/>
             {차입금변동방향 === '상환' ? '차입금 상환 및 자본 증가' : '차입금 증가'}
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function BSAnalysis({ bsData, year, previousYearData }: BSAnalysi
             {차입금비율.toFixed(0)}%
           </div>
           <div className="text-xs text-gray-500 mt-1">
-            (25년말 {전년차입금비율.toFixed(0)}%)
+            ({year - 1}년말 {전년차입금비율.toFixed(0)}%)
           </div>
           <div className="text-xs text-gray-600 mt-2">
             차입금 {차입금변동액.toFixed(0)}M {차입금변동방향}으로<br/>
@@ -147,7 +147,7 @@ export default function BSAnalysis({ bsData, year, previousYearData }: BSAnalysi
             {ROE.toFixed(1)}%
           </div>
           <div className="text-xs text-gray-500 mt-1">
-            ({year === 2026 ? '상반기' : '통년'} 기준)
+            (연간 기준)
           </div>
           <div className="text-xs text-gray-600 mt-2">
             당기순이익 {당기순이익.toFixed(0)}M<br/>
@@ -162,10 +162,10 @@ export default function BSAnalysis({ bsData, year, previousYearData }: BSAnalysi
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
           <h3 className="font-semibold text-blue-900 mb-2">💡 해석:</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• 부채비율 {부채비율.toFixed(0)}%: 25년말 {전년부채비율.toFixed(0)}% 대비 {Math.abs(부채비율 - 전년부채비율).toFixed(0)}%p {부채비율 < 전년부채비율 ? '개선' : '악화'}, 재무 안정성 {부채비율 < 전년부채비율 ? '크게 향상' : '관리 필요'}</li>
+            <li>• 부채비율 {부채비율.toFixed(0)}%: {year - 1}년말 {전년부채비율.toFixed(0)}% 대비 {Math.abs(부채비율 - 전년부채비율).toFixed(0)}%p {부채비율 < 전년부채비율 ? '개선' : '악화'}, 재무 안정성 {부채비율 < 전년부채비율 ? '크게 향상' : '관리 필요'}</li>
             <li>• 유동비율 {유동비율.toFixed(0)}%: 단기 채무상환 능력 양호</li>
-            <li>• ROE {ROE.toFixed(1)}%: {year === 2026 ? '상반기' : '통년'} 순이익 {당기순이익.toFixed(0)}M, 안정적 수익성 유지</li>
-            <li>• 차입금비율 {차입금비율.toFixed(0)}%: 25년말 {전년차입금비율.toFixed(0)}% 대비 {Math.abs(차입금비율 - 전년차입금비율).toFixed(0)}%p {차입금비율 < 전년차입금비율 ? '개선' : '악화'}, 차입금 {차입금변동액.toFixed(0)}M {차입금변동방향}</li>
+            <li>• ROE {ROE.toFixed(1)}%: 연간 순이익 {당기순이익.toFixed(0)}M, 안정적 수익성 유지</li>
+            <li>• 차입금비율 {차입금비율.toFixed(0)}%: {year - 1}년말 {전년차입금비율.toFixed(0)}% 대비 {Math.abs(차입금비율 - 전년차입금비율).toFixed(0)}%p {차입금비율 < 전년차입금비율 ? '개선' : '악화'}, 차입금 {차입금변동액.toFixed(0)}M {차입금변동방향}</li>
           </ul>
         </div>
         
@@ -187,7 +187,7 @@ export default function BSAnalysis({ bsData, year, previousYearData }: BSAnalysi
               <thead>
                 <tr className="bg-orange-100">
                   <th className="border border-gray-300 py-2 px-3 text-center font-semibold">은행명</th>
-                  <th className="border border-gray-300 py-2 px-3 text-center font-semibold">2026년6월</th>
+                  <th className="border border-gray-300 py-2 px-3 text-center font-semibold">2026년1월</th>
                   <th className="border border-gray-300 py-2 px-3 text-center font-semibold">총 한도</th>
                 </tr>
               </thead>
