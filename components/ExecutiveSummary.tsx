@@ -9,7 +9,12 @@ interface ExecutiveSummaryProps {
   onSaveToServer?: (data: ExecutiveSummaryData, password?: string) => Promise<{ ok: boolean; requirePassword?: boolean }>;
 }
 
+const textareaClass = 'w-full p-3 border border-gray-200 rounded-md bg-gray-50/50 text-gray-700 text-[15px] leading-relaxed focus:outline-none focus:border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:bg-white';
+
+const bulletLine = (s: string) => s.replace(/^[•·]\s*/, '');
+
 export default function ExecutiveSummary({ data, onChange, onReset, onSaveToServer }: ExecutiveSummaryProps) {
+  const [editMode, setEditMode] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [serverSavePassword, setServerSavePassword] = useState('');
   const [serverSaveError, setServerSaveError] = useState<string | null>(null);
@@ -40,40 +45,33 @@ export default function ExecutiveSummary({ data, onChange, onReset, onSaveToServ
     value: string
   ) => {
     const lines = value.split('\n').filter(line => line.trim());
-    
-    if (section === '브랜드포트폴리오') {
-      // 브랜드포트폴리오 섹션을 새 구조로 변환
-      const brandPortfolio = { ...data.sections.브랜드포트폴리오 };
-      
-      // 이전 키 제거 (있다면)
-      if (subsection === '기존브랜드') {
-        delete (brandPortfolio as any).MLB장종;
-        brandPortfolio.기존브랜드 = lines;
-      } else if (subsection === '신규브랜드') {
-        delete (brandPortfolio as any).신규브랜드고성장;
-        delete (brandPortfolio as any).신규브랜드성장;
-        brandPortfolio.신규브랜드 = lines;
-      }
-      
+    if (section === '심층분석') {
+      const base = data.sections.심층분석 ?? {
+        수익성악화원인: [], 재고관리이슈: [], 여신리스크개선: [], 재무건전성: [], 긍정적요소: [], 재무구조개선: []
+      };
       onChange({
         ...data,
         sections: {
           ...data.sections,
-          브랜드포트폴리오: brandPortfolio
+          심층분석: { ...base, [subsection]: lines }
         }
       });
-    } else {
-      onChange({
-        ...data,
-        sections: {
-          ...data.sections,
-          [section]: {
-            ...data.sections[section],
-            [subsection]: lines
-          }
-        }
-      });
+      return;
     }
+    if (['주요성과', '핵심분석', '핵심인사이트', '핵심이슈권고사항', '결론'].includes(section)) {
+      onChange({ ...data, sections: { ...data.sections, [section]: lines } });
+      return;
+    }
+    onChange({
+      ...data,
+      sections: {
+        ...data.sections,
+        [section]: {
+          ...data.sections[section],
+          [subsection]: lines
+        }
+      }
+    });
   };
 
   // 서버 저장 (비밀번호 모달에서 확인 클릭 시)
@@ -128,16 +126,20 @@ export default function ExecutiveSummary({ data, onChange, onReset, onSaveToServ
     }
   };
 
-  // 이전 구조 호환성 처리
-  const 기존브랜드 = data.sections.브랜드포트폴리오.기존브랜드 || 
-    (data.sections.브랜드포트폴리오 as any).MLB장종 || [];
-  const 신규브랜드 = data.sections.브랜드포트폴리오.신규브랜드 || 
-    (data.sections.브랜드포트폴리오 as any).신규브랜드성장 || 
-    (data.sections.브랜드포트폴리오 as any).신규브랜드고성장 || [];
+  const handleSaveAndClose = async () => {
+    await handleSave();
+    setEditMode(false);
+  };
+
+  const 주요성과 = data.sections.주요성과 ?? [];
+  const 핵심분석 = data.sections.핵심분석 ?? [];
+  const 핵심인사이트 = data.sections.핵심인사이트 ?? [];
+  const 핵심이슈권고사항 = data.sections.핵심이슈권고사항 ?? [];
+  const 결론 = data.sections.결론 ?? [];
 
   return (
     <div className="p-6">
-      {/* 제목 + 버튼 */}
+      {/* 제목 + 버튼 (우측 상단 고정) */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">{data.title}</h1>
         <div className="flex gap-2">
@@ -153,6 +155,32 @@ export default function ExecutiveSummary({ data, onChange, onReset, onSaveToServ
           >
             🔄 초기값으로
           </button>
+          {!editMode ? (
+            <button
+              type="button"
+              onClick={() => setEditMode(true)}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+            >
+              수정
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setEditMode(false)}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-500 text-white hover:bg-gray-600"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAndClose}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700"
+              >
+                저장
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -161,150 +189,293 @@ export default function ExecutiveSummary({ data, onChange, onReset, onSaveToServ
         {/* 좌측 컬럼 */}
         <div className="space-y-6">
           {/* 수익성 분석 */}
-          <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-5">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-800">
               📊 수익성 분석
             </h2>
-
-            {/* 매출 성장 vs 수익성 약세 */}
-            <div className="mb-4">
-              <h3 className="font-semibold text-blue-700 mb-2 text-sm">매출 성장 vs 수익성 약세</h3>
-              <textarea
-                value={data.sections.수익성분석.매출성장.join('\n')}
-                onChange={(e) => handleTextChange('수익성분석', '매출성장', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={4}
-              />
-            </div>
-
-            {/* 비용 증가 */}
-            <div>
-              <h3 className="font-semibold text-red-700 mb-2 text-sm">비용 증가</h3>
-              <textarea
-                value={data.sections.수익성분석.비용증가.join('\n')}
-                onChange={(e) => handleTextChange('수익성분석', '비용증가', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={2}
-              />
-            </div>
+            {!editMode ? (
+              <>
+                <div className="border-l-4 border-blue-500 pl-4 mb-4">
+                  <h4 className="font-bold text-base mb-2 text-blue-900">매출 성장 vs 수익성 약세</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.수익성분석.매출성장.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-l-4 border-blue-500 pl-4">
+                  <h4 className="font-bold text-base mb-2 text-blue-900">비용 증가</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.수익성분석.비용증가.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-4">
+                  <h3 className="font-medium text-blue-700 mb-2.5 text-base">매출 성장 vs 수익성 약세</h3>
+                  <textarea
+                    value={data.sections.수익성분석.매출성장.join('\n')}
+                    onChange={(e) => handleTextChange('수익성분석', '매출성장', e.target.value)}
+                    className={textareaClass}
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-medium text-red-700 mb-2.5 text-base">비용 증가</h3>
+                  <textarea
+                    value={data.sections.수익성분석.비용증가.join('\n')}
+                    onChange={(e) => handleTextChange('수익성분석', '비용증가', e.target.value)}
+                    className={textareaClass}
+                    rows={2}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* 재무 현황 */}
-          <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-5">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-orange-800">
               🔥 재무 현황
             </h2>
-
-            <div className="space-y-4">
-              {/* 자산 규모 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">자산 규모</h3>
-                <textarea
-                  value={data.sections.재무현황.자산규모.join('\n')}
-                  onChange={(e) => handleTextChange('재무현황', '자산규모', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={2}
-                />
+            {!editMode ? (
+              <div className="space-y-4">
+                <div className="border-l-4 border-orange-500 pl-4">
+                  <h4 className="font-bold text-base mb-2 text-orange-900">자산 규모</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.재무현황.자산규모.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-l-4 border-orange-500 pl-4">
+                  <h4 className="font-bold text-base mb-2 text-orange-900">부채 증가</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.재무현황.부채증가.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-l-4 border-orange-500 pl-4">
+                  <h4 className="font-bold text-base mb-2 text-orange-900">재고자산</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.재무현황.재고자산.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-l-4 border-orange-500 pl-4">
+                  <h4 className="font-bold text-base mb-2 text-orange-900">자본 안정</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.재무현황.자본안정.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-
-              {/* 부채 증가 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">부채 증가</h3>
-                <textarea
-                  value={data.sections.재무현황.부채증가.join('\n')}
-                  onChange={(e) => handleTextChange('재무현황', '부채증가', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={2}
-                />
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium text-gray-800 mb-2.5 text-base">자산 규모</h3>
+                  <textarea
+                    value={data.sections.재무현황.자산규모.join('\n')}
+                    onChange={(e) => handleTextChange('재무현황', '자산규모', e.target.value)}
+                    className={textareaClass}
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-800 mb-2.5 text-base">부채 증가</h3>
+                  <textarea
+                    value={data.sections.재무현황.부채증가.join('\n')}
+                    onChange={(e) => handleTextChange('재무현황', '부채증가', e.target.value)}
+                    className={textareaClass}
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-800 mb-2.5 text-base">재고자산</h3>
+                  <textarea
+                    value={data.sections.재무현황.재고자산.join('\n')}
+                    onChange={(e) => handleTextChange('재무현황', '재고자산', e.target.value)}
+                    className={textareaClass}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-800 mb-2.5 text-base">자본 안정</h3>
+                  <textarea
+                    value={data.sections.재무현황.자본안정.join('\n')}
+                    onChange={(e) => handleTextChange('재무현황', '자본안정', e.target.value)}
+                    className={textareaClass}
+                    rows={1}
+                  />
+                </div>
               </div>
+            )}
+          </div>
 
-              {/* 재고자산 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">재고자산</h3>
-                <textarea
-                  value={data.sections.재무현황.재고자산.join('\n')}
-                  onChange={(e) => handleTextChange('재무현황', '재고자산', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                />
+          {/* 실적 분석 */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-green-800">
+              🔍 실적 분석
+            </h2>
+            {!editMode ? (
+              <div className="space-y-4">
+                <div className="border-l-4 border-green-500 pl-4">
+                  <h4 className="font-bold text-base mb-2 text-green-900">주요 지표</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.실적분석.주요지표.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-l-4 border-green-500 pl-4">
+                  <h4 className="font-bold text-base mb-2 text-green-900">부채비율</h4>
+                  <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                    {data.sections.실적분석.부채비율.map((line, i) => (
+                      <li key={i}>• {bulletLine(line)}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-
-              {/* 자본 안정 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">자본 안정</h3>
-                <textarea
-                  value={data.sections.재무현황.자본안정.join('\n')}
-                  onChange={(e) => handleTextChange('재무현황', '자본안정', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={1}
-                />
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium text-gray-800 mb-2.5 text-base">주요 지표</h3>
+                  <textarea
+                    value={data.sections.실적분석.주요지표.join('\n')}
+                    onChange={(e) => handleTextChange('실적분석', '주요지표', e.target.value)}
+                    className={textareaClass}
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-800 mb-2.5 text-base">부채비율</h3>
+                  <textarea
+                    value={data.sections.실적분석.부채비율.join('\n')}
+                    onChange={(e) => handleTextChange('실적분석', '부채비율', e.target.value)}
+                    className={textareaClass}
+                    rows={1}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         {/* 우측 컬럼 */}
         <div className="space-y-6">
-          {/* 실적 분석 */}
-          <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-5">
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-green-800">
-              🔍 실적 분석
+          {/* 주요 성과 */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-indigo-800">
+              🏆 주요 성과
             </h2>
-
-            <div className="space-y-4">
-              {/* 주요 지표 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">주요 지표</h3>
-                <textarea
-                  value={data.sections.실적분석.주요지표.join('\n')}
-                  onChange={(e) => handleTextChange('실적분석', '주요지표', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={4}
-                />
+            {!editMode ? (
+              <div className="border-l-4 border-indigo-500 pl-4">
+                <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                  {주요성과.map((line, i) => (
+                    <li key={i}>• {bulletLine(line)}</li>
+                  ))}
+                </ul>
               </div>
-
-              {/* 부채비율 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">부채비율</h3>
-                <textarea
-                  value={data.sections.실적분석.부채비율.join('\n')}
-                  onChange={(e) => handleTextChange('실적분석', '부채비율', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={1}
-                />
-              </div>
-            </div>
+            ) : (
+              <textarea
+                value={주요성과.join('\n')}
+                onChange={(e) => handleTextChange('주요성과', '', e.target.value)}
+                className={textareaClass}
+                rows={4}
+              />
+            )}
           </div>
-
-          {/* 브랜드 포트폴리오 */}
-          <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-5">
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-purple-800">
-              📦 브랜드 포트폴리오
+          {/* 핵심 분석 */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-800">
+              📋 핵심 분석
             </h2>
-
-            <div className="space-y-4">
-              {/* 기존브랜드 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">기존브랜드</h3>
-                <textarea
-                  value={기존브랜드.join('\n')}
-                  onChange={(e) => handleTextChange('브랜드포트폴리오', '기존브랜드', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={2}
-                />
+            {!editMode ? (
+              <div className="border-l-4 border-sky-500 pl-4">
+                <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                  {핵심분석.map((line, i) => (
+                    <li key={i}>• {bulletLine(line)}</li>
+                  ))}
+                </ul>
               </div>
-
-              {/* 신규 브랜드 */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2 text-sm">신규 브랜드</h3>
-                <textarea
-                  value={신규브랜드.join('\n')}
-                  onChange={(e) => handleTextChange('브랜드포트폴리오', '신규브랜드', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                />
+            ) : (
+              <textarea
+                value={핵심분석.join('\n')}
+                onChange={(e) => handleTextChange('핵심분석', '', e.target.value)}
+                className={textareaClass}
+                rows={5}
+              />
+            )}
+          </div>
+          {/* 핵심 인사이트 */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-emerald-800">
+              💡 핵심 인사이트
+            </h2>
+            {!editMode ? (
+              <div className="border-l-4 border-emerald-500 pl-4">
+                <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                  {핵심인사이트.map((line, i) => (
+                    <li key={i}>• {bulletLine(line)}</li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            ) : (
+              <textarea
+                value={핵심인사이트.join('\n')}
+                onChange={(e) => handleTextChange('핵심인사이트', '', e.target.value)}
+                className={textareaClass}
+                rows={5}
+              />
+            )}
+          </div>
+          {/* 핵심 이슈 및 권고사항 */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-amber-800">
+              ⚠️ 핵심 이슈 및 권고사항
+            </h2>
+            {!editMode ? (
+              <div className="border-l-4 border-amber-500 pl-4">
+                <ul className="space-y-2 text-sm text-gray-700 leading-relaxed">
+                  {핵심이슈권고사항.map((line, i) => (
+                    <li key={i}>• {bulletLine(line)}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <textarea
+                value={핵심이슈권고사항.join('\n')}
+                onChange={(e) => handleTextChange('핵심이슈권고사항', '', e.target.value)}
+                className={textareaClass}
+                rows={4}
+              />
+            )}
+          </div>
+          {/* 결론 */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800">
+              ✅ 결론
+            </h2>
+            {!editMode ? (
+              <div className="border-l-4 border-slate-500 pl-4 space-y-3 text-sm text-gray-700 leading-relaxed">
+                {결론.map((line, i) => (
+                  <p key={i}>{bulletLine(line)}</p>
+                ))}
+              </div>
+            ) : (
+              <textarea
+                value={결론.join('\n')}
+                onChange={(e) => handleTextChange('결론', '', e.target.value)}
+                className={textareaClass}
+                rows={6}
+              />
+            )}
           </div>
         </div>
       </div>

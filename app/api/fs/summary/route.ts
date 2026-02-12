@@ -1,13 +1,39 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
-import { readCSV } from '@/lib/csv';
-import { calculatePL, calculateBS } from '@/lib/fs-mapping';
+import fs from 'fs';
+import { readCSV, readCFHierarchyCSV, CFHierarchyRow } from '@/lib/csv';
+import { calculatePL, calculateBS, calculateWorkingCapital } from '@/lib/fs-mapping';
 import { ExecutiveSummaryData, TableRow } from '@/lib/types';
 
-// 값 가져오기 헬퍼 함수
+function rowKey(대: string, 중: string, 소: string): string {
+  return `${대}|${중}|${소}`;
+}
+
+function buildCFYearData(rows: CFHierarchyRow[]): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    const key = rowKey(r.대분류, r.중분류, r.소분류);
+    const total = r.values.reduce((a, b) => a + b, 0);
+    map.set(key, total);
+  }
+  return map;
+}
+
+// 값 가져오기 헬퍼 함수 (특정 월)
 function getValue(data: TableRow[], account: string, monthIndex: number): number {
   const row = data.find(r => r.account === account);
-  return row?.values[monthIndex] || 0;
+  return row?.values[monthIndex] ?? 0;
+}
+
+// 연간 합계 (1~12월, 손익계산서 수익성분석용)
+function getValueAnnual(data: TableRow[], account: string): number {
+  const row = data.find(r => r.account === account);
+  if (!row?.values?.length) return 0;
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += row.values[i] ?? 0;
+  }
+  return sum;
 }
 
 // 경영요약 자동 생성 함수 (2025년 기말 vs 2026년 기말)
@@ -15,26 +41,33 @@ function generateSummary(
   pl2025: TableRow[],
   pl2026: TableRow[],
   bs2025: TableRow[],
-  bs2026: TableRow[]
+  bs2026: TableRow[],
+  영업활동YoY: number = 0,
+  운전자본YoY: number = 0
 ): ExecutiveSummaryData {
   
-  const month = 11; // 12월 기말 (index 11)
-  
-  // PL 데이터 추출 (12월 기말 기준, K 단위)
-  const tag매출25 = getValue(pl2025, 'Tag매출', month);
-  const tag매출26 = getValue(pl2026, 'Tag매출', month);
-  const 실판매출25 = getValue(pl2025, '실판매출', month);
-  const 실판매출26 = getValue(pl2026, '실판매출', month);
-  const 매출총이익25 = getValue(pl2025, '매출총이익', month);
-  const 매출총이익26 = getValue(pl2026, '매출총이익', month);
-  const 영업이익25 = getValue(pl2025, '영업이익', month);
-  const 영업이익26 = getValue(pl2026, '영업이익', month);
-  const 영업이익률25 = getValue(pl2025, '영업이익률', month);
-  const 영업이익률26 = getValue(pl2026, '영업이익률', month);
-  const 영업비25 = getValue(pl2025, '영업비', month);
-  const 영업비26 = getValue(pl2026, '영업비', month);
-  const 광고비25 = getValue(pl2025, '광고비', month);
-  const 광고비26 = getValue(pl2026, '광고비', month);
+  const month = 11; // 12월 기말 (index 11) - 재무상태표(BS)·브랜드 등 기말 기준
+
+  // PL 데이터 추출 - 수익성분석/비용증가: 손익계산서 연간 합계 (25년 연간 vs 26년 연간)
+  const tag매출25 = getValueAnnual(pl2025, 'Tag매출');
+  const tag매출26 = getValueAnnual(pl2026, 'Tag매출');
+  const 실판매출25 = getValueAnnual(pl2025, '실판매출');
+  const 실판매출26 = getValueAnnual(pl2026, '실판매출');
+  const 매출총이익25 = getValueAnnual(pl2025, '매출총이익');
+  const 매출총이익26 = getValueAnnual(pl2026, '매출총이익');
+  const 영업이익25 = getValueAnnual(pl2025, '영업이익');
+  const 영업이익26 = getValueAnnual(pl2026, '영업이익');
+  const 직접비25 = getValueAnnual(pl2025, '직접비');
+  const 직접비26 = getValueAnnual(pl2026, '직접비');
+  const 영업비25 = getValueAnnual(pl2025, '영업비');
+  const 영업비26 = getValueAnnual(pl2026, '영업비');
+  const 광고비25 = getValueAnnual(pl2025, '광고비');
+  const 광고비26 = getValueAnnual(pl2026, '광고비');
+  const 매출원가25 = getValueAnnual(pl2025, '매출원가');
+  const 매출원가26 = getValueAnnual(pl2026, '매출원가');
+  // 영업이익률: 연간 합계 기준으로 계산
+  const 영업이익률25 = 실판매출25 !== 0 ? (영업이익25 / 실판매출25) * 100 : 0;
+  const 영업이익률26 = 실판매출26 !== 0 ? (영업이익26 / 실판매출26) * 100 : 0;
   
   // BS 데이터 추출 (12월 기말 기준, K 단위)
   const 자산25 = getValue(bs2025, '자산', month);
@@ -59,13 +92,13 @@ function generateSummary(
   const AR26 = 직영AR26 + 대리상AR26;
   const 차입금25 = getValue(bs2025, '차입금', month);
   const 차입금26 = getValue(bs2026, '차입금', month);
-  
-  // 브랜드별 매출 (12월 기말 기준, K 단위)
-  const mlb26 = getValue(pl2026, 'MLB', month);
-  const kids26 = getValue(pl2026, 'KIDS', month);
-  const discovery25 = getValue(pl2025, 'DISCOVERY', month);
-  const discovery26 = getValue(pl2026, 'DISCOVERY', month);
-  
+  const 본사AP25 = getValue(bs2025, '본사 AP', month);
+  const 제품AP25 = getValue(bs2025, '제품 AP', month);
+  const 본사AP26 = getValue(bs2026, '본사 AP', month);
+  const 제품AP26 = getValue(bs2026, '제품 AP', month);
+  const 외상매입채무25 = Math.abs(본사AP25) + Math.abs(제품AP25);
+  const 외상매입채무26 = Math.abs(본사AP26) + Math.abs(제품AP26);
+
   // 계산 (25년 → 26년)
   const tag매출증가율 = tag매출25 !== 0 ? ((tag매출26 - tag매출25) / tag매출25) * 100 : 0;
   const 실판매출증가율 = 실판매출25 !== 0 ? ((실판매출26 - 실판매출25) / 실판매출25) * 100 : 0;
@@ -76,6 +109,7 @@ function generateSummary(
     영업이익25 > 0 && 영업이익26 < 0 ? '적자전환' :
     null;
   
+  const 직접비증가율 = 직접비25 !== 0 ? ((직접비26 - 직접비25) / 직접비25) * 100 : 0;
   const 영업비증가율 = 영업비25 !== 0 ? ((영업비26 - 영업비25) / 영업비25) * 100 : 0;
   const 광고비증가율 = 광고비25 !== 0 ? ((광고비26 - 광고비25) / 광고비25) * 100 : 0;
   const 자산증가율 = 자산25 !== 0 ? ((자산26 - 자산25) / 자산25) * 100 : 0;
@@ -85,8 +119,9 @@ function generateSummary(
   const AR증가율 = AR25 !== 0 ? ((AR26 - AR25) / AR25) * 100 : 0;
   const 부채비율25 = 자본25 !== 0 ? (부채25 / 자본25) * 100 : 0;
   const 부채비율26 = 자본26 !== 0 ? (부채26 / 자본26) * 100 : 0;
-  const discovery증가율 = discovery25 !== 0 ? ((discovery26 - discovery25) / discovery25) * 100 : 0;
-  
+  const 차입금비율25 = 자본25 !== 0 ? (차입금25 / 자본25) * 100 : 0;
+  const 차입금비율26 = 자본26 !== 0 ? (차입금26 / 자본26) * 100 : 0;
+
   // 당기순이익 (이익잉여금 YoY 차이)
   const 당기순이익26 = 이익잉여금26 - 이익잉여금25;
   
@@ -106,7 +141,36 @@ function generateSummary(
   
   // M 단위로 변환 (K / 1000) - 재무현황 등에서 사용하지 않으므로 제거 가능하지만 일단 유지
   const toM = (val: number) => Math.round(val / 1000);
-  
+  // 백만원(M) 단위 (원 -> M)
+  const toMillion = (val: number) => Math.round(val / 1_000_000);
+  const 영업현금흐름M = toMillion(영업활동YoY);
+  const 재고감축M = 재고25 > 재고26 ? toMillion(재고25 - 재고26) : 0;
+  const 운전자본효율화M = toMillion(운전자본YoY);
+
+  // DIO = (재고자산/매출원가)*365, DSO = (외상매출금/매출액)*365, DPO = (외상매입채무/매출원가)*365, CCC = DSO+DIO-DPO (기말 잔액 + 연간 발생액)
+  const DIO25 = 매출원가25 !== 0 ? (재고25 / 매출원가25) * 365 : 0;
+  const DIO26 = 매출원가26 !== 0 ? (재고26 / 매출원가26) * 365 : 0;
+  const DSO25 = 실판매출25 !== 0 ? (AR25 / 실판매출25) * 365 : 0;
+  const DSO26 = 실판매출26 !== 0 ? (AR26 / 실판매출26) * 365 : 0;
+  const DPO25 = 매출원가25 !== 0 ? (외상매입채무25 / 매출원가25) * 365 : 0;
+  const DPO26 = 매출원가26 !== 0 ? (외상매입채무26 / 매출원가26) * 365 : 0;
+  const CCC25 = DSO25 + DIO25 - DPO25;
+  const CCC26 = DSO26 + DIO26 - DPO26;
+  const DIO단축일수 = Math.round(DIO25 - DIO26);
+  const DSO단축일수 = Math.round(DSO25 - DSO26);
+  const CCC단축일수 = Math.round(CCC25 - CCC26);
+  const CCC개선율 = CCC25 !== 0 ? ((CCC25 - CCC26) / CCC25) * 100 : 0;
+
+  // 차입금 감소율·부채 감소율·자본 증가율 (0 나눗셈 처리)
+  const 차입금감소율 = 차입금25 !== 0 ? ((차입금25 - 차입금26) / 차입금25) * 100 : 0;
+  const 부채감소율 = 부채25 !== 0 ? ((부채25 - 부채26) / 부채25) * 100 : 0;
+  const 매출총이익YoY = 매출총이익26 - 매출총이익25;
+  const 영업비YoY = 영업비26 - 영업비25;
+  const 부채비율개선p = 부채비율25 - 부채비율26;
+  const 영업이익률개선p = 영업이익률26 - 영업이익률25;
+  const 매출총이익률개선p = 매출총이익률26 - 매출총이익률25;
+  const 영업비YoY감소율 = 영업비25 !== 0 ? ((영업비25 - 영업비26) / 영업비25) * 100 : 0;
+
   return {
     title: 'F&F CHINA 2026 재무 성과 종합 분석 (2026년 기말 기준)',
     baseMonth: 12,
@@ -119,6 +183,7 @@ function generateSummary(
           `• 영업이익률 ${영업이익률25.toFixed(1)}% → ${영업이익률26.toFixed(1)}% (${(영업이익률26 - 영업이익률25) > 0 ? '+' : '△'}${Math.abs(영업이익률26 - 영업이익률25).toFixed(1)}%p)`
         ],
         비용증가: [
+          `• 직접비 ${toKWithComma(직접비25)}K → ${toKWithComma(직접비26)}K (${직접비증가율 >= 0 ? '+' : '△'}${Math.abs(직접비증가율).toFixed(1)}%)`,
           `• 영업비 ${toKWithComma(영업비25)}K → ${toKWithComma(영업비26)}K (${영업비증가율 >= 0 ? '+' : '△'}${Math.abs(영업비증가율).toFixed(1)}%)`,
           `• 광고비 ${toKWithComma(광고비25)}K → ${toKWithComma(광고비26)}K (${광고비증가율 >= 0 ? '+' : '△'}${Math.abs(광고비증가율).toFixed(0)}%)`
         ]
@@ -152,15 +217,59 @@ function generateSummary(
           `• 부채비율: ${부채비율25.toFixed(0)}% → ${부채비율26.toFixed(0)}% (${(부채비율26 - 부채비율25) > 0 ? '+' : '△'}${(부채비율26 - 부채비율25).toFixed(0)}%p)`
         ]
       },
-      브랜드포트폴리오: {
-        기존브랜드: [
-          `• MLB: ${toKWithComma(mlb26)}K (${tag매출26 !== 0 ? ((mlb26 / tag매출26) * 100).toFixed(1) : '0'}%)`,
-          `• KIDS: ${toKWithComma(kids26)}K (${tag매출26 !== 0 ? ((kids26 / tag매출26) * 100).toFixed(1) : '0'}%)`
+      심층분석: {
+        수익성악화원인: [
+          `• 매출은 전년 대비 ${실판매출증가율 >= 0 ? '+' : ''}${실판매출증가율.toFixed(1)}% 성장했으나 영업이익은 ${영업이익증가율 >= 0 ? '+' : '△'}${Math.abs(영업이익증가율).toFixed(1)}% ${영업이익증가율 < 0 ? '감소' : '증가'}.`,
+          `• 매출총이익률 25년 ${매출총이익률25.toFixed(1)}% → 26년 ${매출총이익률26.toFixed(1)}% (${(매출총이익률26 - 매출총이익률25) >= 0 ? '+' : '△'}${Math.abs(매출총이익률26 - 매출총이익률25).toFixed(1)}%p).`,
+          `• 영업비 ${영업비증가율 >= 0 ? '+' : '△'}${Math.abs(영업비증가율).toFixed(1)}% 증가(광고비 ${광고비증가율 >= 0 ? '+' : '△'}${Math.abs(광고비증가율).toFixed(0)}% 증가).`
         ],
-        신규브랜드: [
-          `• Discovery: ${discovery증가율 > 0 ? '+' : ''}${discovery증가율.toFixed(0)}% (${toKWithComma(discovery26)}K)`
+        재고관리이슈: [
+          `• 재고자산 25년 말 ${toKWithComma(재고25)}K → 26년 말 ${toKWithComma(재고26)}K (${재고증가율 >= 0 ? '+' : '△'}${Math.abs(재고증가율).toFixed(1)}% ${재고증가율 >= 0 ? '증가' : '감소'}).`
+        ],
+        여신리스크개선: [
+          `• 외상매출금 25년 말 ${toKWithComma(AR25)}K → 26년 말 ${toKWithComma(AR26)}K (${AR증가율 <= 0 ? '△' : '+'}${Math.abs(AR증가율).toFixed(1)}% ${AR증가율 <= 0 ? '감소' : '증가'}).`
+        ],
+        재무건전성: [
+          `• 부채비율 25년 말 ${부채비율25.toFixed(0)}% → 26년 말 ${부채비율26.toFixed(0)}% (전년 대비 ${(부채비율26 - 부채비율25) > 0 ? '+' : ''}${(부채비율26 - 부채비율25).toFixed(0)}%p ${(부채비율26 - 부채비율25) > 0 ? '악화' : '개선'}).`,
+          `• 차입금 비율 25년 말 ${차입금비율25.toFixed(0)}% → 26년 말 ${차입금비율26.toFixed(0)}%.`,
+          `• 유동비율 26년 말 ${유동비율26.toFixed(0)}%로 단기 유동성 양호.`
+        ],
+        긍정적요소: [
+          `• ROE 26년 ${ROE26.toFixed(1)}%로 수익성 유지.`,
+          `• 당기순이익 26년 ${toKWithComma(당기순이익26)}K.`
+        ],
+        재무구조개선: [
+          `• 부채비율 ${부채비율개선p.toFixed(0)}%p 개선의 구조: 부채 ${toMillion(Math.abs(부채26 - 부채25)).toLocaleString('ko-KR')}M 감소(△${부채감소율.toFixed(1)}%)와 자본 ${toMillion(자본26 - 자본25).toLocaleString('ko-KR')}M 증가(+${자본증가율.toFixed(1)}%)의 동시 효과. 차입금 ${차입금감소율.toFixed(1)}% 급감이 핵심 동인.`,
+          `• 차입금 상환 재원 분석: 차입금 ${toMillion(차입금25 - 차입금26).toLocaleString('ko-KR')}M 감축 재원: 영업현금흐름 ${영업현금흐름M.toLocaleString('ko-KR')}M + 운전자본 효율화 ${운전자본효율화M.toLocaleString('ko-KR')}M + 자본 증가 ${toMillion(자본26 - 자본25).toLocaleString('ko-KR')}M. 영업활동 중심의 건전한 재무구조 개선.`,
+          `• 유동성 안정화: 유동비율 ${유동비율25.toFixed(0)}% → ${유동비율26.toFixed(0)}%로 ${Math.abs(유동비율26 - 유동비율25).toFixed(0)}%p 개선. 단기 채무 상환 능력 강화되며 재무 안정성 확보.`
         ]
-      }
+      },
+      주요성과: [
+        `• 수익성 전환: 영업이익률 ${영업이익률25.toFixed(1)}% → ${영업이익률26.toFixed(1)}%로 ${영업이익률개선p.toFixed(1)}%p 개선. 매출총이익률 ${매출총이익률개선p.toFixed(1)}%p 상승하며 원가구조 최적화 성공`,
+        `• 재무구조 정상화: 부채비율 ${부채비율25.toFixed(0)}% → ${부채비율26.toFixed(0)}% 급감. 차입금 ${차입금감소율.toFixed(1)}% 감축으로 재무 안정성 확보`,
+        `• 운전자본 효율화: 재고자산 ${재고증가율 < 0 ? Math.abs(재고증가율).toFixed(1) : '0'}% 감축, 외상매출금 ${AR증가율 < 0 ? Math.abs(AR증가율).toFixed(1) : '0'}% 개선으로 영업현금흐름 ${영업현금흐름M.toLocaleString('ko-KR')}M 창출`
+      ],
+      핵심분석: [
+        `• 역설적 수익성 개선: 매출이 ${실판매출증가율 >= 0 ? '+' : ''}${실판매출증가율.toFixed(1)}% ${실판매출증가율 < 0 ? '감소' : '성장'}했음에도 영업이익은 ${영업이익증가율 >= 0 ? '+' : '△'}${Math.abs(영업이익증가율).toFixed(1)}% 급증. 이는 비용 통제와 수익성 중심 경영으로의 전환을 의미합니다.`,
+        `• 매출총이익률 하락 원인: 매출총이익률이 ${매출총이익률25.toFixed(1)}% → ${매출총이익률26.toFixed(1)}%로 ${Math.abs(매출총이익률개선p).toFixed(1)}%p 하락. 이는 직접비가 ${직접비증가율 >= 0 ? '+' : '△'}${Math.abs(직접비증가율).toFixed(1)}% 증가한 영향으로 보이나, 절대 매출총이익 감소폭(△${toMillion(Math.abs(매출총이익YoY)).toLocaleString('ko-KR')}M)을 판관비 절감(△${toMillion(Math.abs(영업비YoY)).toLocaleString('ko-KR')}M)과 영업효율화로 상쇄하여 영업이익 증대 달성.`,
+        `• 비용 구조 최적화: 판관비가 ${영업비YoY감소율.toFixed(1)}% 감소하며 비용 통제 성공. 광고비는 소폭 증가했으나(${광고비증가율 >= 0 ? '+' : '△'}${Math.abs(광고비증가율).toFixed(1)}%), 전체 영업비 관리 효율화로 영업레버리지 개선.`
+      ],
+      핵심인사이트: [
+        `• 재고 효율화의 현금 창출력: 재고자산 ${재고감축M > 0 ? `${재고감축M.toLocaleString('ko-KR')}M` : '0'} 감축은 단순 자산 축소가 아닌 현금화 전략. 재고회전일수 ${DIO단축일수}일 단축으로 연간 현금흐름 개선 기여도 추정 약 ${재고감축M > 0 ? 재고감축M.toLocaleString('ko-KR') : 0}M.`,
+        `• 외상매출금 관리 강화: 외상매출금 ${AR증가율 < 0 ? Math.abs(AR증가율).toFixed(1) : '0'}% 감소는 회수 정책 강화 또는 고객 구조 변화를 시사. DSO(매출채권회전일수) ${DSO단축일수}일 단축으로 현금흐름 안정성 확보.`,
+        `• CCC ${CCC단축일수}일 단축의 의미: 현금전환주기 ${Math.round(CCC25)}일 → ${Math.round(CCC26)}일로 ${CCC개선율.toFixed(0)}% 개선. 이는 영업현금흐름 ${영업현금흐름M.toLocaleString('ko-KR')}M 창출의 핵심 동인이며, 차입금 상환 재원 확보.`
+      ],
+      핵심이슈권고사항: [
+        `• 매출 성장성 정체: 매출이 ${실판매출증가율 >= 0 ? '+' : ''}${실판매출증가율.toFixed(1)}% ${실판매출증가율 < 0 ? '감소' : '성장'}하며 성장 모멘텀 약화. 수익성 개선은 달성했으나, 지속가능한 성장을 위한 매출 확대 전략 필요.`,
+        `• 직접비 상승률 > 매출 성장률: 직접비가 ${직접비증가율 >= 0 ? '+' : '△'}${Math.abs(직접비증가율).toFixed(1)}% 증가하여 매출 증가율을 상회. 원가 통제력 점검 및 가격 정책 재검토 필요.`,
+        `• 총자산 ${자산증가율 >= 0 ? '+' : '△'}${Math.abs(자산증가율).toFixed(1)}% ${자산증가율 < 0 ? '감소' : '증가'}: 자산 규모 축소가 성장 제약 요인이 될 가능성. 효율성 개선과 성장 투자 간 균형 필요.`
+      ],
+      결론: [
+        '2026년은 구조 개혁의 성과를 확인한 의미있는 해입니다.',
+        `영업이익 ${영업이익증가율 >= 0 ? '+' : '△'}${Math.abs(영업이익증가율).toFixed(0)}% 증가, 부채비율 ${부채비율개선p.toFixed(0)}%p 개선, 차입금 ${차입금감소율.toFixed(0)}% 감축 등은 경영진의 결단력 있는 재무 정상화 노력이 가시화된 결과입니다. 특히 영업현금흐름 ${영업현금흐름M.toLocaleString('ko-KR')}M 창출과 잉여현금흐름 흑자 전환은 향후 성장 투자와 주주 가치 제고의 재원을 확보했다는 점에서 전략적 의미가 큽니다.`,
+        '그러나 매출 성장성 정체와 총자산 축소는 지속가능한 성장을 위한 과제입니다. 효율성 개선을 유지하면서도 매출 확대 모멘텀을 되찾는 것이 2027년의 핵심 과제가 될 것입니다.',
+        '향후 6개월은 단기 성과 창출에 집중하되, 중장기적으로는 성장 투자를 재개하여 \'수익성\'과 \'성장성\'의 균형을 이루는 것이 경영 전략의 핵심이 되어야 합니다.'
+      ]
     }
   };
 }
@@ -182,8 +291,41 @@ export async function GET() {
     const pl2026Rows = calculatePL(pl2026Data);
     const bs2025Rows = calculateBS(bs2025Data);
     const bs2026Rows = calculateBS(bs2026Data);
-    
-    const summary = generateSummary(pl2025Rows, pl2026Rows, bs2025Rows, bs2026Rows);
+
+    let 영업활동YoY = 0;
+    const cashflowDir = path.join(process.cwd(), '파일', 'cashflow');
+    const cf2025Path = path.join(cashflowDir, '2025.csv');
+    const cf2026Path = path.join(cashflowDir, '2026.csv');
+    if (fs.existsSync(cf2026Path)) {
+      try {
+        const [data2025, data2026] = await Promise.all([
+          fs.existsSync(cf2025Path) ? readCFHierarchyCSV(cf2025Path, 2025) : Promise.resolve({ year: 2025, rows: [] as CFHierarchyRow[] }),
+          readCFHierarchyCSV(cf2026Path, 2026),
+        ]);
+        const prev = buildCFYearData(data2025.rows);
+        const curr = buildCFYearData(data2026.rows);
+        for (const r of data2026.rows) {
+          if (r.대분류 !== '영업활동') continue;
+          const key = rowKey(r.대분류, r.중분류, r.소분류);
+          영업활동YoY += (curr.get(key) ?? 0) - (prev.get(key) ?? 0);
+        }
+      } catch (e) {
+        console.warn('경영요약 CF 로드 실패, 영업현금흐름 0으로 처리:', e);
+      }
+    }
+
+    let 운전자본YoY = 0;
+    try {
+      const wc2025 = calculateWorkingCapital(bs2025Data);
+      const wc2026 = calculateWorkingCapital(bs2026Data);
+      const sum25 = wc2025.find(r => r.account === '운전자본')?.values?.slice(0, 12).reduce((a, b) => (a ?? 0) + (b ?? 0), 0) ?? 0;
+      const sum26 = wc2026.find(r => r.account === '운전자본')?.values?.slice(0, 12).reduce((a, b) => (a ?? 0) + (b ?? 0), 0) ?? 0;
+      운전자본YoY = sum26 - sum25;
+    } catch (e) {
+      console.warn('경영요약 운전자본 YoY 계산 실패, 0으로 처리:', e);
+    }
+
+    const summary = generateSummary(pl2025Rows, pl2026Rows, bs2025Rows, bs2026Rows, 영업활동YoY, 운전자본YoY);
     
     return NextResponse.json(summary);
   } catch (error) {

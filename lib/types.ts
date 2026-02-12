@@ -131,10 +131,19 @@ export interface ExecutiveSummaryData {
       주요지표: string[];
       부채비율: string[];
     };
-    브랜드포트폴리오: {
-      기존브랜드: string[];
-      신규브랜드: string[];
+    심층분석: {
+      수익성악화원인: string[];
+      재고관리이슈: string[];
+      여신리스크개선: string[];
+      재무건전성: string[];
+      긍정적요소: string[];
+      재무구조개선: string[];
     };
+    주요성과: string[];
+    핵심분석: string[];
+    핵심인사이트: string[];
+    핵심이슈권고사항: string[];
+    결론: string[];
   };
 }
 
