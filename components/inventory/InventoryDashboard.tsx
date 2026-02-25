@@ -154,16 +154,6 @@ function normalizeAnnualShipmentPlan(source: unknown): AnnualShipmentPlan {
   return base;
 }
 
-function readAnnualShipmentPlanFromLocalStorage(): AnnualShipmentPlan {
-  try {
-    const raw = localStorage.getItem(ANNUAL_SHIPMENT_PLAN_KEY);
-    if (!raw) return createEmptyAnnualShipmentPlan();
-    return normalizeAnnualShipmentPlan(JSON.parse(raw));
-  } catch {
-    return createEmptyAnnualShipmentPlan();
-  }
-}
-
 async function fetchSnapshotFromServer(year: number, brand: string): Promise<SnapshotData | null> {
   try {
     const params = new URLSearchParams({ year: String(year), brand });
@@ -508,12 +498,6 @@ export default function InventoryDashboard() {
         return;
       }
 
-      const localSnap = loadSnapshot(year, brand);
-      if (localSnap) {
-        applySnapshotToState(localSnap);
-        return;
-      }
-
       setSnapshotSaved(false);
       setSnapshotSavedAt(null);
       await Promise.all([
@@ -546,17 +530,12 @@ export default function InventoryDashboard() {
         setAnnualShipmentPlan2026(serverPlan);
         setAnnualShipmentPlanDraft2026(serverPlan);
         setAnnualPlanEditMode(false);
-        try {
-          localStorage.setItem(ANNUAL_SHIPMENT_PLAN_KEY, JSON.stringify(serverPlan));
-        } catch {
-          // ignore storage errors
-        }
         return;
       }
 
-      const localPlan = readAnnualShipmentPlanFromLocalStorage();
-      setAnnualShipmentPlan2026(localPlan);
-      setAnnualShipmentPlanDraft2026(localPlan);
+      const empty = createEmptyAnnualShipmentPlan();
+      setAnnualShipmentPlan2026(empty);
+      setAnnualShipmentPlanDraft2026(empty);
       setAnnualPlanEditMode(false);
     };
 
@@ -583,13 +562,6 @@ export default function InventoryDashboard() {
 
     const warmServerSnapshotsToLocal = async () => {
       const localSnapshots: Partial<Record<LeafBrand, SnapshotData>> = {};
-      for (const b of BRANDS_TO_AGGREGATE) {
-        const localSnap = loadSnapshot(year, b);
-        if (localSnap) localSnapshots[b] = localSnap;
-      }
-      if (!cancelled) {
-        setSavedSnapshotByBrand(localSnapshots);
-      }
 
       await Promise.all(
         BRANDS_TO_AGGREGATE.map(async (b) => {
@@ -628,7 +600,7 @@ export default function InventoryDashboard() {
     if (year === 2026 && brand === '전체') {
       const perBrand: TopTablePair[] = [];
       for (const b of BRANDS_TO_AGGREGATE) {
-        const snap = savedSnapshotByBrand[b] ?? loadSnapshot(year, b);
+        const snap = savedSnapshotByBrand[b];
         const monthly = snap?.monthly ?? monthlyByBrandRef.current[b];
         const shipment = snap?.shipment ?? shipmentByBrandRef.current[b];
         const purchase = snap?.purchase ?? purchaseByBrandRef.current[b];
@@ -897,11 +869,6 @@ export default function InventoryDashboard() {
   const handleAnnualPlanSave = useCallback(async () => {
     setAnnualShipmentPlan2026(annualShipmentPlanDraft2026);
     setAnnualPlanEditMode(false);
-    try {
-      localStorage.setItem(ANNUAL_SHIPMENT_PLAN_KEY, JSON.stringify(annualShipmentPlanDraft2026));
-    } catch {
-      // ignore storage errors
-    }
     await saveAnnualPlanToServer(2026, annualShipmentPlanDraft2026);
   }, [annualShipmentPlanDraft2026]);
 
