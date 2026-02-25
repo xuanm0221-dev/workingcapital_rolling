@@ -912,9 +912,9 @@ export default function InventoryDashboard() {
       <div className="px-6 py-5">
         {/* ?? 湲곗〈 Sell-in / Sell-out ???? */}
         {loading && !dealerTableData && (
-          <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
-            濡쒕뵫 以?..
-          </div>
+            <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
+              \uB85C\uB529 \uC911...
+            </div>
         )}
         {error && !dealerTableData && (
           <div className="py-10 text-center text-red-500 text-sm">{error}</div>
@@ -924,7 +924,7 @@ export default function InventoryDashboard() {
             <div className="flex flex-wrap gap-6 items-start">
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
-                title="?由ъ긽 (CNY K)"
+                title="\uB300\uB9AC\uC0C1 (CNY K)"
                 data={dealerTableData!}
                 year={year}
                 editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
@@ -936,13 +936,13 @@ export default function InventoryDashboard() {
             </div>
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
-                title="蹂몄궗 (CNY K)"
-                titleNote={year === 2026 && brand !== '\uC804\uCCB4' ? '?몄쭛媛?? ?섎쪟 ?곹뭹留ㅼ엯, ?由ъ긽異쒓퀬 | ACC: ?ш퀬二쇱닔' : undefined}
+                title="\uBCF8\uC0AC (CNY K)"
+                titleNote={year === 2026 && brand !== '\uC804\uCCB4' ? '\uD3B8\uC9D1\uAC00\uB2A5: \uC758\uB958 \uC0C1\uD488\uB9E4\uC785, \uB300\uB9AC\uC0C1\uCD9C\uACE0 | ACC: \uC7AC\uACE0\uC8FC\uC218' : undefined}
                 data={hqTableData!}
                 year={year}
                 editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
-                sellInLabel="?곹뭹留ㅼ엯"
-                sellOutLabel="?由ъ긽異쒓퀬"
+                sellInLabel="\uC0C1\uD488\uB9E4\uC785"
+                sellOutLabel="\uB300\uB9AC\uC0C1\uCD9C\uACE0"
                 tableType="hq"
                 onWoiChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleWoiChange : undefined}
                 onHqSellInChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleHqSellInChange : undefined}
@@ -961,9 +961,9 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">?벀</span>
+              <span className="text-lg">\uD83D\uDCE6</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">?붾퀎 ?ш퀬?붿븸</span>
+            <span className="text-sm font-bold text-gray-700">\uC6D4\uBCC4 \uC7AC\uACE0\uC794\uC561</span>
             <span className="text-xs font-normal text-gray-400">
               (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{monthlyData?.closedThrough ?? '--'})
             </span>
@@ -978,7 +978,7 @@ export default function InventoryDashboard() {
             <>
               {monthlyLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  濡쒕뵫 以?..
+                  \uB85C\uB529 \uC911...
                 </div>
               )}
               {monthlyError && (
@@ -987,13 +987,13 @@ export default function InventoryDashboard() {
               {monthlyData && !monthlyLoading && monthlyData.dealer.rows.length > 0 && (
                 <>
                   <InventoryMonthlyTable
-                    firstColumnHeader="?由ъ긽"
+                    firstColumnHeader="\uB300\uB9AC\uC0C1"
                     data={monthlyData.dealer as TableData}
                     year={year}
                     showOpening={true}
                   />
                   <InventoryMonthlyTable
-                    firstColumnHeader="蹂몄궗"
+                    firstColumnHeader="\uBCF8\uC0AC"
                     data={monthlyData.hq as TableData}
                     year={year}
                     showOpening={true}
@@ -1005,7 +1005,7 @@ export default function InventoryDashboard() {
               )}
               {monthlyData && !monthlyLoading && monthlyData.dealer.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
+                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
                 </div>
               )}
             </>
@@ -1020,9 +1020,9 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">?뱤</span>
+              <span className="text-lg">\uD83D\uDCCA</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">由ы뀒??留ㅼ텧</span>
+            <span className="text-sm font-bold text-gray-700">\uB9AC\uD14C\uC77C \uB9E4\uCD9C</span>
             <span className="text-xs font-normal text-gray-400">
               (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{retailData?.closedThrough ?? '--'})
             </span>
@@ -1037,7 +1037,7 @@ export default function InventoryDashboard() {
             <>
               {retailLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  濡쒕뵫 以?..
+                  \uB85C\uB529 \uC911...
                 </div>
               )}
               {retailError && (
@@ -1046,14 +1046,14 @@ export default function InventoryDashboard() {
               {retailData && !retailLoading && retailData.dealer.rows.length > 0 && (
                 <>
                   <InventoryMonthlyTable
-                    firstColumnHeader="?由ъ긽"
+                    firstColumnHeader="\uB300\uB9AC\uC0C1"
                     data={retailData.dealer as TableData}
                     year={year}
                     showOpening={false}
                     planFromMonth={retailData.planFromMonth}
                   />
                   <InventoryMonthlyTable
-                    firstColumnHeader="蹂몄궗"
+                    firstColumnHeader="\uBCF8\uC0AC"
                     data={retailData.hq as TableData}
                     year={year}
                     showOpening={false}
@@ -1066,7 +1066,7 @@ export default function InventoryDashboard() {
               )}
               {retailData && !retailLoading && retailData.dealer.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
+                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
                 </div>
               )}
             </>
@@ -1081,9 +1081,9 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">?뱤</span>
+              <span className="text-lg">\uD83D\uDE9A</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">蹂몄궗?믩?由ъ긽 異쒓퀬留ㅼ텧</span>
+            <span className="text-sm font-bold text-gray-700">\uBCF8\uC0AC\u2192\uB300\uB9AC\uC0C1 \uCD9C\uACE0\uB9E4\uCD9C</span>
             <span className="text-xs font-normal text-gray-400">
               (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{shipmentData?.closedThrough ?? '--'})
             </span>
@@ -1098,7 +1098,7 @@ export default function InventoryDashboard() {
             <>
               {shipmentLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  濡쒕뵫 以?..
+                  \uB85C\uB529 \uC911...
                 </div>
               )}
               {shipmentError && (
@@ -1106,7 +1106,7 @@ export default function InventoryDashboard() {
               )}
               {shipmentData && !shipmentLoading && shipmentData.data.rows.length > 0 && (
                 <InventoryMonthlyTable
-                  firstColumnHeader="蹂몄궗?믩?由ъ긽 異쒓퀬"
+                  firstColumnHeader="\uBCF8\uC0AC\u2192\uB300\uB9AC\uC0C1 \uCD9C\uACE0"
                   data={shipmentData.data as TableData}
                   year={year}
                   showOpening={false}
@@ -1117,7 +1117,7 @@ export default function InventoryDashboard() {
               )}
               {shipmentData && !shipmentLoading && shipmentData.data.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
+                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
                 </div>
               )}
             </>
@@ -1132,9 +1132,9 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">?뱿</span>
+              <span className="text-lg">\uD83D\uDCE5</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">蹂몄궗 留ㅼ엯?곹뭹</span>
+            <span className="text-sm font-bold text-gray-700">\uBCF8\uC0AC \uB9E4\uC785\uC0C1\uD488</span>
             <span className="text-xs font-normal text-gray-400">
               (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{purchaseData?.closedThrough ?? '--'})
             </span>
@@ -1149,7 +1149,7 @@ export default function InventoryDashboard() {
             <>
               {purchaseLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  濡쒕뵫 以?..
+                  \uB85C\uB529 \uC911...
                 </div>
               )}
               {purchaseError && (
@@ -1170,7 +1170,7 @@ export default function InventoryDashboard() {
               )}
               {purchaseData && !purchaseLoading && purchaseData.data.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
+                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
                 </div>
               )}
             </>
