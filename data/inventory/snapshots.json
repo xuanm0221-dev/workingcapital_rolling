@@ -1,2 +1,8531 @@
-{}
-
+{
+  "2026:MLB": {
+    "monthly": {
+      "year": 2026,
+      "brand": "MLB",
+      "closedThrough": "202601",
+      "dealer": {
+        "rows": [
+          {
+            "key": "재고자산합계",
+            "label": "재고자산합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "opening": 5874775131,
+            "monthly": [
+              6145385169,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 3441602093,
+            "monthly": [
+              3420587018,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 244037829,
+            "monthly": [
+              689921096,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 2257652214,
+            "monthly": [
+              1892798524,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 691970533,
+            "monthly": [
+              619374260,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 247941517,
+            "monthly": [
+              218493138,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 2433173038,
+            "monthly": [
+              2724798151,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 1712126965,
+            "monthly": [
+              1922857258,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 505728060,
+            "monthly": [
+              554682253,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 180258740,
+            "monthly": [
+              212841770,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 35059273,
+            "monthly": [
+              34416870,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "재고자산합계",
+            "label": "재고자산합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "opening": 3718234069,
+            "monthly": [
+              4052143976,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 1747850308,
+            "monthly": [
+              2273929343,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 466947680,
+            "monthly": [
+              1081880470,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 840387754,
+            "monthly": [
+              777436879,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 254497908,
+            "monthly": [
+              237730942,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 186016966,
+            "monthly": [
+              176881052,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 1970383761,
+            "monthly": [
+              1778214633,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 1489768405,
+            "monthly": [
+              1303526977,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 356938781,
+            "monthly": [
+              356992482,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 110739345,
+            "monthly": [
+              105150421,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 12937230,
+            "monthly": [
+              12544753,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "retailActuals": {
+      "year": 2026,
+      "brand": "MLB",
+      "closedThrough": "202601",
+      "dealer": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              857663578,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              520621983,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              80493923,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              365497044,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              55060498,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              19570518,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              337041595,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              225149474,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              87615522,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              19653398,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4623201,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              163956281,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              86161580,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              6480489,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              54109924,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              17503376,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              8067791,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              77794701,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              51083807,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              22062555,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4154317,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              494022,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "planFromMonth": 2,
+      "retail2025": {
+        "dealer": {
+          "rows": [
+            {
+              "key": "매출합계",
+              "label": "매출합계",
+              "isTotal": true,
+              "isSubtotal": false,
+              "isLeaf": false,
+              "monthly": [
+                1071504768,
+                523963155,
+                640842899,
+                628797061,
+                681168801,
+                547940523,
+                532990002,
+                577069720,
+                537533435,
+                820452546,
+                791155483,
+                772660360
+              ]
+            },
+            {
+              "key": "의류합계",
+              "label": "의류합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                662924772,
+                267098995,
+                345947973,
+                351403221,
+                376739761,
+                296154272,
+                276329922,
+                290784559,
+                279358700,
+                480741918,
+                476818470,
+                477857387
+              ]
+            },
+            {
+              "key": "당년F",
+              "label": "당년F",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                3867,
+                -1500,
+                3166,
+                3366,
+                499,
+                50282,
+                30460771,
+                103694805,
+                145410252,
+                307879218,
+                357279587,
+                368467292
+              ]
+            },
+            {
+              "key": "당년S",
+              "label": "당년S",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                189691036,
+                128662514,
+                229439685,
+                266992127,
+                297745185,
+                235043476,
+                185977151,
+                117210152,
+                62514562,
+                57381514,
+                19484291,
+                16407640
+              ]
+            },
+            {
+              "key": "1년차",
+              "label": "1년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                375917417,
+                98462927,
+                77339800,
+                59276482,
+                55062994,
+                43721034,
+                43186078,
+                46107969,
+                47819061,
+                79040166,
+                67240238,
+                56538587
+              ]
+            },
+            {
+              "key": "2년차",
+              "label": "2년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                70300371,
+                27137121,
+                26410242,
+                18792848,
+                17242627,
+                12446613,
+                12818517,
+                18056142,
+                18903738,
+                29526661,
+                28470811,
+                23351829
+              ]
+            },
+            {
+              "key": "차기시즌",
+              "label": "차기시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                599,
+                869,
+                439,
+                null,
+                9501025
+              ]
+            },
+            {
+              "key": "과시즌",
+              "label": "과시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                27012081,
+                12837933,
+                12755080,
+                6338398,
+                6688456,
+                4892867,
+                3887405,
+                5714892,
+                4710218,
+                6913920,
+                4343543,
+                3591014
+              ]
+            },
+            {
+              "key": "ACC합계",
+              "label": "ACC합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                408579996,
+                256864160,
+                294894926,
+                277393840,
+                304429040,
+                251786251,
+                256660080,
+                286285161,
+                258174735,
+                339710628,
+                314337013,
+                294802973
+              ]
+            },
+            {
+              "key": "신발",
+              "label": "신발",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                300235516,
+                167149867,
+                191393300,
+                175435623,
+                194378492,
+                158819545,
+                158988345,
+                179709651,
+                169663859,
+                221909764,
+                210428680,
+                195331804
+              ]
+            },
+            {
+              "key": "모자",
+              "label": "모자",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                78310906,
+                63145024,
+                76159011,
+                74803051,
+                76178803,
+                59169694,
+                65693867,
+                71873966,
+                62483795,
+                88416423,
+                81538587,
+                80910370
+              ]
+            },
+            {
+              "key": "가방",
+              "label": "가방",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                24951231,
+                24464290,
+                24889339,
+                24564382,
+                30789189,
+                31019027,
+                29418645,
+                32139237,
+                23672254,
+                25794301,
+                18990536,
+                14845990
+              ]
+            },
+            {
+              "key": "기타",
+              "label": "기타",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                5082343,
+                2104979,
+                2453276,
+                2590784,
+                3082556,
+                2777985,
+                2559223,
+                2562307,
+                2354827,
+                3590140,
+                3379210,
+                3714809
+              ]
+            }
+          ]
+        },
+        "hq": {
+          "rows": [
+            {
+              "key": "매출합계",
+              "label": "매출합계",
+              "isTotal": true,
+              "isSubtotal": false,
+              "isLeaf": false,
+              "monthly": [
+                165157813,
+                73723342,
+                112212428,
+                100675258,
+                137166183,
+                74100092,
+                68042305,
+                84244839,
+                88902923,
+                238082240,
+                135176043,
+                122730263
+              ]
+            },
+            {
+              "key": "의류합계",
+              "label": "의류합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                92928196,
+                31829958,
+                55711117,
+                56958396,
+                68925591,
+                36160452,
+                32148630,
+                35069614,
+                40492529,
+                126347254,
+                72648750,
+                68881800
+              ]
+            },
+            {
+              "key": "당년F",
+              "label": "당년F",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                341347,
+                2136381,
+                6952365,
+                12276140,
+                61428361,
+                37177107,
+                40171519
+              ]
+            },
+            {
+              "key": "당년S",
+              "label": "당년S",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                8112009,
+                8077949,
+                20808620,
+                25273481,
+                41399068,
+                23807380,
+                19283331,
+                15294085,
+                6353425,
+                7189572,
+                1901240,
+                1320189
+              ]
+            },
+            {
+              "key": "1년차",
+              "label": "1년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                49226417,
+                12689676,
+                20175996,
+                15814834,
+                14163090,
+                6105954,
+                6107973,
+                7440103,
+                13052453,
+                34964548,
+                24409837,
+                17888244
+              ]
+            },
+            {
+              "key": "2년차",
+              "label": "2년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                23746130,
+                5944868,
+                8274758,
+                7504250,
+                6781897,
+                2915058,
+                2376439,
+                3386761,
+                6559576,
+                12652054,
+                5493035,
+                4208461
+              ]
+            },
+            {
+              "key": "차기시즌",
+              "label": "차기시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                1396254
+              ]
+            },
+            {
+              "key": "과시즌",
+              "label": "과시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                11843640,
+                5117465,
+                6451743,
+                8365831,
+                6581536,
+                2990713,
+                2244506,
+                1996300,
+                2250935,
+                10112719,
+                3667531,
+                3897133
+              ]
+            },
+            {
+              "key": "ACC합계",
+              "label": "ACC합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                72229617,
+                41893384,
+                56501311,
+                43716862,
+                68240592,
+                37939640,
+                35893675,
+                49175225,
+                48410394,
+                111734986,
+                62527293,
+                53848463
+              ]
+            },
+            {
+              "key": "신발",
+              "label": "신발",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                49396215,
+                25982399,
+                33147621,
+                23994983,
+                39745124,
+                20553578,
+                20944776,
+                29736770,
+                32436677,
+                74283461,
+                37455940,
+                33334224
+              ]
+            },
+            {
+              "key": "모자",
+              "label": "모자",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                16341861,
+                11707543,
+                17681251,
+                15542507,
+                19033092,
+                11942634,
+                10270278,
+                12731196,
+                11909051,
+                29065689,
+                20140415,
+                17063862
+              ]
+            },
+            {
+              "key": "가방",
+              "label": "가방",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                5686316,
+                3872051,
+                5423599,
+                3975943,
+                9156101,
+                5170552,
+                4463857,
+                6435177,
+                3799510,
+                7742864,
+                4016208,
+                2779580
+              ]
+            },
+            {
+              "key": "기타",
+              "label": "기타",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                805225,
+                331391,
+                248840,
+                203429,
+                306275,
+                272876,
+                214764,
+                272082,
+                265156,
+                642972,
+                914730,
+                670797
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "retail2025": {
+      "dealer": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              1071504768,
+              523963155,
+              640842899,
+              628797061,
+              681168801,
+              547940523,
+              532990002,
+              577069720,
+              537533435,
+              820452546,
+              791155483,
+              772660360
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              662924772,
+              267098995,
+              345947973,
+              351403221,
+              376739761,
+              296154272,
+              276329922,
+              290784559,
+              279358700,
+              480741918,
+              476818470,
+              477857387
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              3867,
+              -1500,
+              3166,
+              3366,
+              499,
+              50282,
+              30460771,
+              103694805,
+              145410252,
+              307879218,
+              357279587,
+              368467292
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              189691036,
+              128662514,
+              229439685,
+              266992127,
+              297745185,
+              235043476,
+              185977151,
+              117210152,
+              62514562,
+              57381514,
+              19484291,
+              16407640
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              375917417,
+              98462927,
+              77339800,
+              59276482,
+              55062994,
+              43721034,
+              43186078,
+              46107969,
+              47819061,
+              79040166,
+              67240238,
+              56538587
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              70300371,
+              27137121,
+              26410242,
+              18792848,
+              17242627,
+              12446613,
+              12818517,
+              18056142,
+              18903738,
+              29526661,
+              28470811,
+              23351829
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              599,
+              869,
+              439,
+              null,
+              9501025
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              27012081,
+              12837933,
+              12755080,
+              6338398,
+              6688456,
+              4892867,
+              3887405,
+              5714892,
+              4710218,
+              6913920,
+              4343543,
+              3591014
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              408579996,
+              256864160,
+              294894926,
+              277393840,
+              304429040,
+              251786251,
+              256660080,
+              286285161,
+              258174735,
+              339710628,
+              314337013,
+              294802973
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              300235516,
+              167149867,
+              191393300,
+              175435623,
+              194378492,
+              158819545,
+              158988345,
+              179709651,
+              169663859,
+              221909764,
+              210428680,
+              195331804
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              78310906,
+              63145024,
+              76159011,
+              74803051,
+              76178803,
+              59169694,
+              65693867,
+              71873966,
+              62483795,
+              88416423,
+              81538587,
+              80910370
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              24951231,
+              24464290,
+              24889339,
+              24564382,
+              30789189,
+              31019027,
+              29418645,
+              32139237,
+              23672254,
+              25794301,
+              18990536,
+              14845990
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              5082343,
+              2104979,
+              2453276,
+              2590784,
+              3082556,
+              2777985,
+              2559223,
+              2562307,
+              2354827,
+              3590140,
+              3379210,
+              3714809
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              165157813,
+              73723342,
+              112212428,
+              100675258,
+              137166183,
+              74100092,
+              68042305,
+              84244839,
+              88902923,
+              238082240,
+              135176043,
+              122730263
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              92928196,
+              31829958,
+              55711117,
+              56958396,
+              68925591,
+              36160452,
+              32148630,
+              35069614,
+              40492529,
+              126347254,
+              72648750,
+              68881800
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              341347,
+              2136381,
+              6952365,
+              12276140,
+              61428361,
+              37177107,
+              40171519
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              8112009,
+              8077949,
+              20808620,
+              25273481,
+              41399068,
+              23807380,
+              19283331,
+              15294085,
+              6353425,
+              7189572,
+              1901240,
+              1320189
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              49226417,
+              12689676,
+              20175996,
+              15814834,
+              14163090,
+              6105954,
+              6107973,
+              7440103,
+              13052453,
+              34964548,
+              24409837,
+              17888244
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              23746130,
+              5944868,
+              8274758,
+              7504250,
+              6781897,
+              2915058,
+              2376439,
+              3386761,
+              6559576,
+              12652054,
+              5493035,
+              4208461
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              1396254
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              11843640,
+              5117465,
+              6451743,
+              8365831,
+              6581536,
+              2990713,
+              2244506,
+              1996300,
+              2250935,
+              10112719,
+              3667531,
+              3897133
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              72229617,
+              41893384,
+              56501311,
+              43716862,
+              68240592,
+              37939640,
+              35893675,
+              49175225,
+              48410394,
+              111734986,
+              62527293,
+              53848463
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              49396215,
+              25982399,
+              33147621,
+              23994983,
+              39745124,
+              20553578,
+              20944776,
+              29736770,
+              32436677,
+              74283461,
+              37455940,
+              33334224
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              16341861,
+              11707543,
+              17681251,
+              15542507,
+              19033092,
+              11942634,
+              10270278,
+              12731196,
+              11909051,
+              29065689,
+              20140415,
+              17063862
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              5686316,
+              3872051,
+              5423599,
+              3975943,
+              9156101,
+              5170552,
+              4463857,
+              6435177,
+              3799510,
+              7742864,
+              4016208,
+              2779580
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              805225,
+              331391,
+              248840,
+              203429,
+              306275,
+              272876,
+              214764,
+              272082,
+              265156,
+              642972,
+              914730,
+              670797
+            ]
+          }
+        ]
+      }
+    },
+    "shipment": {
+      "year": 2026,
+      "brand": "MLB",
+      "closedThrough": "202601",
+      "data": {
+        "rows": [
+          {
+            "key": "출고매출합계",
+            "label": "출고매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              1253703665,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              551097697,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              536986060,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              14111637,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              702605968,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              497608434,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              141383607,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              58787175,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4826752,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "purchase": {
+      "year": 2026,
+      "brand": "MLB",
+      "closedThrough": "202601",
+      "data": {
+        "rows": [
+          {
+            "key": "매입합계",
+            "label": "매입합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              1772549888,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              1132451024,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1132451024,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              640098864,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              407848480,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              170781401,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              56508505,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4960478,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "savedAt": "2026-02-25T17:25:42.367Z",
+    "planFromMonth": 2,
+    "hqSellInPlan": {
+      "당년F": 3000639,
+      "당년S": 2188954,
+      "차기시즌": 754172,
+      "1년차": 0
+    },
+    "accTargetWoiDealer": {
+      "신발": 29,
+      "모자": 29,
+      "가방": 25,
+      "기타": 39
+    },
+    "accTargetWoiHq": {
+      "신발": 10,
+      "모자": 8,
+      "가방": 10,
+      "기타": 10
+    }
+  },
+  "2026:MLB KIDS": {
+    "monthly": {
+      "year": 2026,
+      "brand": "MLB KIDS",
+      "closedThrough": "202601",
+      "dealer": {
+        "rows": [
+          {
+            "key": "재고자산합계",
+            "label": "재고자산합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "opening": 306468524,
+            "monthly": [
+              312197996,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 212293778,
+            "monthly": [
+              211887443,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 13880284,
+            "monthly": [
+              30768427,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 101847479,
+            "monthly": [
+              88819302,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 57335920,
+            "monthly": [
+              54519781,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 39230095,
+            "monthly": [
+              37779933,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 94174746,
+            "monthly": [
+              100310553,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 59891825,
+            "monthly": [
+              63105732,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 20825171,
+            "monthly": [
+              21877781,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 10528993,
+            "monthly": [
+              12423308,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 2928757,
+            "monthly": [
+              2903732,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "재고자산합계",
+            "label": "재고자산합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "opening": 199694309,
+            "monthly": [
+              217522744,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 136273447,
+            "monthly": [
+              146780529,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 16180749,
+            "monthly": [
+              42135126,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 58381530,
+            "monthly": [
+              47347566,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 32488261,
+            "monthly": [
+              29332726,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 29222907,
+            "monthly": [
+              27965111,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 63420862,
+            "monthly": [
+              70742215,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 30132035,
+            "monthly": [
+              35750531,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 17818945,
+            "monthly": [
+              18078372,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 14194018,
+            "monthly": [
+              15676859,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 1275864,
+            "monthly": [
+              1236453,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "retailActuals": {
+      "year": 2026,
+      "brand": "MLB KIDS",
+      "closedThrough": "202601",
+      "dealer": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              36962412,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              27336810,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4593109,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              16568572,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4123265,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              2051864,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              9625602,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              6464428,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1616566,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1390769,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              153839,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              19239727,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              14288420,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1303460,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              8053137,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              3482612,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1449211,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              4951307,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              3042508,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1201583,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              628000,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              79216,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "planFromMonth": 2,
+      "retail2025": {
+        "dealer": {
+          "rows": [
+            {
+              "key": "매출합계",
+              "label": "매출합계",
+              "isTotal": true,
+              "isSubtotal": false,
+              "isLeaf": false,
+              "monthly": [
+                60314773,
+                19208618,
+                33335833,
+                26992699,
+                29329111,
+                20930056,
+                21013949,
+                26951894,
+                22032400,
+                33892130,
+                28796569,
+                28401613
+              ]
+            },
+            {
+              "key": "의류합계",
+              "label": "의류합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                43613100,
+                11939983,
+                20411926,
+                18755195,
+                20329258,
+                13279687,
+                12207069,
+                15873620,
+                14026129,
+                23573314,
+                20258499,
+                20240451
+              ]
+            },
+            {
+              "key": "당년F",
+              "label": "당년F",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                0,
+                null,
+                998,
+                null,
+                498439,
+                4430005,
+                5932133,
+                13377936,
+                12463962,
+                13035352
+              ]
+            },
+            {
+              "key": "당년S",
+              "label": "당년S",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                9536293,
+                3655188,
+                9092509,
+                11958773,
+                14138602,
+                8533240,
+                7506205,
+                5668501,
+                2679323,
+                1958466,
+                617960,
+                621801
+              ]
+            },
+            {
+              "key": "1년차",
+              "label": "1년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                25251226,
+                5261262,
+                6981820,
+                4272236,
+                4219118,
+                2960119,
+                2674600,
+                3594504,
+                3610388,
+                4956995,
+                4487559,
+                3699739
+              ]
+            },
+            {
+              "key": "2년차",
+              "label": "2년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                6179455,
+                2048924,
+                3715190,
+                1907231,
+                1520051,
+                1344650,
+                1252711,
+                1649126,
+                1472939,
+                2202071,
+                2363067,
+                1533015
+              ]
+            },
+            {
+              "key": "차기시즌",
+              "label": "차기시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                439,
+                null,
+                11393,
+                1126145
+              ]
+            },
+            {
+              "key": "과시즌",
+              "label": "과시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                2646126,
+                974609,
+                622407,
+                616955,
+                450489,
+                441678,
+                275114,
+                531484,
+                330907,
+                1077846,
+                314558,
+                224399
+              ]
+            },
+            {
+              "key": "ACC합계",
+              "label": "ACC합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                16701673,
+                7268635,
+                12923907,
+                8237504,
+                8999853,
+                7650369,
+                8806880,
+                11078274,
+                8006271,
+                10318816,
+                8538070,
+                8161162
+              ]
+            },
+            {
+              "key": "신발",
+              "label": "신발",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                12387486,
+                4429978,
+                8503280,
+                4782917,
+                5245559,
+                3723349,
+                5402080,
+                6735488,
+                5200176,
+                6498738,
+                4870881,
+                4664961
+              ]
+            },
+            {
+              "key": "모자",
+              "label": "모자",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                2773041,
+                1577019,
+                2852563,
+                2115269,
+                2086510,
+                1439585,
+                1333758,
+                1397929,
+                1122766,
+                2105348,
+                1592367,
+                1480293
+              ]
+            },
+            {
+              "key": "가방",
+              "label": "가방",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                1212751,
+                1172926,
+                1422963,
+                1228245,
+                1560003,
+                2401143,
+                1995020,
+                2840147,
+                1612598,
+                1549700,
+                1930848,
+                1778637
+              ]
+            },
+            {
+              "key": "기타",
+              "label": "기타",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                328395,
+                88712,
+                145101,
+                111073,
+                107781,
+                86292,
+                76022,
+                104710,
+                70731,
+                165030,
+                143974,
+                237271
+              ]
+            }
+          ]
+        },
+        "hq": {
+          "rows": [
+            {
+              "key": "매출합계",
+              "label": "매출합계",
+              "isTotal": true,
+              "isSubtotal": false,
+              "isLeaf": false,
+              "monthly": [
+                20930975,
+                6121237,
+                11833459,
+                13776060,
+                14808870,
+                8124631,
+                8053248,
+                13078173,
+                11956759,
+                24536562,
+                12077145,
+                13421113
+              ]
+            },
+            {
+              "key": "의류합계",
+              "label": "의류합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                15326889,
+                3723281,
+                7960042,
+                10529978,
+                10669453,
+                5875123,
+                5654094,
+                8912744,
+                8498143,
+                18276269,
+                8668758,
+                9725721
+              ]
+            },
+            {
+              "key": "당년F",
+              "label": "당년F",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                4249,
+                218491,
+                1194871,
+                1828695,
+                9331516,
+                4612864,
+                5463195
+              ]
+            },
+            {
+              "key": "당년S",
+              "label": "당년S",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                1315758,
+                724121,
+                2434393,
+                3366707,
+                4668655,
+                2505838,
+                1835711,
+                1325590,
+                525729,
+                455155,
+                129187,
+                290127
+              ]
+            },
+            {
+              "key": "1년차",
+              "label": "1년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                7952855,
+                1466571,
+                3231486,
+                3647753,
+                3061409,
+                1402670,
+                1429413,
+                2336705,
+                2560151,
+                5370479,
+                2532863,
+                2371541
+              ]
+            },
+            {
+              "key": "2년차",
+              "label": "2년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                4723304,
+                1158557,
+                1911050,
+                2371657,
+                1866716,
+                754965,
+                1040570,
+                1894166,
+                2704016,
+                2566953,
+                1354418,
+                1098771
+              ]
+            },
+            {
+              "key": "차기시즌",
+              "label": "차기시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                9787,
+                485927
+              ]
+            },
+            {
+              "key": "과시즌",
+              "label": "과시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                1334972,
+                374032,
+                383113,
+                1143861,
+                1072673,
+                1207401,
+                1129909,
+                2161412,
+                879552,
+                552166,
+                29639,
+                16160
+              ]
+            },
+            {
+              "key": "ACC합계",
+              "label": "ACC합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                5604086,
+                2397956,
+                3873417,
+                3246082,
+                4139417,
+                2249508,
+                2399154,
+                4165429,
+                3458616,
+                6260293,
+                3408387,
+                3695392
+              ]
+            },
+            {
+              "key": "신발",
+              "label": "신발",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                3864335,
+                1383429,
+                2213866,
+                1752761,
+                2351687,
+                1202424,
+                1279800,
+                2312979,
+                2132351,
+                3637324,
+                1736204,
+                2023368
+              ]
+            },
+            {
+              "key": "모자",
+              "label": "모자",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                1232563,
+                667932,
+                1378623,
+                1220833,
+                1114540,
+                609945,
+                620033,
+                792912,
+                819985,
+                1821913,
+                1053701,
+                1022562
+              ]
+            },
+            {
+              "key": "가방",
+              "label": "가방",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                446703,
+                320498,
+                247728,
+                240923,
+                630531,
+                417875,
+                483728,
+                1032952,
+                468198,
+                716472,
+                551935,
+                580681
+              ]
+            },
+            {
+              "key": "기타",
+              "label": "기타",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                60485,
+                26097,
+                33200,
+                31565,
+                42659,
+                19264,
+                15593,
+                26586,
+                38082,
+                84584,
+                66547,
+                68781
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "retail2025": {
+      "dealer": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              60314773,
+              19208618,
+              33335833,
+              26992699,
+              29329111,
+              20930056,
+              21013949,
+              26951894,
+              22032400,
+              33892130,
+              28796569,
+              28401613
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              43613100,
+              11939983,
+              20411926,
+              18755195,
+              20329258,
+              13279687,
+              12207069,
+              15873620,
+              14026129,
+              23573314,
+              20258499,
+              20240451
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              0,
+              null,
+              998,
+              null,
+              498439,
+              4430005,
+              5932133,
+              13377936,
+              12463962,
+              13035352
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              9536293,
+              3655188,
+              9092509,
+              11958773,
+              14138602,
+              8533240,
+              7506205,
+              5668501,
+              2679323,
+              1958466,
+              617960,
+              621801
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              25251226,
+              5261262,
+              6981820,
+              4272236,
+              4219118,
+              2960119,
+              2674600,
+              3594504,
+              3610388,
+              4956995,
+              4487559,
+              3699739
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              6179455,
+              2048924,
+              3715190,
+              1907231,
+              1520051,
+              1344650,
+              1252711,
+              1649126,
+              1472939,
+              2202071,
+              2363067,
+              1533015
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              439,
+              null,
+              11393,
+              1126145
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              2646126,
+              974609,
+              622407,
+              616955,
+              450489,
+              441678,
+              275114,
+              531484,
+              330907,
+              1077846,
+              314558,
+              224399
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              16701673,
+              7268635,
+              12923907,
+              8237504,
+              8999853,
+              7650369,
+              8806880,
+              11078274,
+              8006271,
+              10318816,
+              8538070,
+              8161162
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              12387486,
+              4429978,
+              8503280,
+              4782917,
+              5245559,
+              3723349,
+              5402080,
+              6735488,
+              5200176,
+              6498738,
+              4870881,
+              4664961
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              2773041,
+              1577019,
+              2852563,
+              2115269,
+              2086510,
+              1439585,
+              1333758,
+              1397929,
+              1122766,
+              2105348,
+              1592367,
+              1480293
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1212751,
+              1172926,
+              1422963,
+              1228245,
+              1560003,
+              2401143,
+              1995020,
+              2840147,
+              1612598,
+              1549700,
+              1930848,
+              1778637
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              328395,
+              88712,
+              145101,
+              111073,
+              107781,
+              86292,
+              76022,
+              104710,
+              70731,
+              165030,
+              143974,
+              237271
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              20930975,
+              6121237,
+              11833459,
+              13776060,
+              14808870,
+              8124631,
+              8053248,
+              13078173,
+              11956759,
+              24536562,
+              12077145,
+              13421113
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              15326889,
+              3723281,
+              7960042,
+              10529978,
+              10669453,
+              5875123,
+              5654094,
+              8912744,
+              8498143,
+              18276269,
+              8668758,
+              9725721
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              4249,
+              218491,
+              1194871,
+              1828695,
+              9331516,
+              4612864,
+              5463195
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1315758,
+              724121,
+              2434393,
+              3366707,
+              4668655,
+              2505838,
+              1835711,
+              1325590,
+              525729,
+              455155,
+              129187,
+              290127
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              7952855,
+              1466571,
+              3231486,
+              3647753,
+              3061409,
+              1402670,
+              1429413,
+              2336705,
+              2560151,
+              5370479,
+              2532863,
+              2371541
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4723304,
+              1158557,
+              1911050,
+              2371657,
+              1866716,
+              754965,
+              1040570,
+              1894166,
+              2704016,
+              2566953,
+              1354418,
+              1098771
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              9787,
+              485927
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1334972,
+              374032,
+              383113,
+              1143861,
+              1072673,
+              1207401,
+              1129909,
+              2161412,
+              879552,
+              552166,
+              29639,
+              16160
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              5604086,
+              2397956,
+              3873417,
+              3246082,
+              4139417,
+              2249508,
+              2399154,
+              4165429,
+              3458616,
+              6260293,
+              3408387,
+              3695392
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              3864335,
+              1383429,
+              2213866,
+              1752761,
+              2351687,
+              1202424,
+              1279800,
+              2312979,
+              2132351,
+              3637324,
+              1736204,
+              2023368
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1232563,
+              667932,
+              1378623,
+              1220833,
+              1114540,
+              609945,
+              620033,
+              792912,
+              819985,
+              1821913,
+              1053701,
+              1022562
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              446703,
+              320498,
+              247728,
+              240923,
+              630531,
+              417875,
+              483728,
+              1032952,
+              468198,
+              716472,
+              551935,
+              580681
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              60485,
+              26097,
+              33200,
+              31565,
+              42659,
+              19264,
+              15593,
+              26586,
+              38082,
+              84584,
+              66547,
+              68781
+            ]
+          }
+        ]
+      }
+    },
+    "shipment": {
+      "year": 2026,
+      "brand": "MLB KIDS",
+      "closedThrough": "202601",
+      "data": {
+        "rows": [
+          {
+            "key": "출고매출합계",
+            "label": "출고매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              34537532,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              22069530,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              19949316,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              2120214,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              12468002,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              7960329,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1381108,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              3063487,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              63078,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "purchase": {
+      "year": 2026,
+      "brand": "MLB KIDS",
+      "closedThrough": "202601",
+      "data": {
+        "rows": [
+          {
+            "key": "매입합계",
+            "label": "매입합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              65065560,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              40439738,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              40439738,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              24625822,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              15356400,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              3767344,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              5346000,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              156078,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "savedAt": "2026-02-25T17:26:11.841Z",
+    "planFromMonth": 2,
+    "hqSellInPlan": {
+      "당년F": 159511,
+      "당년S": 85460,
+      "차기시즌": 51127,
+      "1년차": 0
+    },
+    "accTargetWoiDealer": {
+      "신발": 29,
+      "모자": 29,
+      "가방": 25,
+      "기타": 39
+    },
+    "accTargetWoiHq": {
+      "신발": 10,
+      "모자": 8,
+      "가방": 10,
+      "기타": 10
+    }
+  },
+  "2026:DISCOVERY": {
+    "monthly": {
+      "year": 2026,
+      "brand": "DISCOVERY",
+      "closedThrough": "202601",
+      "dealer": {
+        "rows": [
+          {
+            "key": "재고자산합계",
+            "label": "재고자산합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "opening": 67746896,
+            "monthly": [
+              65160211,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 58716480,
+            "monthly": [
+              55956130,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              11527340,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 56585250,
+            "monthly": [
+              44022410,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 2131230,
+            "monthly": [
+              406380,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 9030416,
+            "monthly": [
+              9204081,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 6805030,
+            "monthly": [
+              6702480,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 966640,
+            "monthly": [
+              1159330,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 985460,
+            "monthly": [
+              1073490,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 273286,
+            "monthly": [
+              268781,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "재고자산합계",
+            "label": "재고자산합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "opening": 452261678,
+            "monthly": [
+              477209862,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 422285160,
+            "monthly": [
+              446042160,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 6293610,
+            "monthly": [
+              24583910,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 393103530,
+            "monthly": [
+              397461970,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 22888020,
+            "monthly": [
+              23996280,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": null,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "opening": 29976518,
+            "monthly": [
+              31167702,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 16698750,
+            "monthly": [
+              17099810,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 6405280,
+            "monthly": [
+              6845580,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 5805840,
+            "monthly": [
+              6193660,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "opening": 1066648,
+            "monthly": [
+              1028652,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "retailActuals": {
+      "year": 2026,
+      "brand": "DISCOVERY",
+      "closedThrough": "202601",
+      "dealer": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              5838605,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              5560690,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              483130,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              4987010,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              90550,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              277915,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              93920,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              142140,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              27060,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              14795,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              4084151,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              3858690,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              155600,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              3221660,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              481430,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              225461,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              70710,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              97550,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              13870,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              43331,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      },
+      "planFromMonth": 2,
+      "retail2025": {
+        "dealer": {
+          "rows": [
+            {
+              "key": "매출합계",
+              "label": "매출합계",
+              "isTotal": true,
+              "isSubtotal": false,
+              "isLeaf": false,
+              "monthly": [
+                1383004,
+                834262,
+                966032,
+                1111810,
+                1702774,
+                1647628,
+                2341703,
+                3274981,
+                3129114,
+                4964226,
+                4581488,
+                6697403
+              ]
+            },
+            {
+              "key": "의류합계",
+              "label": "의류합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                1312750,
+                777890,
+                913530,
+                1007840,
+                1545490,
+                1461900,
+                2073500,
+                2781580,
+                2820430,
+                4720880,
+                4377640,
+                6380060
+              ]
+            },
+            {
+              "key": "당년F",
+              "label": "당년F",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                1940,
+                1364490,
+                2487900,
+                4638700,
+                4354530,
+                5343060
+              ]
+            },
+            {
+              "key": "당년S",
+              "label": "당년S",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                198360,
+                430610,
+                755600,
+                980380,
+                1536270,
+                1455390,
+                2063980,
+                1409150,
+                329750,
+                74080,
+                10510,
+                114810
+              ]
+            },
+            {
+              "key": "1년차",
+              "label": "1년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                1114390,
+                347280,
+                157930,
+                27460,
+                9220,
+                6510,
+                7580,
+                7940,
+                2780,
+                8100,
+                12600,
+                922190
+              ]
+            },
+            {
+              "key": "2년차",
+              "label": "2년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "key": "차기시즌",
+              "label": "차기시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "key": "과시즌",
+              "label": "과시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "key": "ACC합계",
+              "label": "ACC합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                70254,
+                56372,
+                52502,
+                103970,
+                157284,
+                185728,
+                268203,
+                493401,
+                308684,
+                243346,
+                203848,
+                317343
+              ]
+            },
+            {
+              "key": "신발",
+              "label": "신발",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                59060,
+                36240,
+                36730,
+                73260,
+                115760,
+                139250,
+                197230,
+                173630,
+                109560,
+                86250,
+                96470,
+                165460
+              ]
+            },
+            {
+              "key": "모자",
+              "label": "모자",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                7320,
+                9790,
+                10990,
+                20170,
+                29000,
+                26230,
+                37230,
+                236030,
+                158060,
+                113340,
+                78070,
+                90340
+              ]
+            },
+            {
+              "key": "가방",
+              "label": "가방",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                1750,
+                9180,
+                3950,
+                9370,
+                9810,
+                17120,
+                25960,
+                76430,
+                37040,
+                32490,
+                19840,
+                41030
+              ]
+            },
+            {
+              "key": "기타",
+              "label": "기타",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                2124,
+                1162,
+                832,
+                1170,
+                2714,
+                3128,
+                7783,
+                7311,
+                4024,
+                11266,
+                9468,
+                20513
+              ]
+            }
+          ]
+        },
+        "hq": {
+          "rows": [
+            {
+              "key": "매출합계",
+              "label": "매출합계",
+              "isTotal": true,
+              "isSubtotal": false,
+              "isLeaf": false,
+              "monthly": [
+                1416287,
+                1494566,
+                1207735,
+                1171494,
+                1532502,
+                1380146,
+                785408,
+                4018170,
+                2467223,
+                5387645,
+                2600599,
+                3604031
+              ]
+            },
+            {
+              "key": "의류합계",
+              "label": "의류합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                1341990,
+                1330920,
+                1113820,
+                942560,
+                1315550,
+                1189970,
+                686450,
+                3652760,
+                2212950,
+                5169970,
+                2469860,
+                3457990
+              ]
+            },
+            {
+              "key": "당년F",
+              "label": "당년F",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                1940,
+                2694260,
+                1857250,
+                3908130,
+                2196080,
+                2787150
+              ]
+            },
+            {
+              "key": "당년S",
+              "label": "당년S",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                103300,
+                911600,
+                1010320,
+                901510,
+                1217800,
+                1154460,
+                663620,
+                836470,
+                250330,
+                146690,
+                57060,
+                42520
+              ]
+            },
+            {
+              "key": "1년차",
+              "label": "1년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                1238690,
+                419320,
+                103500,
+                41050,
+                97750,
+                35510,
+                20890,
+                122030,
+                105370,
+                1115150,
+                216720,
+                628320
+              ]
+            },
+            {
+              "key": "2년차",
+              "label": "2년차",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "key": "차기시즌",
+              "label": "차기시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "key": "과시즌",
+              "label": "과시즌",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            {
+              "key": "ACC합계",
+              "label": "ACC합계",
+              "isTotal": false,
+              "isSubtotal": true,
+              "isLeaf": false,
+              "monthly": [
+                74297,
+                163646,
+                93915,
+                228934,
+                216952,
+                190176,
+                98958,
+                365410,
+                254273,
+                217675,
+                130739,
+                146041
+              ]
+            },
+            {
+              "key": "신발",
+              "label": "신발",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                41290,
+                99780,
+                52050,
+                176100,
+                170480,
+                145080,
+                54160,
+                129320,
+                68910,
+                62960,
+                53380,
+                48340
+              ]
+            },
+            {
+              "key": "모자",
+              "label": "모자",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                17770,
+                32960,
+                26210,
+                34260,
+                28330,
+                27520,
+                29150,
+                132860,
+                128650,
+                117180,
+                59260,
+                50020
+              ]
+            },
+            {
+              "key": "가방",
+              "label": "가방",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                9720,
+                27830,
+                14510,
+                15290,
+                14540,
+                12380,
+                14070,
+                98080,
+                54270,
+                26040,
+                13770,
+                41920
+              ]
+            },
+            {
+              "key": "기타",
+              "label": "기타",
+              "isTotal": false,
+              "isSubtotal": false,
+              "isLeaf": true,
+              "monthly": [
+                5517,
+                3076,
+                1145,
+                3284,
+                3602,
+                5196,
+                1578,
+                5150,
+                2443,
+                11495,
+                4329,
+                5761
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "retail2025": {
+      "dealer": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              1383004,
+              834262,
+              966032,
+              1111810,
+              1702774,
+              1647628,
+              2341703,
+              3274981,
+              3129114,
+              4964226,
+              4581488,
+              6697403
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              1312750,
+              777890,
+              913530,
+              1007840,
+              1545490,
+              1461900,
+              2073500,
+              2781580,
+              2820430,
+              4720880,
+              4377640,
+              6380060
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              1940,
+              1364490,
+              2487900,
+              4638700,
+              4354530,
+              5343060
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              198360,
+              430610,
+              755600,
+              980380,
+              1536270,
+              1455390,
+              2063980,
+              1409150,
+              329750,
+              74080,
+              10510,
+              114810
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1114390,
+              347280,
+              157930,
+              27460,
+              9220,
+              6510,
+              7580,
+              7940,
+              2780,
+              8100,
+              12600,
+              922190
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              70254,
+              56372,
+              52502,
+              103970,
+              157284,
+              185728,
+              268203,
+              493401,
+              308684,
+              243346,
+              203848,
+              317343
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              59060,
+              36240,
+              36730,
+              73260,
+              115760,
+              139250,
+              197230,
+              173630,
+              109560,
+              86250,
+              96470,
+              165460
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              7320,
+              9790,
+              10990,
+              20170,
+              29000,
+              26230,
+              37230,
+              236030,
+              158060,
+              113340,
+              78070,
+              90340
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1750,
+              9180,
+              3950,
+              9370,
+              9810,
+              17120,
+              25960,
+              76430,
+              37040,
+              32490,
+              19840,
+              41030
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              2124,
+              1162,
+              832,
+              1170,
+              2714,
+              3128,
+              7783,
+              7311,
+              4024,
+              11266,
+              9468,
+              20513
+            ]
+          }
+        ]
+      },
+      "hq": {
+        "rows": [
+          {
+            "key": "매출합계",
+            "label": "매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              1416287,
+              1494566,
+              1207735,
+              1171494,
+              1532502,
+              1380146,
+              785408,
+              4018170,
+              2467223,
+              5387645,
+              2600599,
+              3604031
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              1341990,
+              1330920,
+              1113820,
+              942560,
+              1315550,
+              1189970,
+              686450,
+              3652760,
+              2212950,
+              5169970,
+              2469860,
+              3457990
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              1940,
+              2694260,
+              1857250,
+              3908130,
+              2196080,
+              2787150
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              103300,
+              911600,
+              1010320,
+              901510,
+              1217800,
+              1154460,
+              663620,
+              836470,
+              250330,
+              146690,
+              57060,
+              42520
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              1238690,
+              419320,
+              103500,
+              41050,
+              97750,
+              35510,
+              20890,
+              122030,
+              105370,
+              1115150,
+              216720,
+              628320
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              74297,
+              163646,
+              93915,
+              228934,
+              216952,
+              190176,
+              98958,
+              365410,
+              254273,
+              217675,
+              130739,
+              146041
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              41290,
+              99780,
+              52050,
+              176100,
+              170480,
+              145080,
+              54160,
+              129320,
+              68910,
+              62960,
+              53380,
+              48340
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              17770,
+              32960,
+              26210,
+              34260,
+              28330,
+              27520,
+              29150,
+              132860,
+              128650,
+              117180,
+              59260,
+              50020
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              9720,
+              27830,
+              14510,
+              15290,
+              14540,
+              12380,
+              14070,
+              98080,
+              54270,
+              26040,
+              13770,
+              41920
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              5517,
+              3076,
+              1145,
+              3284,
+              3602,
+              5196,
+              1578,
+              5150,
+              2443,
+              11495,
+              4329,
+              5761
+            ]
+          }
+        ]
+      }
+    },
+    "shipment": {
+      "year": 2026,
+      "brand": "DISCOVERY",
+      "closedThrough": "202601",
+      "data": {
+        "rows": [
+          {
+            "key": "출고매출합계",
+            "label": "출고매출합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              2395686,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              2643260,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              12003360,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              -7747090,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              -1613010,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              -247574,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              -477900,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              146460,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              87940,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              -4074,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "purchase": {
+      "year": 2026,
+      "brand": "DISCOVERY",
+      "closedThrough": "202601",
+      "data": {
+        "rows": [
+          {
+            "key": "매입합계",
+            "label": "매입합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              30233080,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "의류합계",
+            "label": "의류합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              28990820,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년F",
+            "label": "당년F",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "당년S",
+            "label": "당년S",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              28990820,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "1년차",
+            "label": "1년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "2년차",
+            "label": "2년차",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "차기시즌",
+            "label": "차기시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "과시즌",
+            "label": "과시즌",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "ACC합계",
+            "label": "ACC합계",
+            "isTotal": false,
+            "isSubtotal": true,
+            "isLeaf": false,
+            "monthly": [
+              1242260,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "신발",
+            "label": "신발",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "모자",
+            "label": "모자",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              810260,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "가방",
+            "label": "가방",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              432000,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "key": "기타",
+            "label": "기타",
+            "isTotal": false,
+            "isSubtotal": false,
+            "isLeaf": true,
+            "monthly": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ]
+      }
+    },
+    "savedAt": "2026-02-25T17:26:36.565Z",
+    "planFromMonth": 2,
+    "hqSellInPlan": {
+      "당년F": 201445,
+      "당년S": 112460,
+      "차기시즌": 68814,
+      "1년차": 0
+    },
+    "accTargetWoiDealer": {
+      "신발": 29,
+      "모자": 29,
+      "가방": 25,
+      "기타": 39
+    },
+    "accTargetWoiHq": {
+      "신발": 10,
+      "모자": 8,
+      "가방": 10,
+      "기타": 10
+    }
+  }
+}
