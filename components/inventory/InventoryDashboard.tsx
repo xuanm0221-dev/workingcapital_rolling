@@ -289,6 +289,7 @@ export default function InventoryDashboard() {
   const retailByBrandRef = useRef<Partial<Record<LeafBrand, RetailSalesResponse>>>({});
   const shipmentByBrandRef = useRef<Partial<Record<LeafBrand, ShipmentSalesResponse>>>({});
   const purchaseByBrandRef = useRef<Partial<Record<LeafBrand, PurchaseResponse>>>({});
+  const [savedSnapshotByBrand, setSavedSnapshotByBrand] = useState<Partial<Record<LeafBrand, SnapshotData>>>({});
 
   const DEFAULT_ACC_WOI_DEALER: Record<AccKey, number> = {
     '\uC2E0\uBC1C': 29,
@@ -581,12 +582,27 @@ export default function InventoryDashboard() {
     let cancelled = false;
 
     const warmServerSnapshotsToLocal = async () => {
+      const localSnapshots: Partial<Record<LeafBrand, SnapshotData>> = {};
+      for (const b of BRANDS_TO_AGGREGATE) {
+        const localSnap = loadSnapshot(year, b);
+        if (localSnap) localSnapshots[b] = localSnap;
+      }
+      if (!cancelled) {
+        setSavedSnapshotByBrand(localSnapshots);
+      }
+
       await Promise.all(
         BRANDS_TO_AGGREGATE.map(async (b) => {
           const snap = await fetchSnapshotFromServer(year, b);
-          if (!cancelled && snap) saveSnapshot(year, b, snap);
+          if (!cancelled && snap) {
+            saveSnapshot(year, b, snap);
+            localSnapshots[b] = snap;
+          }
         }),
       );
+      if (!cancelled) {
+        setSavedSnapshotByBrand({ ...localSnapshots });
+      }
     };
 
     void warmServerSnapshotsToLocal();
@@ -612,7 +628,7 @@ export default function InventoryDashboard() {
     if (year === 2026 && brand === '\uC804\uCCB4') {
       const perBrand: TopTablePair[] = [];
       for (const b of BRANDS_TO_AGGREGATE) {
-        const snap = loadSnapshot(year, b);
+        const snap = savedSnapshotByBrand[b] ?? loadSnapshot(year, b);
         const monthly = snap?.monthly ?? monthlyByBrandRef.current[b];
         const shipment = snap?.shipment ?? shipmentByBrandRef.current[b];
         const purchase = snap?.purchase ?? purchaseByBrandRef.current[b];
@@ -703,7 +719,7 @@ export default function InventoryDashboard() {
       );
     }
     return built;
-  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, annualShipmentPlan2026, accTargetWoiDealer, accTargetWoiHq, hqSellInPlan, hqSellOutPlan]);
+  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, annualShipmentPlan2026, accTargetWoiDealer, accTargetWoiHq, hqSellInPlan, hqSellOutPlan, savedSnapshotByBrand]);
 
   const shouldUseTopTableOnly = year === 2025 || year === 2026;
   const dealerTableData = shouldUseTopTableOnly
