@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Brand, InventoryApiResponse, InventoryTableData, InventoryRowRaw, AccKey, ACC_KEYS, SEASON_KEYS, RowKey } from '@/lib/inventory-types';
@@ -25,7 +25,7 @@ import InventoryFilterBar from './InventoryFilterBar';
 import InventoryTable from './InventoryTable';
 import InventoryMonthlyTable, { TableData } from './InventoryMonthlyTable';
 
-type LeafBrand = Exclude<Brand, '전체'>;
+type LeafBrand = Exclude<Brand, '\uC804\uCCB4'>;
 type TopTablePair = { dealer: InventoryTableData; hq: InventoryTableData };
 const ANNUAL_SHIPMENT_PLAN_KEY = 'inv_annual_shipment_plan_2026_v1';
 const ANNUAL_PLAN_BRANDS = ['MLB', 'MLB KIDS', 'DISCOVERY'] as const;
@@ -142,37 +142,108 @@ function SectionIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
+function normalizeAnnualShipmentPlan(source: unknown): AnnualShipmentPlan {
+  const base = createEmptyAnnualShipmentPlan();
+  const parsed = (source ?? {}) as Partial<AnnualShipmentPlan>;
+  for (const b of ANNUAL_PLAN_BRANDS) {
+    for (const season of ANNUAL_PLAN_SEASONS) {
+      const v = parsed?.[b]?.[season];
+      base[b][season] = typeof v === 'number' && Number.isFinite(v) ? v : 0;
+    }
+  }
+  return base;
+}
+
+function readAnnualShipmentPlanFromLocalStorage(): AnnualShipmentPlan {
+  try {
+    const raw = localStorage.getItem(ANNUAL_SHIPMENT_PLAN_KEY);
+    if (!raw) return createEmptyAnnualShipmentPlan();
+    return normalizeAnnualShipmentPlan(JSON.parse(raw));
+  } catch {
+    return createEmptyAnnualShipmentPlan();
+  }
+}
+
+async function fetchSnapshotFromServer(year: number, brand: string): Promise<SnapshotData | null> {
+  try {
+    const params = new URLSearchParams({ year: String(year), brand });
+    const res = await fetch(`/api/inventory/snapshot?${params}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { data?: SnapshotData | null };
+    return (json.data ?? null) as SnapshotData | null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveSnapshotToServer(year: number, brand: string, data: SnapshotData): Promise<void> {
+  try {
+    await fetch('/api/inventory/snapshot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year, brand, data }),
+    });
+  } catch {
+    // ignore server sync errors; local snapshot remains available
+  }
+}
+
+async function fetchAnnualPlanFromServer(year: number): Promise<AnnualShipmentPlan | null> {
+  try {
+    const params = new URLSearchParams({ year: String(year) });
+    const res = await fetch(`/api/inventory/annual-shipment-plan?${params}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { data?: unknown };
+    if (!json.data) return null;
+    return normalizeAnnualShipmentPlan(json.data);
+  } catch {
+    return null;
+  }
+}
+
+async function saveAnnualPlanToServer(year: number, data: AnnualShipmentPlan): Promise<void> {
+  try {
+    await fetch('/api/inventory/annual-shipment-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year, data }),
+    });
+  } catch {
+    // ignore server sync errors; local copy remains available
+  }
+}
+
 export default function InventoryDashboard() {
   const [year, setYear] = useState<number>(2026);
-  const [brand, setBrand] = useState<Brand>('전체');
+  const [brand, setBrand] = useState<Brand>('\uC804\uCCB4');
   const [growthRate, setGrowthRate] = useState<number>(5);
 
-  // 기존 Sell-in/Sell-out 표 데이터
+  // 湲곗〈 Sell-in/Sell-out ???곗씠??
   const [data, setData] = useState<InventoryApiResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 월별 재고잔액 표 데이터
+  // ?붾퀎 ?ш퀬?붿븸 ???곗씠??
   const [monthlyData, setMonthlyData] = useState<MonthlyStockResponse | null>(null);
   const [monthlyLoading, setMonthlyLoading] = useState<boolean>(false);
   const [monthlyError, setMonthlyError] = useState<string | null>(null);
 
-  // 리테일 매출 표 데이터
+  // 由ы뀒??留ㅼ텧 ???곗씠??
   const [retailData, setRetailData] = useState<RetailSalesResponse | null>(null);
   const [retailLoading, setRetailLoading] = useState<boolean>(false);
   const [retailError, setRetailError] = useState<string | null>(null);
 
-  // 본사→대리상 출고매출 표 데이터
+  // 蹂몄궗?믩?由ъ긽 異쒓퀬留ㅼ텧 ???곗씠??
   const [shipmentData, setShipmentData] = useState<ShipmentSalesResponse | null>(null);
   const [shipmentLoading, setShipmentLoading] = useState<boolean>(false);
   const [shipmentError, setShipmentError] = useState<string | null>(null);
 
-  // 본사 매입상품 표 데이터
+  // 蹂몄궗 留ㅼ엯?곹뭹 ???곗씠??
   const [purchaseData, setPurchaseData] = useState<PurchaseResponse | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
-  // 월별 섹션 토글 (기본 접힘)
+  // ?붾퀎 ?뱀뀡 ?좉? (湲곕낯 ?묓옒)
   const [monthlyOpen, setMonthlyOpen] = useState(false);
   const [retailOpen, setRetailOpen] = useState(false);
   const [shipmentOpen, setShipmentOpen] = useState(false);
@@ -182,17 +253,23 @@ export default function InventoryDashboard() {
   const [annualShipmentPlanDraft2026, setAnnualShipmentPlanDraft2026] = useState<AnnualShipmentPlan>(createEmptyAnnualShipmentPlan);
   const [annualPlanEditMode, setAnnualPlanEditMode] = useState(false);
 
-  // 스냅샷 상태
+  // ?ㅻ깄???곹깭
   const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [snapshotSavedAt, setSnapshotSavedAt] = useState<string | null>(null);
   const [recalcLoading, setRecalcLoading] = useState(false);
-  // 2026 ACC 기말 목표 재고주수 (대리상/본사별 신발·모자·가방·기타)
+  // 2026 ACC 湲곕쭚 紐⑺몴 ?ш퀬二쇱닔 (?由ъ긽/蹂몄궗蹂??좊컻쨌紐⑥옄쨌媛諛㈑룰린?)
   const [accTargetWoiDealer, setAccTargetWoiDealer] = useState<Record<AccKey, number>>({
-    신발: 29, 모자: 29, 가방: 25, 기타: 39,
-  });
+    '\uC2E0\uBC1C': 29,
+    '\uBAA8\uC790': 29,
+    '\uAC00\uBC29': 25,
+    '\uAE30\uD0C0': 39,
+  } as Record<AccKey, number>);
   const [accTargetWoiHq, setAccTargetWoiHq] = useState<Record<AccKey, number>>({
-    신발: 10, 모자: 8, 가방: 10, 기타: 10,
-  });
+    '\uC2E0\uBC1C': 10,
+    '\uBAA8\uC790': 8,
+    '\uAC00\uBC29': 10,
+    '\uAE30\uD0C0': 10,
+  } as Record<AccKey, number>);
   const accTargetWoiDealerRef = useRef(accTargetWoiDealer);
   const accTargetWoiHqRef = useRef(accTargetWoiHq);
   useEffect(() => {
@@ -201,25 +278,35 @@ export default function InventoryDashboard() {
   useEffect(() => {
     accTargetWoiHqRef.current = accTargetWoiHq;
   }, [accTargetWoiHq]);
-  // 2026 본사 상품매입·대리상출고 편집 계획 (연간 K). 2025는 사용하지 않음.
+  // 2026 蹂몄궗 ?곹뭹留ㅼ엯쨌?由ъ긽異쒓퀬 ?몄쭛 怨꾪쉷 (?곌컙 K). 2025???ъ슜?섏? ?딆쓬.
   const [hqSellInPlan, setHqSellInPlan] = useState<Partial<Record<RowKey, number>>>({});
   const [hqSellOutPlan, setHqSellOutPlan] = useState<Partial<Record<RowKey, number>>>({});
-  // 2026 재고자산표 편집 모드 (수정 클릭 시에만 편집 가능한 박스 표시)
+  // 2026 ?ш퀬?먯궛???몄쭛 紐⑤뱶 (?섏젙 ?대┃ ?쒖뿉留??몄쭛 媛?ν븳 諛뺤뒪 ?쒖떆)
   const [editMode, setEditMode] = useState(false);
-  // 2026 계획월 계산용 2025 실적 보관 (API 응답에 포함됨)
+  // 2026 怨꾪쉷??怨꾩궛??2025 ?ㅼ쟻 蹂닿? (API ?묐떟???ы븿??
   const retail2025Ref = useRef<RetailSalesResponse['retail2025'] | null>(null);
   const monthlyByBrandRef = useRef<Partial<Record<LeafBrand, MonthlyStockResponse>>>({});
   const retailByBrandRef = useRef<Partial<Record<LeafBrand, RetailSalesResponse>>>({});
   const shipmentByBrandRef = useRef<Partial<Record<LeafBrand, ShipmentSalesResponse>>>({});
   const purchaseByBrandRef = useRef<Partial<Record<LeafBrand, PurchaseResponse>>>({});
 
-  const DEFAULT_ACC_WOI_DEALER: Record<AccKey, number> = { 신발: 29, 모자: 29, 가방: 25, 기타: 39 };
-  const DEFAULT_ACC_WOI_HQ: Record<AccKey, number> = { 신발: 10, 모자: 8, 가방: 10, 기타: 10 };
+  const DEFAULT_ACC_WOI_DEALER: Record<AccKey, number> = {
+    '\uC2E0\uBC1C': 29,
+    '\uBAA8\uC790': 29,
+    '\uAC00\uBC29': 25,
+    '\uAE30\uD0C0': 39,
+  } as Record<AccKey, number>;
+  const DEFAULT_ACC_WOI_HQ: Record<AccKey, number> = {
+    '\uC2E0\uBC1C': 10,
+    '\uBAA8\uC790': 8,
+    '\uAC00\uBC29': 10,
+    '\uAE30\uD0C0': 10,
+  } as Record<AccKey, number>;
 
-  // ── 기존 표 fetch ──
+  // ?? 湲곗〈 ??fetch ??
   const fetchData = useCallback(async () => {
-    // 2025/2026 재고자산 탭 상단 요약표는 월별/리테일/출고/매입 조합으로만 렌더한다.
-    // (기존 /api/inventory fallback을 쓰면 초기 하드코딩 숫자 깜빡임이 발생)
+    // 2025/2026 ?ш퀬?먯궛 ???곷떒 ?붿빟?쒕뒗 ?붾퀎/由ы뀒??異쒓퀬/留ㅼ엯 議고빀?쇰줈留??뚮뜑?쒕떎.
+    // (湲곗〈 /api/inventory fallback???곕㈃ 珥덇린 ?섎뱶肄붾뵫 ?レ옄 源쒕묀?꾩씠 諛쒖깮)
     if (year === 2025 || year === 2026) {
       setLoading(false);
       setError(null);
@@ -235,7 +322,7 @@ export default function InventoryDashboard() {
         brand,
       });
       const res = await fetch(`/api/inventory?${params}`);
-      if (!res.ok) throw new Error('데이터 로드 실패');
+      if (!res.ok) throw new Error('?곗씠??濡쒕뱶 ?ㅽ뙣');
       setData(await res.json());
     } catch (e) {
       setError(String(e));
@@ -244,12 +331,12 @@ export default function InventoryDashboard() {
     }
   }, [year, brand, growthRate]);
 
-  // ── 월별 재고잔액 fetch ──
+  // ?? ?붾퀎 ?ш퀬?붿븸 fetch ??
   const fetchMonthlyData = useCallback(async () => {
     setMonthlyLoading(true);
     setMonthlyError(null);
     try {
-      if (brand === '전체') {
+      if (brand === '\uC804\uCCB4') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand: b })}`),
@@ -263,7 +350,7 @@ export default function InventoryDashboard() {
         setMonthlyData(aggregateMonthlyStock(jsons));
       } else {
         const res = await fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand })}`);
-        if (!res.ok) throw new Error('월별 데이터 로드 실패');
+        if (!res.ok) throw new Error('?붾퀎 ?곗씠??濡쒕뱶 ?ㅽ뙣');
         const json: MonthlyStockResponse = await res.json();
         if ((json as { error?: string }).error) throw new Error((json as { error?: string }).error);
         monthlyByBrandRef.current[brand as LeafBrand] = json;
@@ -276,12 +363,12 @@ export default function InventoryDashboard() {
     }
   }, [year, brand]);
 
-  // ── 리테일 매출 fetch ──
+  // ?? 由ы뀒??留ㅼ텧 fetch ??
   const fetchRetailData = useCallback(async () => {
     setRetailLoading(true);
     setRetailError(null);
     try {
-      if (brand === '전체') {
+      if (brand === '\uC804\uCCB4') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand: b, growthRate: String(growthRate) })}`),
@@ -297,7 +384,7 @@ export default function InventoryDashboard() {
         setRetailData(aggregated);
       } else {
         const res = await fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand, growthRate: String(growthRate) })}`);
-        if (!res.ok) throw new Error('리테일 매출 데이터 로드 실패');
+        if (!res.ok) throw new Error('由ы뀒??留ㅼ텧 ?곗씠??濡쒕뱶 ?ㅽ뙣');
         const json: RetailSalesResponse = await res.json();
         if ((json as { error?: string }).error) throw new Error((json as { error?: string }).error);
         if (json.retail2025) retail2025Ref.current = json.retail2025;
@@ -311,19 +398,19 @@ export default function InventoryDashboard() {
     }
   }, [year, brand, growthRate]);
 
-  // ── 출고매출 fetch ──
+  // ?? 異쒓퀬留ㅼ텧 fetch ??
   const fetchShipmentData = useCallback(async () => {
     setShipmentLoading(true);
     setShipmentError(null);
     try {
-      if (brand === '전체') {
+      if (brand === '\uC804\uCCB4') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand: b })}`),
           ),
         );
         const jsons: ShipmentSalesResponse[] = await Promise.all(ress.map((r) => r.json()));
-        for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error ?? '출고매출 데이터 로드 실패');
+        for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error ?? '異쒓퀬留ㅼ텧 ?곗씠??濡쒕뱶 ?ㅽ뙣');
         BRANDS_TO_AGGREGATE.forEach((b, i) => {
           shipmentByBrandRef.current[b] = jsons[i];
         });
@@ -331,7 +418,7 @@ export default function InventoryDashboard() {
       } else {
         const res = await fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand })}`);
         const json: ShipmentSalesResponse = await res.json();
-        if (!res.ok || (json as { error?: string }).error) throw new Error((json as { error?: string }).error ?? '출고매출 데이터 로드 실패');
+        if (!res.ok || (json as { error?: string }).error) throw new Error((json as { error?: string }).error ?? '異쒓퀬留ㅼ텧 ?곗씠??濡쒕뱶 ?ㅽ뙣');
         shipmentByBrandRef.current[brand as LeafBrand] = json;
         setShipmentData(json);
       }
@@ -342,19 +429,19 @@ export default function InventoryDashboard() {
     }
   }, [year, brand]);
 
-  // ── 본사 매입상품 fetch ──
+  // ?? 蹂몄궗 留ㅼ엯?곹뭹 fetch ??
   const fetchPurchaseData = useCallback(async () => {
     setPurchaseLoading(true);
     setPurchaseError(null);
     try {
-      if (brand === '전체') {
+      if (brand === '\uC804\uCCB4') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(year), brand: b })}`),
           ),
         );
         const jsons: PurchaseResponse[] = await Promise.all(ress.map((r) => r.json()));
-        for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error ?? '매입상품 데이터 로드 실패');
+        for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error ?? '留ㅼ엯?곹뭹 ?곗씠??濡쒕뱶 ?ㅽ뙣');
         BRANDS_TO_AGGREGATE.forEach((b, i) => {
           purchaseByBrandRef.current[b] = jsons[i];
         });
@@ -362,7 +449,7 @@ export default function InventoryDashboard() {
       } else {
         const res = await fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(year), brand })}`);
         const json: PurchaseResponse = await res.json();
-        if (!res.ok || (json as { error?: string }).error) throw new Error((json as { error?: string }).error ?? '매입상품 데이터 로드 실패');
+        if (!res.ok || (json as { error?: string }).error) throw new Error((json as { error?: string }).error ?? '留ㅼ엯?곹뭹 ?곗씠??濡쒕뱶 ?ㅽ뙣');
         purchaseByBrandRef.current[brand as LeafBrand] = json;
         setPurchaseData(json);
       }
@@ -375,19 +462,11 @@ export default function InventoryDashboard() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // 스냅샷이 있으면 API 생략, 없으면 4개 API 호출 (전체 탭은 스냅샷 미사용, 항상 API 집계)
+  // ?ㅻ깄?룹씠 ?덉쑝硫?API ?앸왂, ?놁쑝硫?4媛?API ?몄텧 (\uC804\uCCB4 ??? ?ㅻ깄??誘몄궗?? ??긽 API 吏묎퀎)
   useEffect(() => {
-    if (brand === '전체') {
-      setSnapshotSaved(false);
-      setSnapshotSavedAt(null);
-      fetchMonthlyData();
-      fetchRetailData();
-      fetchShipmentData();
-      fetchPurchaseData();
-      return;
-    }
-    const snap = loadSnapshot(year, brand);
-    if (snap) {
+    let cancelled = false;
+
+    const applySnapshotToState = (snap: SnapshotData) => {
       setMonthlyData(snap.monthly);
       setShipmentData(snap.shipment);
       setPurchaseData(snap.purchase);
@@ -395,7 +474,6 @@ export default function InventoryDashboard() {
       if (snap.hqSellOutPlan && Object.keys(snap.hqSellOutPlan).length) setHqSellOutPlan(snap.hqSellOutPlan);
       if (snap.accTargetWoiDealer) setAccTargetWoiDealer(snap.accTargetWoiDealer);
       if (snap.accTargetWoiHq) setAccTargetWoiHq(snap.accTargetWoiHq);
-      // 계획월은 현재 growthRate로 동적 재계산
       if (year === 2026 && snap.planFromMonth && snap.retail2025) {
         retail2025Ref.current = snap.retail2025;
         setRetailData(
@@ -406,17 +484,51 @@ export default function InventoryDashboard() {
       }
       setSnapshotSaved(true);
       setSnapshotSavedAt(snap.savedAt);
-      return;
-    }
-    // 스냅샷 없음 → API 호출
-    setSnapshotSaved(false);
-    setSnapshotSavedAt(null);
-    fetchMonthlyData();
-    fetchRetailData();
-    fetchShipmentData();
-    fetchPurchaseData();
+    };
+
+    const run = async () => {
+      if (brand === '\uC804\uCCB4') {
+        setSnapshotSaved(false);
+        setSnapshotSavedAt(null);
+        await Promise.all([
+          fetchMonthlyData(),
+          fetchRetailData(),
+          fetchShipmentData(),
+          fetchPurchaseData(),
+        ]);
+        return;
+      }
+
+      const serverSnap = await fetchSnapshotFromServer(year, brand);
+      if (cancelled) return;
+      if (serverSnap) {
+        saveSnapshot(year, brand, serverSnap);
+        applySnapshotToState(serverSnap);
+        return;
+      }
+
+      const localSnap = loadSnapshot(year, brand);
+      if (localSnap) {
+        applySnapshotToState(localSnap);
+        return;
+      }
+
+      setSnapshotSaved(false);
+      setSnapshotSavedAt(null);
+      await Promise.all([
+        fetchMonthlyData(),
+        fetchRetailData(),
+        fetchShipmentData(),
+        fetchPurchaseData(),
+      ]);
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year, brand]); // growthRate는 의도적으로 제외
+  }, [year, brand]); // growthRate???섎룄?곸쑝濡??쒖쇅
 
   useEffect(() => {
     setEditMode(false);
@@ -424,35 +536,36 @@ export default function InventoryDashboard() {
 
   useEffect(() => {
     if (year !== 2026) return;
-    try {
-      const raw = localStorage.getItem(ANNUAL_SHIPMENT_PLAN_KEY);
-      if (!raw) {
-        const empty = createEmptyAnnualShipmentPlan();
-        setAnnualShipmentPlan2026(empty);
-        setAnnualShipmentPlanDraft2026(empty);
+    let cancelled = false;
+
+    const run = async () => {
+      const serverPlan = await fetchAnnualPlanFromServer(year);
+      if (cancelled) return;
+      if (serverPlan) {
+        setAnnualShipmentPlan2026(serverPlan);
+        setAnnualShipmentPlanDraft2026(serverPlan);
         setAnnualPlanEditMode(false);
+        try {
+          localStorage.setItem(ANNUAL_SHIPMENT_PLAN_KEY, JSON.stringify(serverPlan));
+        } catch {
+          // ignore storage errors
+        }
         return;
       }
-      const parsed = JSON.parse(raw) as Partial<AnnualShipmentPlan>;
-      const base = createEmptyAnnualShipmentPlan();
-      for (const b of ANNUAL_PLAN_BRANDS) {
-        for (const season of ANNUAL_PLAN_SEASONS) {
-          const v = parsed?.[b]?.[season];
-          base[b][season] = typeof v === 'number' && Number.isFinite(v) ? v : 0;
-        }
-      }
-      setAnnualShipmentPlan2026(base);
-      setAnnualShipmentPlanDraft2026(base);
+
+      const localPlan = readAnnualShipmentPlanFromLocalStorage();
+      setAnnualShipmentPlan2026(localPlan);
+      setAnnualShipmentPlanDraft2026(localPlan);
       setAnnualPlanEditMode(false);
-    } catch {
-      const empty = createEmptyAnnualShipmentPlan();
-      setAnnualShipmentPlan2026(empty);
-      setAnnualShipmentPlanDraft2026(empty);
-      setAnnualPlanEditMode(false);
-    }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [year]);
 
-  // growthRate 변경 시 — 스냅샷 로드 상태이면 계획월만 재계산 (API 없음)
+  // growthRate 변경 시 저장된 스냅샷이면 계획 구간만 재계산 (API 재조회 없음)
   useEffect(() => {
     if (!snapshotSaved) return;
     const snap = loadSnapshot(year, brand);
@@ -463,8 +576,27 @@ export default function InventoryDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [growthRate]);
 
-  // 2025·2026일 때 상단 표는 월별 재고잔액 + 리테일 매출 + 출고매출 + 매입상품으로 구성
-  // 2026일 때만 ACC 목표 재고주수 오버레이 적용
+  useEffect(() => {
+    if (year !== 2026 || brand !== '\uC804\uCCB4') return;
+    let cancelled = false;
+
+    const warmServerSnapshotsToLocal = async () => {
+      await Promise.all(
+        BRANDS_TO_AGGREGATE.map(async (b) => {
+          const snap = await fetchSnapshotFromServer(year, b);
+          if (!cancelled && snap) saveSnapshot(year, b, snap);
+        }),
+      );
+    };
+
+    void warmServerSnapshotsToLocal();
+    return () => {
+      cancelled = true;
+    };
+  }, [year, brand]);
+
+  // 2025쨌2026?????곷떒 ?쒕뒗 ?붾퀎 ?ш퀬?붿븸 + 由ы뀒??留ㅼ텧 + 異쒓퀬留ㅼ텧 + 留ㅼ엯?곹뭹?쇰줈 援ъ꽦
+  // 2026???뚮쭔 ACC 紐⑺몴 ?ш퀬二쇱닔 ?ㅻ쾭?덉씠 ?곸슜
   const topTableData = useMemo(() => {
     if (
       (year !== 2025 && year !== 2026) ||
@@ -477,7 +609,7 @@ export default function InventoryDashboard() {
     ) {
       return null;
     }
-    if (year === 2026 && brand === '전체') {
+    if (year === 2026 && brand === '\uC804\uCCB4') {
       const perBrand: TopTablePair[] = [];
       for (const b of BRANDS_TO_AGGREGATE) {
         const snap = loadSnapshot(year, b);
@@ -544,7 +676,7 @@ export default function InventoryDashboard() {
       purchaseData ?? undefined,
       year,
     );
-    if (year === 2026 && brand !== '전체') {
+    if (year === 2026 && brand !== '\uC804\uCCB4') {
       const withWoi = applyAccTargetWoiOverlay(
         built.dealer,
         built.hq,
@@ -581,7 +713,7 @@ export default function InventoryDashboard() {
     ? (topTableData?.hq ?? null)
     : (topTableData?.hq ?? data?.hq ?? null);
 
-  // 2026 ACC 행 재고주수 편집 시 상태 반영 (표 셀 또는 기본값 블록과 연동)
+  // 2026 ACC ???ш퀬二쇱닔 ?몄쭛 ???곹깭 諛섏쁺 (??? ?먮뒗 湲곕낯媛?釉붾줉怨??곕룞)
   const handleWoiChange = useCallback((tableType: 'dealer' | 'hq', rowKey: string, newWoi: number) => {
     if (!ACC_KEYS.includes(rowKey as AccKey)) return;
     if (tableType === 'dealer') {
@@ -599,18 +731,18 @@ export default function InventoryDashboard() {
     }
   }, []);
 
-  // 2026 본사 상품매입(연간) 편집
+  // 2026 蹂몄궗 ?곹뭹留ㅼ엯(?곌컙) ?몄쭛
   const handleHqSellInChange = useCallback((rowKey: RowKey, newSellInTotal: number) => {
     setHqSellInPlan((prev) => ({ ...prev, [rowKey]: newSellInTotal }));
   }, []);
 
-  // 2026 본사 대리상출고(연간) 편집 — 대리상 표 Sell-in에 자동 반영
+  // 2026 蹂몄궗 ?由ъ긽異쒓퀬(?곌컙) ?몄쭛 ???由ъ긽 ??Sell-in???먮룞 諛섏쁺
   const handleHqSellOutChange = useCallback((rowKey: RowKey, newSellOutTotal: number) => {
     setHqSellOutPlan((prev) => ({ ...prev, [rowKey]: newSellOutTotal }));
   }, []);
 
-  // ── 스냅샷 저장 ──
-  const handleSave = useCallback(() => {
+  // ?? ?ㅻ깄???????
+  const handleSave = useCallback(async () => {
     if (!monthlyData || !retailData || !shipmentData || !purchaseData) return;
     const retailActuals =
       year === 2026 && retailData.planFromMonth
@@ -632,12 +764,13 @@ export default function InventoryDashboard() {
       snap.accTargetWoiHq = accTargetWoiHqRef.current;
     }
     saveSnapshot(year, brand, snap);
+    await saveSnapshotToServer(year, brand, snap);
     setSnapshotSaved(true);
     setSnapshotSavedAt(snap.savedAt);
     setEditMode(false);
   }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, hqSellInPlan, hqSellOutPlan]);
 
-  // ── 2026 편집값 초기값 리셋 ──
+  // ?? 2026 ?몄쭛媛?珥덇린媛?由ъ뀑 ??
   const handleResetToDefault = useCallback(() => {
     setHqSellInPlan({});
     setHqSellOutPlan({});
@@ -646,7 +779,7 @@ export default function InventoryDashboard() {
     setEditMode(false);
   }, []);
 
-  // ── 재계산 ──
+  // ?? ?ш퀎????
   const handleRecalc = useCallback(async (mode: 'current' | 'annual') => {
     setRecalcLoading(true);
     try {
@@ -717,6 +850,7 @@ export default function InventoryDashboard() {
       }
 
       saveSnapshot(year, brand, freshSnapshot);
+      await saveSnapshotToServer(year, brand, freshSnapshot);
       setSnapshotSaved(true);
       setSnapshotSavedAt(freshSnapshot.savedAt);
     } catch (e) {
@@ -744,7 +878,7 @@ export default function InventoryDashboard() {
     setAnnualPlanEditMode(true);
   }, [annualShipmentPlan2026]);
 
-  const handleAnnualPlanSave = useCallback(() => {
+  const handleAnnualPlanSave = useCallback(async () => {
     setAnnualShipmentPlan2026(annualShipmentPlanDraft2026);
     setAnnualPlanEditMode(false);
     try {
@@ -752,6 +886,7 @@ export default function InventoryDashboard() {
     } catch {
       // ignore storage errors
     }
+    await saveAnnualPlanToServer(2026, annualShipmentPlanDraft2026);
   }, [annualShipmentPlanDraft2026]);
 
   return (
@@ -769,16 +904,16 @@ export default function InventoryDashboard() {
         onSave={handleSave}
         onRecalc={handleRecalc}
         canSave={!!(monthlyData && retailData && shipmentData && purchaseData)}
-        editMode={year === 2026 && brand !== '전체' ? editMode : false}
-        onEditModeEnter={year === 2026 && brand !== '전체' ? () => setEditMode(true) : undefined}
-        onResetToDefault={year === 2026 && brand !== '전체' ? handleResetToDefault : undefined}
+        editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
+        onEditModeEnter={year === 2026 && brand !== '\uC804\uCCB4' ? () => setEditMode(true) : undefined}
+        onResetToDefault={year === 2026 && brand !== '\uC804\uCCB4' ? handleResetToDefault : undefined}
       />
 
       <div className="px-6 py-5">
-        {/* ── 기존 Sell-in / Sell-out 표 ── */}
+        {/* ?? 湲곗〈 Sell-in / Sell-out ???? */}
         {loading && !dealerTableData && (
           <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
-            로딩 중...
+            濡쒕뵫 以?..
           </div>
         )}
         {error && !dealerTableData && (
@@ -789,36 +924,36 @@ export default function InventoryDashboard() {
             <div className="flex flex-wrap gap-6 items-start">
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
-                title="대리상 (CNY K)"
+                title="?由ъ긽 (CNY K)"
                 data={dealerTableData!}
                 year={year}
-                editMode={year === 2026 && brand !== '전체' ? editMode : false}
+                editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
                 sellInLabel="Sell-in"
                 sellOutLabel="Sell-out"
                 tableType="dealer"
-                onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
+                onWoiChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleWoiChange : undefined}
               />
             </div>
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
-                title="본사 (CNY K)"
-                titleNote={year === 2026 && brand !== '전체' ? '편집가능: 의류 상품매입, 대리상출고 | ACC: 재고주수' : undefined}
+                title="蹂몄궗 (CNY K)"
+                titleNote={year === 2026 && brand !== '\uC804\uCCB4' ? '?몄쭛媛?? ?섎쪟 ?곹뭹留ㅼ엯, ?由ъ긽異쒓퀬 | ACC: ?ш퀬二쇱닔' : undefined}
                 data={hqTableData!}
                 year={year}
-                editMode={year === 2026 && brand !== '전체' ? editMode : false}
-                sellInLabel="상품매입"
-                sellOutLabel="대리상출고"
+                editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
+                sellInLabel="?곹뭹留ㅼ엯"
+                sellOutLabel="?由ъ긽異쒓퀬"
                 tableType="hq"
-                onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
-                onHqSellInChange={year === 2026 && brand !== '전체' ? handleHqSellInChange : undefined}
-                onHqSellOutChange={year === 2026 && brand !== '전체' ? handleHqSellOutChange : undefined}
+                onWoiChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleWoiChange : undefined}
+                onHqSellInChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleHqSellInChange : undefined}
+                onHqSellOutChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleHqSellOutChange : undefined}
               />
             </div>
           </div>
           </>
         )}
 
-        {/* ── 월별 재고잔액 표 ── */}
+        {/* ?? ?붾퀎 ?ш퀬?붿븸 ???? */}
         <div className="mt-10 border-t border-gray-300 pt-8">
           <button
             type="button"
@@ -826,14 +961,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">📦</span>
+              <span className="text-lg">?벀</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">월별 재고잔액</span>
+            <span className="text-sm font-bold text-gray-700">?붾퀎 ?ш퀬?붿븸</span>
             <span className="text-xs font-normal text-gray-400">
-              (단위: CNY K / 실적 기준: ~{monthlyData?.closedThrough ?? '…'})
+              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{monthlyData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {monthlyOpen ? '▲ 접기' : '▼ 펼치기'}
+              {monthlyOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
             </span>
           </button>
           {monthlyError && !monthlyOpen && (
@@ -843,7 +978,7 @@ export default function InventoryDashboard() {
             <>
               {monthlyLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  로딩 중...
+                  濡쒕뵫 以?..
                 </div>
               )}
               {monthlyError && (
@@ -852,13 +987,13 @@ export default function InventoryDashboard() {
               {monthlyData && !monthlyLoading && monthlyData.dealer.rows.length > 0 && (
                 <>
                   <InventoryMonthlyTable
-                    firstColumnHeader="대리상"
+                    firstColumnHeader="?由ъ긽"
                     data={monthlyData.dealer as TableData}
                     year={year}
                     showOpening={true}
                   />
                   <InventoryMonthlyTable
-                    firstColumnHeader="본사"
+                    firstColumnHeader="蹂몄궗"
                     data={monthlyData.hq as TableData}
                     year={year}
                     showOpening={true}
@@ -870,14 +1005,14 @@ export default function InventoryDashboard() {
               )}
               {monthlyData && !monthlyLoading && monthlyData.dealer.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  해당 연도의 마감 데이터가 없습니다.
+                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
                 </div>
               )}
             </>
           )}
         </div>
 
-        {/* ── 리테일 매출 표 ── */}
+        {/* ?? 由ы뀒??留ㅼ텧 ???? */}
         <div className="mt-10 border-t border-gray-300 pt-8">
           <button
             type="button"
@@ -885,14 +1020,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">📊</span>
+              <span className="text-lg">?뱤</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">리테일 매출</span>
+            <span className="text-sm font-bold text-gray-700">由ы뀒??留ㅼ텧</span>
             <span className="text-xs font-normal text-gray-400">
-              (단위: CNY K / 실적 기준: ~{retailData?.closedThrough ?? '…'})
+              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{retailData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {retailOpen ? '▲ 접기' : '▼ 펼치기'}
+              {retailOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
             </span>
           </button>
           {retailError && !retailOpen && (
@@ -902,7 +1037,7 @@ export default function InventoryDashboard() {
             <>
               {retailLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  로딩 중...
+                  濡쒕뵫 以?..
                 </div>
               )}
               {retailError && (
@@ -911,14 +1046,14 @@ export default function InventoryDashboard() {
               {retailData && !retailLoading && retailData.dealer.rows.length > 0 && (
                 <>
                   <InventoryMonthlyTable
-                    firstColumnHeader="대리상"
+                    firstColumnHeader="?由ъ긽"
                     data={retailData.dealer as TableData}
                     year={year}
                     showOpening={false}
                     planFromMonth={retailData.planFromMonth}
                   />
                   <InventoryMonthlyTable
-                    firstColumnHeader="본사"
+                    firstColumnHeader="蹂몄궗"
                     data={retailData.hq as TableData}
                     year={year}
                     showOpening={false}
@@ -931,14 +1066,14 @@ export default function InventoryDashboard() {
               )}
               {retailData && !retailLoading && retailData.dealer.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  해당 연도의 마감 데이터가 없습니다.
+                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
                 </div>
               )}
             </>
           )}
         </div>
 
-        {/* ── 본사→대리상 출고매출 표 ── */}
+        {/* ?? 蹂몄궗?믩?由ъ긽 異쒓퀬留ㅼ텧 ???? */}
         <div className="mt-10 border-t border-gray-300 pt-8">
           <button
             type="button"
@@ -946,14 +1081,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">📊</span>
+              <span className="text-lg">?뱤</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">본사→대리상 출고매출</span>
+            <span className="text-sm font-bold text-gray-700">蹂몄궗?믩?由ъ긽 異쒓퀬留ㅼ텧</span>
             <span className="text-xs font-normal text-gray-400">
-              (단위: CNY K / 실적 기준: ~{shipmentData?.closedThrough ?? '…'})
+              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{shipmentData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {shipmentOpen ? '▲ 접기' : '▼ 펼치기'}
+              {shipmentOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
             </span>
           </button>
           {shipmentError && !shipmentOpen && (
@@ -963,7 +1098,7 @@ export default function InventoryDashboard() {
             <>
               {shipmentLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  로딩 중...
+                  濡쒕뵫 以?..
                 </div>
               )}
               {shipmentError && (
@@ -971,7 +1106,7 @@ export default function InventoryDashboard() {
               )}
               {shipmentData && !shipmentLoading && shipmentData.data.rows.length > 0 && (
                 <InventoryMonthlyTable
-                  firstColumnHeader="본사→대리상 출고"
+                  firstColumnHeader="蹂몄궗?믩?由ъ긽 異쒓퀬"
                   data={shipmentData.data as TableData}
                   year={year}
                   showOpening={false}
@@ -982,14 +1117,14 @@ export default function InventoryDashboard() {
               )}
               {shipmentData && !shipmentLoading && shipmentData.data.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  해당 연도의 마감 데이터가 없습니다.
+                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
                 </div>
               )}
             </>
           )}
         </div>
 
-        {/* ── 본사 매입상품 표 ── */}
+        {/* ?? 蹂몄궗 留ㅼ엯?곹뭹 ???? */}
         <div className="mt-10 border-t border-gray-300 pt-8">
           <button
             type="button"
@@ -997,14 +1132,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">📥</span>
+              <span className="text-lg">?뱿</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">본사 매입상품</span>
+            <span className="text-sm font-bold text-gray-700">蹂몄궗 留ㅼ엯?곹뭹</span>
             <span className="text-xs font-normal text-gray-400">
-              (단위: CNY K / 실적 기준: ~{purchaseData?.closedThrough ?? '…'})
+              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{purchaseData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {purchaseOpen ? '▲ 접기' : '▼ 펼치기'}
+              {purchaseOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
             </span>
           </button>
           {purchaseError && !purchaseOpen && (
@@ -1014,7 +1149,7 @@ export default function InventoryDashboard() {
             <>
               {purchaseLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  로딩 중...
+                  濡쒕뵫 以?..
                 </div>
               )}
               {purchaseError && (
@@ -1035,14 +1170,14 @@ export default function InventoryDashboard() {
               )}
               {purchaseData && !purchaseLoading && purchaseData.data.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  해당 연도의 마감 데이터가 없습니다.
+                  ?대떦 ?곕룄??留덇컧 ?곗씠?곌? ?놁뒿?덈떎.
                 </div>
               )}
             </>
           )}
         </div>
 
-        {/* 2026 시즌별 연간 출고계획 */}
+        {/* 2026 ?쒖쫵蹂??곌컙 異쒓퀬怨꾪쉷 */}
         {year === 2026 && (
           <div className="mt-10 border-t border-gray-300 pt-8">
             <div className="flex items-center gap-2">
