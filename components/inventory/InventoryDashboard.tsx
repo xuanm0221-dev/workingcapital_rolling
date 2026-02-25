@@ -25,7 +25,7 @@ import InventoryFilterBar from './InventoryFilterBar';
 import InventoryTable from './InventoryTable';
 import InventoryMonthlyTable, { TableData } from './InventoryMonthlyTable';
 
-type LeafBrand = Exclude<Brand, '\uC804\uCCB4'>;
+type LeafBrand = Exclude<Brand, '전체'>;
 type TopTablePair = { dealer: InventoryTableData; hq: InventoryTableData };
 const ANNUAL_SHIPMENT_PLAN_KEY = 'inv_annual_shipment_plan_2026_v1';
 const ANNUAL_PLAN_BRANDS = ['MLB', 'MLB KIDS', 'DISCOVERY'] as const;
@@ -35,23 +35,23 @@ type AnnualPlanSeason = typeof ANNUAL_PLAN_SEASONS[number];
 type AnnualShipmentPlan = Record<AnnualPlanBrand, Record<AnnualPlanSeason, number>>;
 
 const ANNUAL_PLAN_SEASON_LABELS: Record<AnnualPlanSeason, string> = {
-  currF: '\uB2F9\uB144F',
-  currS: '\uB2F9\uB144S',
-  year1: '\u0031\uB144\uCC28',
-  year2: '\u0032\uB144\uCC28',
-  next: '\uCC28\uAE30\uC2DC\uC98C',
-  past: '\uACFC\uC2DC\uC98C',
+  currF: '당년F',
+  currS: '당년S',
+  year1: '1년차',
+  year2: '2년차',
+  next: '차기시즌',
+  past: '과시즌',
 };
-const TXT_HQ_PURCHASE_HEADER = '\uBCF8\uC0AC \uB9E4\uC785';
-const TXT_ANNUAL_PLAN_TITLE = '26\uB144 \uC2DC\uC98C\uBCC4 \uC5F0\uAC04 \uCD9C\uACE0\uACC4\uD68D\uD45C';
-const TXT_BRAND = '\uBE0C\uB79C\uB4DC';
-const TXT_PLAN_SECTION = '26\uB144 \uC2DC\uC98C\uBCC4 \uC5F0\uAC04 \uCD9C\uACE0\uACC4\uD68D';
-const TXT_PLAN_UNIT = '(\uB2E8\uC704: CNY K)';
-const TXT_EDIT = '\uC218\uC815';
-const TXT_SAVE = '\uC800\uC7A5';
-const TXT_PLAN_ICON = '\uD83D\uDCCB';
-const TXT_COLLAPSE = '\u25B2 \uC811\uAE30';
-const TXT_EXPAND = '\u25BC \uD3BC\uCE58\uAE30';
+const TXT_HQ_PURCHASE_HEADER = '본사 매입';
+const TXT_ANNUAL_PLAN_TITLE = '26년 시즌별 연간 출고계획표';
+const TXT_BRAND = '브랜드';
+const TXT_PLAN_SECTION = '26년 시즌별 연간 출고계획';
+const TXT_PLAN_UNIT = '(단위: CNY K)';
+const TXT_EDIT = '수정';
+const TXT_SAVE = '저장';
+const TXT_PLAN_ICON = '📋';
+const TXT_COLLAPSE = '▲ 접기';
+const TXT_EXPAND = '▼ 펼치기';
 
 function createEmptyAnnualShipmentPlan(): AnnualShipmentPlan {
   const emptyRow: Record<AnnualPlanSeason, number> = {
@@ -215,7 +215,7 @@ async function saveAnnualPlanToServer(year: number, data: AnnualShipmentPlan): P
 
 export default function InventoryDashboard() {
   const [year, setYear] = useState<number>(2026);
-  const [brand, setBrand] = useState<Brand>('\uC804\uCCB4');
+  const [brand, setBrand] = useState<Brand>('전체');
   const [growthRate, setGrowthRate] = useState<number>(5);
 
   // 湲곗〈 Sell-in/Sell-out ???곗씠??
@@ -259,16 +259,16 @@ export default function InventoryDashboard() {
   const [recalcLoading, setRecalcLoading] = useState(false);
   // 2026 ACC 湲곕쭚 紐⑺몴 ?ш퀬二쇱닔 (?由ъ긽/蹂몄궗蹂??좊컻쨌紐⑥옄쨌媛諛㈑룰린?)
   const [accTargetWoiDealer, setAccTargetWoiDealer] = useState<Record<AccKey, number>>({
-    '\uC2E0\uBC1C': 29,
-    '\uBAA8\uC790': 29,
-    '\uAC00\uBC29': 25,
-    '\uAE30\uD0C0': 39,
+    '신발': 29,
+    '모자': 29,
+    '가방': 25,
+    '기타': 39,
   } as Record<AccKey, number>);
   const [accTargetWoiHq, setAccTargetWoiHq] = useState<Record<AccKey, number>>({
-    '\uC2E0\uBC1C': 10,
-    '\uBAA8\uC790': 8,
-    '\uAC00\uBC29': 10,
-    '\uAE30\uD0C0': 10,
+    '신발': 10,
+    '모자': 8,
+    '가방': 10,
+    '기타': 10,
   } as Record<AccKey, number>);
   const accTargetWoiDealerRef = useRef(accTargetWoiDealer);
   const accTargetWoiHqRef = useRef(accTargetWoiHq);
@@ -292,16 +292,16 @@ export default function InventoryDashboard() {
   const [savedSnapshotByBrand, setSavedSnapshotByBrand] = useState<Partial<Record<LeafBrand, SnapshotData>>>({});
 
   const DEFAULT_ACC_WOI_DEALER: Record<AccKey, number> = {
-    '\uC2E0\uBC1C': 29,
-    '\uBAA8\uC790': 29,
-    '\uAC00\uBC29': 25,
-    '\uAE30\uD0C0': 39,
+    '신발': 29,
+    '모자': 29,
+    '가방': 25,
+    '기타': 39,
   } as Record<AccKey, number>;
   const DEFAULT_ACC_WOI_HQ: Record<AccKey, number> = {
-    '\uC2E0\uBC1C': 10,
-    '\uBAA8\uC790': 8,
-    '\uAC00\uBC29': 10,
-    '\uAE30\uD0C0': 10,
+    '신발': 10,
+    '모자': 8,
+    '가방': 10,
+    '기타': 10,
   } as Record<AccKey, number>;
 
   // ?? 湲곗〈 ??fetch ??
@@ -337,7 +337,7 @@ export default function InventoryDashboard() {
     setMonthlyLoading(true);
     setMonthlyError(null);
     try {
-      if (brand === '\uC804\uCCB4') {
+      if (brand === '전체') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand: b })}`),
@@ -369,7 +369,7 @@ export default function InventoryDashboard() {
     setRetailLoading(true);
     setRetailError(null);
     try {
-      if (brand === '\uC804\uCCB4') {
+      if (brand === '전체') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand: b, growthRate: String(growthRate) })}`),
@@ -404,7 +404,7 @@ export default function InventoryDashboard() {
     setShipmentLoading(true);
     setShipmentError(null);
     try {
-      if (brand === '\uC804\uCCB4') {
+      if (brand === '전체') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand: b })}`),
@@ -435,7 +435,7 @@ export default function InventoryDashboard() {
     setPurchaseLoading(true);
     setPurchaseError(null);
     try {
-      if (brand === '\uC804\uCCB4') {
+      if (brand === '전체') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
             fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(year), brand: b })}`),
@@ -463,7 +463,7 @@ export default function InventoryDashboard() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // ?ㅻ깄?룹씠 ?덉쑝硫?API ?앸왂, ?놁쑝硫?4媛?API ?몄텧 (\uC804\uCCB4 ??? ?ㅻ깄??誘몄궗?? ??긽 API 吏묎퀎)
+  // ?ㅻ깄?룹씠 ?덉쑝硫?API ?앸왂, ?놁쑝硫?4媛?API ?몄텧 (전체 ??? ?ㅻ깄??誘몄궗?? ??긽 API 吏묎퀎)
   useEffect(() => {
     let cancelled = false;
 
@@ -488,7 +488,7 @@ export default function InventoryDashboard() {
     };
 
     const run = async () => {
-      if (brand === '\uC804\uCCB4') {
+      if (brand === '전체') {
         setSnapshotSaved(false);
         setSnapshotSavedAt(null);
         await Promise.all([
@@ -578,7 +578,7 @@ export default function InventoryDashboard() {
   }, [growthRate]);
 
   useEffect(() => {
-    if (year !== 2026 || brand !== '\uC804\uCCB4') return;
+    if (year !== 2026 || brand !== '전체') return;
     let cancelled = false;
 
     const warmServerSnapshotsToLocal = async () => {
@@ -625,7 +625,7 @@ export default function InventoryDashboard() {
     ) {
       return null;
     }
-    if (year === 2026 && brand === '\uC804\uCCB4') {
+    if (year === 2026 && brand === '전체') {
       const perBrand: TopTablePair[] = [];
       for (const b of BRANDS_TO_AGGREGATE) {
         const snap = savedSnapshotByBrand[b] ?? loadSnapshot(year, b);
@@ -692,7 +692,7 @@ export default function InventoryDashboard() {
       purchaseData ?? undefined,
       year,
     );
-    if (year === 2026 && brand !== '\uC804\uCCB4') {
+    if (year === 2026 && brand !== '전체') {
       const withWoi = applyAccTargetWoiOverlay(
         built.dealer,
         built.hq,
@@ -920,16 +920,16 @@ export default function InventoryDashboard() {
         onSave={handleSave}
         onRecalc={handleRecalc}
         canSave={!!(monthlyData && retailData && shipmentData && purchaseData)}
-        editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
-        onEditModeEnter={year === 2026 && brand !== '\uC804\uCCB4' ? () => setEditMode(true) : undefined}
-        onResetToDefault={year === 2026 && brand !== '\uC804\uCCB4' ? handleResetToDefault : undefined}
+        editMode={year === 2026 && brand !== '전체' ? editMode : false}
+        onEditModeEnter={year === 2026 && brand !== '전체' ? () => setEditMode(true) : undefined}
+        onResetToDefault={year === 2026 && brand !== '전체' ? handleResetToDefault : undefined}
       />
 
       <div className="px-6 py-5">
         {/* ?? 湲곗〈 Sell-in / Sell-out ???? */}
         {loading && !dealerTableData && (
             <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
-              \uB85C\uB529 \uC911...
+              로딩 중...
             </div>
         )}
         {error && !dealerTableData && (
@@ -940,29 +940,29 @@ export default function InventoryDashboard() {
             <div className="flex flex-wrap gap-6 items-start">
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
-                title="\uB300\uB9AC\uC0C1 (CNY K)"
+                title="대리상 (CNY K)"
                 data={dealerTableData!}
                 year={year}
-                editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
+                editMode={year === 2026 && brand !== '전체' ? editMode : false}
                 sellInLabel="Sell-in"
                 sellOutLabel="Sell-out"
                 tableType="dealer"
-                onWoiChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleWoiChange : undefined}
+                onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
               />
             </div>
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
-                title="\uBCF8\uC0AC (CNY K)"
-                titleNote={year === 2026 && brand !== '\uC804\uCCB4' ? '\uD3B8\uC9D1\uAC00\uB2A5: \uC758\uB958 \uC0C1\uD488\uB9E4\uC785, \uB300\uB9AC\uC0C1\uCD9C\uACE0 | ACC: \uC7AC\uACE0\uC8FC\uC218' : undefined}
+                title="본사 (CNY K)"
+                titleNote={year === 2026 && brand !== '전체' ? '편집가능: 의류 상품매입, 대리상출고 | ACC: 재고주수' : undefined}
                 data={hqTableData!}
                 year={year}
-                editMode={year === 2026 && brand !== '\uC804\uCCB4' ? editMode : false}
-                sellInLabel="\uC0C1\uD488\uB9E4\uC785"
-                sellOutLabel="\uB300\uB9AC\uC0C1\uCD9C\uACE0"
+                editMode={year === 2026 && brand !== '전체' ? editMode : false}
+                sellInLabel="상품매입"
+                sellOutLabel="대리상출고"
                 tableType="hq"
-                onWoiChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleWoiChange : undefined}
-                onHqSellInChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleHqSellInChange : undefined}
-                onHqSellOutChange={year === 2026 && brand !== '\uC804\uCCB4' ? handleHqSellOutChange : undefined}
+                onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
+                onHqSellInChange={year === 2026 && brand !== '전체' ? handleHqSellInChange : undefined}
+                onHqSellOutChange={year === 2026 && brand !== '전체' ? handleHqSellOutChange : undefined}
               />
             </div>
           </div>
@@ -977,14 +977,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">\uD83D\uDCE6</span>
+              <span className="text-lg">📦</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">\uC6D4\uBCC4 \uC7AC\uACE0\uC794\uC561</span>
+            <span className="text-sm font-bold text-gray-700">월별 재고잔액</span>
             <span className="text-xs font-normal text-gray-400">
-              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{monthlyData?.closedThrough ?? '--'})
+              (단위: CNY K / 실적 기준: ~{monthlyData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {monthlyOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
+              {monthlyOpen ? '접기' : '펼치기'}
             </span>
           </button>
           {monthlyError && !monthlyOpen && (
@@ -994,7 +994,7 @@ export default function InventoryDashboard() {
             <>
               {monthlyLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  \uB85C\uB529 \uC911...
+                  로딩 중...
                 </div>
               )}
               {monthlyError && (
@@ -1003,13 +1003,13 @@ export default function InventoryDashboard() {
               {monthlyData && !monthlyLoading && monthlyData.dealer.rows.length > 0 && (
                 <>
                   <InventoryMonthlyTable
-                    firstColumnHeader="\uB300\uB9AC\uC0C1"
+                    firstColumnHeader="대리상"
                     data={monthlyData.dealer as TableData}
                     year={year}
                     showOpening={true}
                   />
                   <InventoryMonthlyTable
-                    firstColumnHeader="\uBCF8\uC0AC"
+                    firstColumnHeader="본사"
                     data={monthlyData.hq as TableData}
                     year={year}
                     showOpening={true}
@@ -1021,7 +1021,7 @@ export default function InventoryDashboard() {
               )}
               {monthlyData && !monthlyLoading && monthlyData.dealer.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
+                  해당 연도의 마감 데이터가 없습니다.
                 </div>
               )}
             </>
@@ -1036,14 +1036,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">\uD83D\uDCCA</span>
+              <span className="text-lg">📊</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">\uB9AC\uD14C\uC77C \uB9E4\uCD9C</span>
+            <span className="text-sm font-bold text-gray-700">리테일 매출</span>
             <span className="text-xs font-normal text-gray-400">
-              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{retailData?.closedThrough ?? '--'})
+              (단위: CNY K / 실적 기준: ~{retailData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {retailOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
+              {retailOpen ? '접기' : '펼치기'}
             </span>
           </button>
           {retailError && !retailOpen && (
@@ -1053,7 +1053,7 @@ export default function InventoryDashboard() {
             <>
               {retailLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  \uB85C\uB529 \uC911...
+                  로딩 중...
                 </div>
               )}
               {retailError && (
@@ -1062,14 +1062,14 @@ export default function InventoryDashboard() {
               {retailData && !retailLoading && retailData.dealer.rows.length > 0 && (
                 <>
                   <InventoryMonthlyTable
-                    firstColumnHeader="\uB300\uB9AC\uC0C1"
+                    firstColumnHeader="대리상"
                     data={retailData.dealer as TableData}
                     year={year}
                     showOpening={false}
                     planFromMonth={retailData.planFromMonth}
                   />
                   <InventoryMonthlyTable
-                    firstColumnHeader="\uBCF8\uC0AC"
+                    firstColumnHeader="본사"
                     data={retailData.hq as TableData}
                     year={year}
                     showOpening={false}
@@ -1082,7 +1082,7 @@ export default function InventoryDashboard() {
               )}
               {retailData && !retailLoading && retailData.dealer.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
+                  해당 연도의 마감 데이터가 없습니다.
                 </div>
               )}
             </>
@@ -1097,14 +1097,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">\uD83D\uDE9A</span>
+              <span className="text-lg">🚚</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">\uBCF8\uC0AC\u2192\uB300\uB9AC\uC0C1 \uCD9C\uACE0\uB9E4\uCD9C</span>
+            <span className="text-sm font-bold text-gray-700">본사→대리상 출고매출</span>
             <span className="text-xs font-normal text-gray-400">
-              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{shipmentData?.closedThrough ?? '--'})
+              (단위: CNY K / 실적 기준: ~{shipmentData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {shipmentOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
+              {shipmentOpen ? '접기' : '펼치기'}
             </span>
           </button>
           {shipmentError && !shipmentOpen && (
@@ -1114,7 +1114,7 @@ export default function InventoryDashboard() {
             <>
               {shipmentLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  \uB85C\uB529 \uC911...
+                  로딩 중...
                 </div>
               )}
               {shipmentError && (
@@ -1122,7 +1122,7 @@ export default function InventoryDashboard() {
               )}
               {shipmentData && !shipmentLoading && shipmentData.data.rows.length > 0 && (
                 <InventoryMonthlyTable
-                  firstColumnHeader="\uBCF8\uC0AC\u2192\uB300\uB9AC\uC0C1 \uCD9C\uACE0"
+                  firstColumnHeader="본사→대리상 출고"
                   data={shipmentData.data as TableData}
                   year={year}
                   showOpening={false}
@@ -1133,7 +1133,7 @@ export default function InventoryDashboard() {
               )}
               {shipmentData && !shipmentLoading && shipmentData.data.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
+                  해당 연도의 마감 데이터가 없습니다.
                 </div>
               )}
             </>
@@ -1148,14 +1148,14 @@ export default function InventoryDashboard() {
             className="flex items-center gap-2 w-full text-left py-1"
           >
             <SectionIcon>
-              <span className="text-lg">\uD83D\uDCE5</span>
+              <span className="text-lg">📥</span>
             </SectionIcon>
-            <span className="text-sm font-bold text-gray-700">\uBCF8\uC0AC \uB9E4\uC785\uC0C1\uD488</span>
+            <span className="text-sm font-bold text-gray-700">본사 매입상품</span>
             <span className="text-xs font-normal text-gray-400">
-              (\uB2E8\uC704: CNY K / \uC2E4\uC801 \uAE30\uC900: ~{purchaseData?.closedThrough ?? '--'})
+              (단위: CNY K / 실적 기준: ~{purchaseData?.closedThrough ?? '--'})
             </span>
             <span className="ml-auto text-gray-400 text-xs shrink-0">
-              {purchaseOpen ? '\uC811\uAE30' : '\uD3BC\uCE58\uAE30'}
+              {purchaseOpen ? '접기' : '펼치기'}
             </span>
           </button>
           {purchaseError && !purchaseOpen && (
@@ -1165,7 +1165,7 @@ export default function InventoryDashboard() {
             <>
               {purchaseLoading && (
                 <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
-                  \uB85C\uB529 \uC911...
+                  로딩 중...
                 </div>
               )}
               {purchaseError && (
@@ -1186,7 +1186,7 @@ export default function InventoryDashboard() {
               )}
               {purchaseData && !purchaseLoading && purchaseData.data.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
-                  \uD574\uB2F9 \uC5F0\uB3C4\uC758 \uB9C8\uAC10 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
+                  해당 연도의 마감 데이터가 없습니다.
                 </div>
               )}
             </>
