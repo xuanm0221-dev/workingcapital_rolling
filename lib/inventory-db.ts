@@ -27,8 +27,8 @@ const LABELS: Record<string, string> = {
 /** 브랜드 → brd_cd 매핑 (undefined = 필터 없음 = 전체) */
 export const BRD_CD_MAP: Record<string, string | undefined> = {
   'MLB': 'M',
-  'MLB KIDS': undefined, // TODO: brd_cd 확정 후 입력
-  'DISCOVERY': undefined, // TODO: brd_cd 확정 후 입력
+  'MLB KIDS': 'I', // TODO: brd_cd 확정 후 입력
+  'DISCOVERY': 'X', // TODO: brd_cd 확정 후 입력
   '전체': undefined,
 };
 

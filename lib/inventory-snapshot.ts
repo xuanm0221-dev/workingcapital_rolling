@@ -7,6 +7,8 @@ import type { PurchaseResponse } from '@/app/api/inventory/purchase/route';
 import type { RowKey, AccKey } from './inventory-types';
 
 export interface SnapshotData {
+  /** snapshot schema version */
+  version?: number;
   /** 월별 재고잔액 — 실적월만 (미래월 null) */
   monthly: MonthlyStockResponse;
   /** 리테일 매출 — 계획월 strip 후 실적월만 */
@@ -31,12 +33,17 @@ export interface SnapshotData {
   accTargetWoiHq?: Record<AccKey, number>;
 }
 
+const SNAPSHOT_SCHEMA_VERSION = 2;
+
 const snapshotKey = (year: number, brand: string) =>
   `inv_snapshot_${year}_${brand}`;
 
 export function saveSnapshot(year: number, brand: string, data: SnapshotData): void {
   try {
-    localStorage.setItem(snapshotKey(year, brand), JSON.stringify(data));
+    localStorage.setItem(
+      snapshotKey(year, brand),
+      JSON.stringify({ ...data, version: SNAPSHOT_SCHEMA_VERSION }),
+    );
   } catch {
     console.warn('[snapshot] localStorage 저장 실패 (용량 초과 등)');
   }
@@ -45,7 +52,10 @@ export function saveSnapshot(year: number, brand: string, data: SnapshotData): v
 export function loadSnapshot(year: number, brand: string): SnapshotData | null {
   try {
     const raw = localStorage.getItem(snapshotKey(year, brand));
-    return raw ? (JSON.parse(raw) as SnapshotData) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SnapshotData;
+    if ((parsed.version ?? 0) !== SNAPSHOT_SCHEMA_VERSION) return null;
+    return parsed;
   } catch {
     return null;
   }

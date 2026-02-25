@@ -1,18 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Brand, InventoryApiResponse, AccKey, ACC_KEYS, RowKey } from '@/lib/inventory-types';
+import { Brand, InventoryApiResponse, InventoryTableData, InventoryRowRaw, AccKey, ACC_KEYS, SEASON_KEYS, RowKey } from '@/lib/inventory-types';
 import { MonthlyStockResponse } from '@/lib/inventory-monthly-types';
 import { RetailSalesResponse } from '@/lib/retail-sales-types';
 import type { ShipmentSalesResponse } from '@/app/api/inventory/shipment-sales/route';
 import type { PurchaseResponse } from '@/app/api/inventory/purchase/route';
 import { buildTableDataFromMonthly } from '@/lib/build-inventory-from-monthly';
-import { applyAccTargetWoiOverlay, applyHqSellInSellOutPlanOverlay } from '@/lib/inventory-calc';
+import { buildTableData, applyAccTargetWoiOverlay, applyHqSellInSellOutPlanOverlay } from '@/lib/inventory-calc';
 import {
   saveSnapshot,
   loadSnapshot,
-  mergeLatestMonthIntoSnapshot,
-  getLatestActualMonthIdx,
   type SnapshotData,
 } from '@/lib/inventory-snapshot';
 import { stripPlanMonths, applyPlanToSnapshot, PLAN_FROM_MONTH } from '@/lib/retail-plan';
@@ -27,14 +25,118 @@ import InventoryFilterBar from './InventoryFilterBar';
 import InventoryTable from './InventoryTable';
 import InventoryMonthlyTable, { TableData } from './InventoryMonthlyTable';
 
-const ICON_BG = 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)';
+type LeafBrand = Exclude<Brand, '전체'>;
+type TopTablePair = { dealer: InventoryTableData; hq: InventoryTableData };
+const ANNUAL_SHIPMENT_PLAN_KEY = 'inv_annual_shipment_plan_2026_v1';
+const ANNUAL_PLAN_BRANDS = ['MLB', 'MLB KIDS', 'DISCOVERY'] as const;
+const ANNUAL_PLAN_SEASONS = ['currF', 'currS', 'year1', 'year2', 'next', 'past'] as const;
+type AnnualPlanBrand = typeof ANNUAL_PLAN_BRANDS[number];
+type AnnualPlanSeason = typeof ANNUAL_PLAN_SEASONS[number];
+type AnnualShipmentPlan = Record<AnnualPlanBrand, Record<AnnualPlanSeason, number>>;
+
+const ANNUAL_PLAN_SEASON_LABELS: Record<AnnualPlanSeason, string> = {
+  currF: '\uB2F9\uB144F',
+  currS: '\uB2F9\uB144S',
+  year1: '\u0031\uB144\uCC28',
+  year2: '\u0032\uB144\uCC28',
+  next: '\uCC28\uAE30\uC2DC\uC98C',
+  past: '\uACFC\uC2DC\uC98C',
+};
+const TXT_HQ_PURCHASE_HEADER = '\uBCF8\uC0AC \uB9E4\uC785';
+const TXT_ANNUAL_PLAN_TITLE = '26\uB144 \uC2DC\uC98C\uBCC4 \uC5F0\uAC04 \uCD9C\uACE0\uACC4\uD68D\uD45C';
+const TXT_BRAND = '\uBE0C\uB79C\uB4DC';
+const TXT_PLAN_SECTION = '26\uB144 \uC2DC\uC98C\uBCC4 \uC5F0\uAC04 \uCD9C\uACE0\uACC4\uD68D';
+const TXT_PLAN_UNIT = '(\uB2E8\uC704: CNY K)';
+const TXT_EDIT = '\uC218\uC815';
+const TXT_SAVE = '\uC800\uC7A5';
+const TXT_PLAN_ICON = '\uD83D\uDCCB';
+const TXT_COLLAPSE = '\u25B2 \uC811\uAE30';
+const TXT_EXPAND = '\u25BC \uD3BC\uCE58\uAE30';
+
+function createEmptyAnnualShipmentPlan(): AnnualShipmentPlan {
+  const emptyRow: Record<AnnualPlanSeason, number> = {
+    currF: 0,
+    currS: 0,
+    year1: 0,
+    year2: 0,
+    next: 0,
+    past: 0,
+  };
+  return {
+    MLB: { ...emptyRow },
+    'MLB KIDS': { ...emptyRow },
+    DISCOVERY: { ...emptyRow },
+  };
+}
+
+function calcYearDays(year: number): number {
+  return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 366 : 365;
+}
+
+function sum12(a: number[], b: number[]): number[] {
+  return a.map((v, i) => v + (b[i] ?? 0));
+}
+
+function aggregateLeafTables(tables: InventoryTableData[], year: number): InventoryTableData {
+  if (tables.length === 0) return { rows: [] };
+  const yearDays = calcYearDays(year);
+  const byKey = new Map<string, InventoryRowRaw>();
+  for (const table of tables) {
+    for (const row of table.rows) {
+      if (!row.isLeaf) continue;
+      const existing = byKey.get(row.key);
+      if (!existing) {
+        byKey.set(row.key, {
+          key: row.key as RowKey,
+          opening: row.opening,
+          sellIn: [...row.sellIn],
+          sellOut: [...row.sellOut],
+          closing: row.closing,
+          woiSellOut: [...row.woiSellOut],
+          ...(row.hqSales ? { hqSales: [...row.hqSales] } : {}),
+        });
+      } else {
+        existing.opening += row.opening;
+        existing.closing += row.closing;
+        existing.sellIn = sum12(existing.sellIn, row.sellIn);
+        existing.sellOut = sum12(existing.sellOut, row.sellOut);
+        existing.woiSellOut = sum12(existing.woiSellOut ?? new Array(12).fill(0), row.woiSellOut);
+        if (row.hqSales) {
+          existing.hqSales = sum12(existing.hqSales ?? new Array(12).fill(0), row.hqSales);
+        }
+      }
+    }
+  }
+  return buildTableData(Array.from(byKey.values()), yearDays);
+}
+
+function aggregateTopTables(tables: TopTablePair[], year: number): TopTablePair {
+  return {
+    dealer: aggregateLeafTables(tables.map((t) => t.dealer), year),
+    hq: aggregateLeafTables(tables.map((t) => t.hq), year),
+  };
+}
+
+function buildSeasonShipmentDerivedSellOutPlan(
+  planBrand: AnnualPlanBrand,
+  annualPlan: AnnualShipmentPlan,
+  hqTable: InventoryTableData,
+): Partial<Record<RowKey, number>> {
+  const byKey = new Map(hqTable.rows.filter((r) => r.isLeaf).map((r) => [r.key, r]));
+  const out: Partial<Record<RowKey, number>> = {};
+  for (let i = 0; i < SEASON_KEYS.length && i < ANNUAL_PLAN_SEASONS.length; i += 1) {
+    const seasonKey = SEASON_KEYS[i] as RowKey;
+    const planSeason = ANNUAL_PLAN_SEASONS[i];
+    const plannedShipment = annualPlan[planBrand][planSeason] ?? 0;
+    const hqSalesTotal = byKey.get(seasonKey)?.hqSalesTotal ?? 0;
+    out[seasonKey] = Math.max(0, Math.round(plannedShipment - hqSalesTotal));
+  }
+  return out;
+}
 
 function SectionIcon({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="flex items-center justify-center rounded-xl w-8 h-8 flex-shrink-0 shadow-sm border border-sky-200/60"
-      style={{ background: ICON_BG }}
-    >
+    <div className="flex items-center justify-center w-5 h-5 flex-shrink-0">
       {children}
     </div>
   );
@@ -75,6 +177,10 @@ export default function InventoryDashboard() {
   const [retailOpen, setRetailOpen] = useState(false);
   const [shipmentOpen, setShipmentOpen] = useState(false);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [annualPlanOpen, setAnnualPlanOpen] = useState(false);
+  const [annualShipmentPlan2026, setAnnualShipmentPlan2026] = useState<AnnualShipmentPlan>(createEmptyAnnualShipmentPlan);
+  const [annualShipmentPlanDraft2026, setAnnualShipmentPlanDraft2026] = useState<AnnualShipmentPlan>(createEmptyAnnualShipmentPlan);
+  const [annualPlanEditMode, setAnnualPlanEditMode] = useState(false);
 
   // 스냅샷 상태
   const [snapshotSaved, setSnapshotSaved] = useState(false);
@@ -102,12 +208,24 @@ export default function InventoryDashboard() {
   const [editMode, setEditMode] = useState(false);
   // 2026 계획월 계산용 2025 실적 보관 (API 응답에 포함됨)
   const retail2025Ref = useRef<RetailSalesResponse['retail2025'] | null>(null);
+  const monthlyByBrandRef = useRef<Partial<Record<LeafBrand, MonthlyStockResponse>>>({});
+  const retailByBrandRef = useRef<Partial<Record<LeafBrand, RetailSalesResponse>>>({});
+  const shipmentByBrandRef = useRef<Partial<Record<LeafBrand, ShipmentSalesResponse>>>({});
+  const purchaseByBrandRef = useRef<Partial<Record<LeafBrand, PurchaseResponse>>>({});
 
   const DEFAULT_ACC_WOI_DEALER: Record<AccKey, number> = { 신발: 29, 모자: 29, 가방: 25, 기타: 39 };
   const DEFAULT_ACC_WOI_HQ: Record<AccKey, number> = { 신발: 10, 모자: 8, 가방: 10, 기타: 10 };
 
   // ── 기존 표 fetch ──
   const fetchData = useCallback(async () => {
+    // 2025/2026 재고자산 탭 상단 요약표는 월별/리테일/출고/매입 조합으로만 렌더한다.
+    // (기존 /api/inventory fallback을 쓰면 초기 하드코딩 숫자 깜빡임이 발생)
+    if (year === 2025 || year === 2026) {
+      setLoading(false);
+      setError(null);
+      setData(null);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -137,14 +255,18 @@ export default function InventoryDashboard() {
             fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand: b })}`),
           ),
         );
-        const jsons = await Promise.all(ress.map((r) => r.json()));
-        for (const j of jsons) if (j.error) throw new Error(j.error);
+        const jsons: MonthlyStockResponse[] = await Promise.all(ress.map((r) => r.json()));
+        for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error);
+        BRANDS_TO_AGGREGATE.forEach((b, i) => {
+          monthlyByBrandRef.current[b] = jsons[i];
+        });
         setMonthlyData(aggregateMonthlyStock(jsons));
       } else {
         const res = await fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand })}`);
         if (!res.ok) throw new Error('월별 데이터 로드 실패');
-        const json = await res.json();
-        if (json.error) throw new Error(json.error);
+        const json: MonthlyStockResponse = await res.json();
+        if ((json as { error?: string }).error) throw new Error((json as { error?: string }).error);
+        monthlyByBrandRef.current[brand as LeafBrand] = json;
         setMonthlyData(json);
       }
     } catch (e) {
@@ -167,6 +289,9 @@ export default function InventoryDashboard() {
         );
         const jsons: RetailSalesResponse[] = await Promise.all(ress.map((r) => r.json()));
         for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error);
+        BRANDS_TO_AGGREGATE.forEach((b, i) => {
+          retailByBrandRef.current[b] = jsons[i];
+        });
         const aggregated = aggregateRetailSales(jsons);
         if (aggregated.retail2025) retail2025Ref.current = aggregated.retail2025;
         setRetailData(aggregated);
@@ -176,6 +301,7 @@ export default function InventoryDashboard() {
         const json: RetailSalesResponse = await res.json();
         if ((json as { error?: string }).error) throw new Error((json as { error?: string }).error);
         if (json.retail2025) retail2025Ref.current = json.retail2025;
+        retailByBrandRef.current[brand as LeafBrand] = json;
         setRetailData(json);
       }
     } catch (e) {
@@ -196,13 +322,17 @@ export default function InventoryDashboard() {
             fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand: b })}`),
           ),
         );
-        const jsons = await Promise.all(ress.map((r) => r.json()));
-        for (const j of jsons) if (j.error) throw new Error(j.error ?? '출고매출 데이터 로드 실패');
+        const jsons: ShipmentSalesResponse[] = await Promise.all(ress.map((r) => r.json()));
+        for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error ?? '출고매출 데이터 로드 실패');
+        BRANDS_TO_AGGREGATE.forEach((b, i) => {
+          shipmentByBrandRef.current[b] = jsons[i];
+        });
         setShipmentData(aggregateShipmentSales(jsons));
       } else {
         const res = await fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand })}`);
-        const json = await res.json();
-        if (!res.ok || json.error) throw new Error(json.error ?? '출고매출 데이터 로드 실패');
+        const json: ShipmentSalesResponse = await res.json();
+        if (!res.ok || (json as { error?: string }).error) throw new Error((json as { error?: string }).error ?? '출고매출 데이터 로드 실패');
+        shipmentByBrandRef.current[brand as LeafBrand] = json;
         setShipmentData(json);
       }
     } catch (e) {
@@ -223,13 +353,17 @@ export default function InventoryDashboard() {
             fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(year), brand: b })}`),
           ),
         );
-        const jsons = await Promise.all(ress.map((r) => r.json()));
-        for (const j of jsons) if (j.error) throw new Error(j.error ?? '매입상품 데이터 로드 실패');
+        const jsons: PurchaseResponse[] = await Promise.all(ress.map((r) => r.json()));
+        for (const j of jsons) if ((j as { error?: string }).error) throw new Error((j as { error?: string }).error ?? '매입상품 데이터 로드 실패');
+        BRANDS_TO_AGGREGATE.forEach((b, i) => {
+          purchaseByBrandRef.current[b] = jsons[i];
+        });
         setPurchaseData(aggregatePurchase(jsons));
       } else {
         const res = await fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(year), brand })}`);
-        const json = await res.json();
-        if (!res.ok || json.error) throw new Error(json.error ?? '매입상품 데이터 로드 실패');
+        const json: PurchaseResponse = await res.json();
+        if (!res.ok || (json as { error?: string }).error) throw new Error((json as { error?: string }).error ?? '매입상품 데이터 로드 실패');
+        purchaseByBrandRef.current[brand as LeafBrand] = json;
         setPurchaseData(json);
       }
     } catch (e) {
@@ -288,6 +422,36 @@ export default function InventoryDashboard() {
     setEditMode(false);
   }, [year, brand]);
 
+  useEffect(() => {
+    if (year !== 2026) return;
+    try {
+      const raw = localStorage.getItem(ANNUAL_SHIPMENT_PLAN_KEY);
+      if (!raw) {
+        const empty = createEmptyAnnualShipmentPlan();
+        setAnnualShipmentPlan2026(empty);
+        setAnnualShipmentPlanDraft2026(empty);
+        setAnnualPlanEditMode(false);
+        return;
+      }
+      const parsed = JSON.parse(raw) as Partial<AnnualShipmentPlan>;
+      const base = createEmptyAnnualShipmentPlan();
+      for (const b of ANNUAL_PLAN_BRANDS) {
+        for (const season of ANNUAL_PLAN_SEASONS) {
+          const v = parsed?.[b]?.[season];
+          base[b][season] = typeof v === 'number' && Number.isFinite(v) ? v : 0;
+        }
+      }
+      setAnnualShipmentPlan2026(base);
+      setAnnualShipmentPlanDraft2026(base);
+      setAnnualPlanEditMode(false);
+    } catch {
+      const empty = createEmptyAnnualShipmentPlan();
+      setAnnualShipmentPlan2026(empty);
+      setAnnualShipmentPlanDraft2026(empty);
+      setAnnualPlanEditMode(false);
+    }
+  }, [year]);
+
   // growthRate 변경 시 — 스냅샷 로드 상태이면 계획월만 재계산 (API 없음)
   useEffect(() => {
     if (!snapshotSaved) return;
@@ -313,6 +477,66 @@ export default function InventoryDashboard() {
     ) {
       return null;
     }
+    if (year === 2026 && brand === '전체') {
+      const perBrand: TopTablePair[] = [];
+      for (const b of BRANDS_TO_AGGREGATE) {
+        const snap = loadSnapshot(year, b);
+        const monthly = snap?.monthly ?? monthlyByBrandRef.current[b];
+        const shipment = snap?.shipment ?? shipmentByBrandRef.current[b];
+        const purchase = snap?.purchase ?? purchaseByBrandRef.current[b];
+        const retail = snap
+          ? (
+            snap.planFromMonth && snap.retail2025
+              ? applyPlanToSnapshot(
+                  snap.retailActuals,
+                  snap.retail2025 as RetailSalesResponse,
+                  snap.planFromMonth,
+                  growthRate,
+                )
+              : snap.retailActuals
+          )
+          : retailByBrandRef.current[b];
+        if (!monthly || !retail || !shipment || !purchase) continue;
+
+        const builtByBrand = buildTableDataFromMonthly(
+          monthly,
+          retail,
+          shipment,
+          purchase,
+          year,
+        );
+        const withWoi = applyAccTargetWoiOverlay(
+          builtByBrand.dealer,
+          builtByBrand.hq,
+          retail,
+          snap?.accTargetWoiDealer ?? DEFAULT_ACC_WOI_DEALER,
+          snap?.accTargetWoiHq ?? DEFAULT_ACC_WOI_HQ,
+          year,
+        );
+        const derivedSellOutPlan = buildSeasonShipmentDerivedSellOutPlan(
+          b,
+          annualShipmentPlan2026,
+          withWoi.hq,
+        );
+        const mergedSellOutPlan = {
+          ...(snap?.hqSellOutPlan ?? {}),
+          ...derivedSellOutPlan,
+        };
+        perBrand.push(
+          applyHqSellInSellOutPlanOverlay(
+            withWoi.dealer,
+            withWoi.hq,
+            snap?.hqSellInPlan ?? {},
+            mergedSellOutPlan,
+            year,
+          ),
+        );
+      }
+      if (perBrand.length > 0) {
+        return aggregateTopTables(perBrand, year);
+      }
+    }
+
     const built = buildTableDataFromMonthly(
       monthlyData,
       retailData,
@@ -329,19 +553,33 @@ export default function InventoryDashboard() {
         accTargetWoiHq,
         year,
       );
+      const derivedSellOutPlan = buildSeasonShipmentDerivedSellOutPlan(
+        brand as AnnualPlanBrand,
+        annualShipmentPlan2026,
+        withWoi.hq,
+      );
+      const mergedSellOutPlan = {
+        ...hqSellOutPlan,
+        ...derivedSellOutPlan,
+      };
       return applyHqSellInSellOutPlanOverlay(
         withWoi.dealer,
         withWoi.hq,
         hqSellInPlan,
-        hqSellOutPlan,
+        mergedSellOutPlan,
         year,
       );
     }
     return built;
-  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, accTargetWoiDealer, accTargetWoiHq, hqSellInPlan, hqSellOutPlan]);
+  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, annualShipmentPlan2026, accTargetWoiDealer, accTargetWoiHq, hqSellInPlan, hqSellOutPlan]);
 
-  const dealerTableData = topTableData?.dealer ?? data?.dealer ?? null;
-  const hqTableData = topTableData?.hq ?? data?.hq ?? null;
+  const shouldUseTopTableOnly = year === 2025 || year === 2026;
+  const dealerTableData = shouldUseTopTableOnly
+    ? (topTableData?.dealer ?? null)
+    : (topTableData?.dealer ?? data?.dealer ?? null);
+  const hqTableData = shouldUseTopTableOnly
+    ? (topTableData?.hq ?? null)
+    : (topTableData?.hq ?? data?.hq ?? null);
 
   // 2026 ACC 행 재고주수 편집 시 상태 반영 (표 셀 또는 기본값 블록과 연동)
   const handleWoiChange = useCallback((tableType: 'dealer' | 'hq', rowKey: string, newWoi: number) => {
@@ -412,47 +650,109 @@ export default function InventoryDashboard() {
   const handleRecalc = useCallback(async (mode: 'current' | 'annual') => {
     setRecalcLoading(true);
     try {
-      if (mode === 'annual') {
-        // 연간: 4개 API 전체 재호출 → 완료 후 스냅샷 교체
+      // mode? ?? ?? ???? ??, ??? ?? ?? ??? ?? ????? ??
+      void mode;
+
+      if (brand !== 'MLB' && brand !== 'MLB KIDS' && brand !== 'DISCOVERY') {
         await Promise.all([
           fetchMonthlyData(),
           fetchRetailData(),
           fetchShipmentData(),
           fetchPurchaseData(),
         ]);
-        // fetchRetailData 내에서 상태 업데이트가 되므로 잠시 후 저장
-        // (setTimeout 없이는 최신 state를 바로 읽기 어려워 별도 저장 로직 사용)
-        setSnapshotSaved(false); // 저장 버튼 다시 활성화 (사용자가 확인 후 저장)
-      } else {
-        // 당월: onlyLatest=true API 3개 호출 → 최신 월 컬럼만 병합
-        const p = new URLSearchParams({ year: String(year), brand, onlyLatest: 'true' });
-        const [fm, fs, fp] = await Promise.all([
-          fetch(`/api/inventory/monthly-stock?${p}`).then((r) => r.json() as Promise<MonthlyStockResponse>),
-          fetch(`/api/inventory/shipment-sales?${p}`).then((r) => r.json() as Promise<ShipmentSalesResponse>),
-          fetch(`/api/inventory/purchase?${p}`).then((r) => r.json() as Promise<PurchaseResponse>),
-        ]);
-        const snap = loadSnapshot(year, brand);
-        if (!snap) {
-          // 스냅샷 없으면 전체 API 호출
-          await Promise.all([fetchMonthlyData(), fetchShipmentData(), fetchPurchaseData()]);
-          setSnapshotSaved(false);
-          return;
-        }
-        const latestIdx = getLatestActualMonthIdx(year, fm.closedThrough);
-        const merged = mergeLatestMonthIntoSnapshot(snap, { monthly: fm, shipment: fs, purchase: fp }, latestIdx);
-        setMonthlyData(merged.monthly);
-        setShipmentData(merged.shipment);
-        setPurchaseData(merged.purchase);
-        saveSnapshot(year, brand, merged);
-        setSnapshotSavedAt(merged.savedAt);
-        setSnapshotSaved(true);
+        setSnapshotSaved(false);
+        setSnapshotSavedAt(null);
+        return;
       }
+
+      const [fm, fr, fs, fp] = await Promise.all([
+        fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand })}`).then(
+          (r) => r.json() as Promise<MonthlyStockResponse & { error?: string }>,
+        ),
+        fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand, growthRate: String(growthRate) })}`).then(
+          (r) => r.json() as Promise<RetailSalesResponse & { error?: string }>,
+        ),
+        fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand })}`).then(
+          (r) => r.json() as Promise<ShipmentSalesResponse & { error?: string }>,
+        ),
+        fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(year), brand })}`).then(
+          (r) => r.json() as Promise<PurchaseResponse & { error?: string }>,
+        ),
+      ]);
+
+      if (fm.error) throw new Error(fm.error);
+      if (fr.error) throw new Error(fr.error);
+      if (fs.error) throw new Error(fs.error);
+      if (fp.error) throw new Error(fp.error);
+
+      setMonthlyData(fm);
+      setRetailData(fr);
+      setShipmentData(fs);
+      setPurchaseData(fp);
+      monthlyByBrandRef.current[brand as LeafBrand] = fm;
+      retailByBrandRef.current[brand as LeafBrand] = fr;
+      shipmentByBrandRef.current[brand as LeafBrand] = fs;
+      purchaseByBrandRef.current[brand as LeafBrand] = fp;
+      if (fr.retail2025) retail2025Ref.current = fr.retail2025;
+
+      const retailActuals =
+        year === 2026 && fr.planFromMonth
+          ? stripPlanMonths(fr, fr.planFromMonth)
+          : fr;
+
+      const freshSnapshot: SnapshotData = {
+        monthly: fm,
+        retailActuals,
+        retail2025: fr.retail2025 ?? null,
+        shipment: fs,
+        purchase: fp,
+        savedAt: new Date().toISOString(),
+        planFromMonth: fr.planFromMonth,
+      };
+      if (year === 2026) {
+        freshSnapshot.hqSellInPlan = Object.keys(hqSellInPlan).length ? hqSellInPlan : undefined;
+        freshSnapshot.hqSellOutPlan = Object.keys(hqSellOutPlan).length ? hqSellOutPlan : undefined;
+        freshSnapshot.accTargetWoiDealer = accTargetWoiDealerRef.current;
+        freshSnapshot.accTargetWoiHq = accTargetWoiHqRef.current;
+      }
+
+      saveSnapshot(year, brand, freshSnapshot);
+      setSnapshotSaved(true);
+      setSnapshotSavedAt(freshSnapshot.savedAt);
     } catch (e) {
       console.error('[recalc] error:', e);
     } finally {
       setRecalcLoading(false);
     }
-  }, [year, brand, fetchMonthlyData, fetchRetailData, fetchShipmentData, fetchPurchaseData]);
+  }, [year, brand, growthRate, fetchMonthlyData, fetchRetailData, fetchShipmentData, fetchPurchaseData, hqSellInPlan, hqSellOutPlan]);
+
+  const handleAnnualPlanCellChange = useCallback((planBrand: AnnualPlanBrand, season: AnnualPlanSeason, value: string) => {
+    if (!annualPlanEditMode) return;
+    const numeric = parseInt(value.replace(/[^\d-]/g, ''), 10);
+    const nextValue = Number.isNaN(numeric) ? 0 : numeric;
+    setAnnualShipmentPlanDraft2026((prev) => ({
+      ...prev,
+      [planBrand]: {
+        ...prev[planBrand],
+        [season]: nextValue,
+      },
+    }));
+  }, [annualPlanEditMode]);
+
+  const handleAnnualPlanEditStart = useCallback(() => {
+    setAnnualShipmentPlanDraft2026(annualShipmentPlan2026);
+    setAnnualPlanEditMode(true);
+  }, [annualShipmentPlan2026]);
+
+  const handleAnnualPlanSave = useCallback(() => {
+    setAnnualShipmentPlan2026(annualShipmentPlanDraft2026);
+    setAnnualPlanEditMode(false);
+    try {
+      localStorage.setItem(ANNUAL_SHIPMENT_PLAN_KEY, JSON.stringify(annualShipmentPlanDraft2026));
+    } catch {
+      // ignore storage errors
+    }
+  }, [annualShipmentPlanDraft2026]);
 
   return (
     <div className="bg-gray-50 overflow-auto h-[calc(100vh-64px)]">
@@ -486,8 +786,8 @@ export default function InventoryDashboard() {
         )}
         {dealerTableData && hqTableData && (
           <>
-            <div className="flex flex-wrap gap-6 items-stretch">
-            <div className="min-w-0 flex-1 flex flex-col" style={{ minWidth: '320px' }}>
+            <div className="flex flex-wrap gap-6 items-start">
+            <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
                 title="대리상 (CNY K)"
                 data={dealerTableData!}
@@ -499,7 +799,7 @@ export default function InventoryDashboard() {
                 onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
               />
             </div>
-            <div className="min-w-0 flex-1 flex flex-col" style={{ minWidth: '320px' }}>
+            <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
                 title="본사 (CNY K)"
                 titleNote={year === 2026 && brand !== '전체' ? '편집가능: 의류 상품매입, 대리상출고 | ACC: 재고주수' : undefined}
@@ -721,15 +1021,17 @@ export default function InventoryDashboard() {
                 <div className="py-8 text-center text-red-500 text-sm">{purchaseError}</div>
               )}
               {purchaseData && !purchaseLoading && purchaseData.data.rows.length > 0 && (
-                <InventoryMonthlyTable
-                  firstColumnHeader="본사 매입"
-                  data={purchaseData.data as TableData}
-                  year={year}
-                  showOpening={false}
-                  headerBg="#4db6ac"
-                  headerBorderColor="#2a9d8f"
-                  totalRowCls="bg-teal-50"
-                />
+                <>
+                  <InventoryMonthlyTable
+                    firstColumnHeader={TXT_HQ_PURCHASE_HEADER}
+                    data={purchaseData.data as TableData}
+                    year={year}
+                    showOpening={false}
+                    headerBg="#4db6ac"
+                    headerBorderColor="#2a9d8f"
+                    totalRowCls="bg-teal-50"
+                  />
+                </>
               )}
               {purchaseData && !purchaseLoading && purchaseData.data.rows.length === 0 && (
                 <div className="py-8 text-center text-gray-400 text-sm">
@@ -739,6 +1041,89 @@ export default function InventoryDashboard() {
             </>
           )}
         </div>
+
+        {/* 2026 시즌별 연간 출고계획 */}
+        {year === 2026 && (
+          <div className="mt-10 border-t border-gray-300 pt-8">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAnnualPlanOpen((v) => !v)}
+                className="flex items-center gap-2 flex-1 text-left py-1"
+              >
+                <SectionIcon>
+                  <span className="text-lg">{TXT_PLAN_ICON}</span>
+                </SectionIcon>
+                <span className="text-sm font-bold text-gray-700">{TXT_PLAN_SECTION}</span>
+                <span className="text-xs font-normal text-gray-400">{TXT_PLAN_UNIT}</span>
+                <span className="ml-auto text-gray-400 text-xs shrink-0">
+                  {annualPlanOpen ? TXT_COLLAPSE : TXT_EXPAND}
+                </span>
+              </button>
+              {annualPlanOpen && (
+                <div className="flex items-center gap-2">
+                  {!annualPlanEditMode ? (
+                    <button
+                      type="button"
+                      onClick={handleAnnualPlanEditStart}
+                      className="px-3 py-1.5 text-xs rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                    >
+                      {TXT_EDIT}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAnnualPlanSave}
+                      className="px-3 py-1.5 text-xs rounded border border-sky-600 bg-sky-600 text-white hover:bg-sky-700"
+                    >
+                      {TXT_SAVE}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {annualPlanOpen && (
+              <div className="mt-3 overflow-x-auto rounded border border-gray-200">
+                <table className="min-w-full border-collapse text-xs">
+                  <thead>
+                    <tr>
+                      <th className="px-3 py-2 text-left bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[120px]">{TXT_BRAND}</th>
+                      {ANNUAL_PLAN_SEASONS.map((season) => (
+                        <th
+                          key={season}
+                          className="px-3 py-2 text-center bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[90px]"
+                        >
+                          {ANNUAL_PLAN_SEASON_LABELS[season]}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ANNUAL_PLAN_BRANDS.map((planBrand) => (
+                      <tr key={planBrand} className="bg-white hover:bg-gray-50">
+                        <td className="px-3 py-2 border-b border-gray-200 font-medium text-gray-700">{planBrand}</td>
+                        {ANNUAL_PLAN_SEASONS.map((season) => (
+                          <td key={`${planBrand}-${season}`} className="px-2 py-1.5 border-b border-gray-200">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={String((annualPlanEditMode ? annualShipmentPlanDraft2026 : annualShipmentPlan2026)[planBrand][season] || 0)}
+                              onChange={(e) => handleAnnualPlanCellChange(planBrand, season, e.target.value)}
+                              disabled={!annualPlanEditMode}
+                              className={`w-full text-right text-xs px-1.5 py-1 rounded border focus:outline-none focus:ring-1 focus:ring-sky-400 ${
+                                annualPlanEditMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 text-gray-600'
+                              }`}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -107,18 +107,18 @@ export default function InventoryFilterBar({
           <div className="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white">
             <input
               type="number"
-              min={100}
+              min={0}
               max={200}
               step={1}
               value={100 + growthRate}
               onChange={(e) => {
                 const raw = e.target.value === '' ? 100 : Number(e.target.value);
-                const clamped = Math.min(200, Math.max(100, Math.round(raw)));
+                const clamped = Math.min(200, Math.max(0, Math.round(raw)));
                 onGrowthRateChange(clamped - 100);
               }}
               onBlur={(e) => {
                 const raw = e.target.value === '' ? 100 : Number(e.target.value);
-                const clamped = Math.min(200, Math.max(100, Math.round(raw)));
+                const clamped = Math.min(200, Math.max(0, Math.round(raw)));
                 onGrowthRateChange(clamped - 100);
               }}
               className="w-14 py-1.5 pl-2 pr-1 text-sm text-right font-medium text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -134,7 +134,7 @@ export default function InventoryFilterBar({
               </button>
               <button
                 type="button"
-                onClick={() => onGrowthRateChange(Math.max(0, growthRate - 1))}
+                onClick={() => onGrowthRateChange(Math.max(-100, growthRate - 1))}
                 className="flex items-center justify-center w-6 h-[18px] text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors border-t border-gray-200"
                 aria-label="감소"
               >

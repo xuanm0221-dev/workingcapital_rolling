@@ -115,16 +115,13 @@ export default function InventoryTable({
   const inputCls = 'w-full min-w-0 text-right text-xs border-0 bg-transparent outline-none tabular-nums px-1 py-0.5';
 
   return (
-    <div className="mb-8 flex flex-col flex-1 min-h-0">
+    <div className="mb-8 flex flex-col">
       {/* 테이블 제목 */}
       <div className="flex flex-wrap items-center gap-3 mb-2">
         <div
           className={`
             border-l-4 rounded-r-md px-4 py-2 text-sm font-semibold tracking-tight
-            ${tableType === 'dealer'
-              ? 'border-slate-500 bg-slate-50 text-slate-800'
-              : 'border-teal-600 bg-teal-50/80 text-slate-800'
-            }
+            border-teal-600 bg-teal-50/80 text-slate-800
           `}
         >
           {title}
@@ -136,7 +133,7 @@ export default function InventoryTable({
         )}
       </div>
 
-      <div className="overflow-x-auto rounded border border-gray-200 shadow-sm flex-1 min-h-0 flex flex-col">
+      <div className="overflow-x-auto rounded border border-gray-200 shadow-sm">
         <table className="min-w-full border-collapse text-xs">
           <thead>
             <tr>
@@ -311,11 +308,20 @@ export default function InventoryTable({
       {/* 범례: 2025 = Sell-through·재고주수 / 2026 = ACC 계산로직 */}
       <div className="mt-2 px-1 text-[11px] text-gray-500 space-y-1">
         {year === 2026 ? (
-          <p>
-            <strong className="text-gray-600">ACC 계산로직:</strong>
-            {' 목표 재고주수 편집 → 기말 = 목표주수 × 주간매출 → Sell-in = 기말 + Sell-out − 기초. '}
-            {'대리상 Sell-in = 본사 대리상출고. 본사 상품매입 = 기말 + 대리상출고 + 본사판매 − 기초.'}
-          </p>
+          tableType === 'dealer' ? (
+            <>
+              <p>①Sell-out / 본사판매 : 전년동월 x 성장률</p>
+              <p>②대리상/본사 목표 재고주수 입력</p>
+              <p>③대리상/본사 목표 기말재고 역산 (=연간매출÷연간일수x7일x목표재고주수)</p>
+              <p>④대리상 Sell-in 산출 (=기말+Sell-out-Sell-in-기초)</p>
+            </>
+          ) : (
+            <>
+              <p>⑤본사 대리상출고=④</p>
+              <p>⑥본사 상품매입=기말재고+본사판매+대리상출고-기초</p>
+              <p>의류 계산로직: 대리상출고=시즌별 연간 출고계획-본사판매(본사판매는 성장률 기반)</p>
+            </>
+          )
         ) : (
           <>
             <p>
