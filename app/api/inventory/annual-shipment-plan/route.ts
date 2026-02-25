@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { readAnnualPlanStore, writeAnnualPlanStore } from '@/lib/inventory-file-store';
 
-const keyOf = (year: number) => `inv_annual_shipment_plan_${year}`;
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
     if (!Number.isFinite(year)) {
       return NextResponse.json({ error: 'Invalid year' }, { status: 400 });
     }
-    const data = await kv.get(keyOf(year));
-    return NextResponse.json({ data: data ?? null });
+    const store = await readAnnualPlanStore();
+    return NextResponse.json({ data: store[String(year)] ?? null });
   } catch (error) {
     console.error('annual shipment plan GET error:', error);
     return NextResponse.json({ data: null });
@@ -28,11 +28,12 @@ export async function POST(request: NextRequest) {
     if (!Number.isFinite(year)) {
       return NextResponse.json({ error: 'Invalid year' }, { status: 400 });
     }
-    await kv.set(keyOf(year), body.data ?? null);
+    const store = await readAnnualPlanStore();
+    store[String(year)] = (body.data ?? null) as never;
+    await writeAnnualPlanStore(store);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('annual shipment plan POST error:', error);
     return NextResponse.json({ error: 'Failed to save annual shipment plan' }, { status: 500 });
   }
 }
-
