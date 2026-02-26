@@ -18,7 +18,7 @@ import { TableRow, CreditData, CreditRecoveryData, TabType, ExecutiveSummaryData
 import InventoryDashboard from '@/components/inventory/InventoryDashboard';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<number>(5);
   const [plYear, setPlYear] = useState<number>(2026);
   const [plBrand, setPlBrand] = useState<string | null>(null); // null=법인, 'mlb', 'kids' 등
   const [bsYear, setBsYear] = useState<number>(2026);

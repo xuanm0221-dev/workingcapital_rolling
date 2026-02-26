@@ -21,7 +21,7 @@ import {
   aggregateShipmentSales,
   aggregatePurchase,
 } from '@/lib/aggregate-inventory-by-brand';
-import InventoryFilterBar from './InventoryFilterBar';
+import InventoryFilterBar, { GrowthRateControl } from './InventoryFilterBar';
 import InventoryTable from './InventoryTable';
 import InventoryMonthlyTable, { TableData } from './InventoryMonthlyTable';
 
@@ -42,16 +42,37 @@ const ANNUAL_PLAN_SEASON_LABELS: Record<AnnualPlanSeason, string> = {
   next: '차기시즌',
   past: '과시즌',
 };
+const OTB_SEASONS_LIST = ['27F', '27S', '26F', '26S'] as const;
+type OtbSeason = typeof OTB_SEASONS_LIST[number];
+type OtbBrand = AnnualPlanBrand;
+type OtbData = Record<OtbSeason, Record<OtbBrand, number>>;
+
 const TXT_HQ_PURCHASE_HEADER = '본사 매입';
 const TXT_ANNUAL_PLAN_TITLE = '26년 시즌별 연간 출고계획표';
 const TXT_BRAND = '브랜드';
 const TXT_PLAN_SECTION = '26년 시즌별 연간 출고계획 (중국법인 제공)';
 const TXT_PLAN_UNIT = '(단위: CNY K)';
+const TXT_OTB_SECTION = '대리상 OTB';
+const TXT_OTB_UNIT = '(단위: CNY K)';
+const TXT_SEASON = '시즌';
 const TXT_EDIT = '수정';
 const TXT_SAVE = '저장';
 const TXT_PLAN_ICON = '📋';
 const TXT_COLLAPSE = '▲ 접기';
 const TXT_EXPAND = '▼ 펼치기';
+
+/** OTB(CNY) → 대리상 의류 Sell-in(CNY K) 매핑. 당년F=26F, 당년S=26S, 차기시즌=27F+27S. 1년차/2년차/과시즌=0 */
+function otbToDealerSellInPlan(otbData: OtbData | null, planBrand: OtbBrand): Partial<Record<RowKey, number>> {
+  if (!otbData) return {};
+  const out: Partial<Record<RowKey, number>> = {};
+  out['당년F'] = Math.round((otbData['26F']?.[planBrand] ?? 0) / 1000);
+  out['당년S'] = Math.round((otbData['26S']?.[planBrand] ?? 0) / 1000);
+  out['1년차'] = 0;
+  out['2년차'] = 0;
+  out['차기시즌'] = Math.round(((otbData['27F']?.[planBrand] ?? 0) + (otbData['27S']?.[planBrand] ?? 0)) / 1000);
+  out['과시즌'] = 0;
+  return out;
+}
 
 function createEmptyAnnualShipmentPlan(): AnnualShipmentPlan {
   const emptyRow: Record<AnnualPlanSeason, number> = {
@@ -142,6 +163,76 @@ function SectionIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
+const ACC_KEYS_ORDER: AccKey[] = ['신발', '모자', '가방', '기타'];
+const TH_SMALL = 'px-3 py-2 text-center text-xs font-semibold bg-[#1a2e5a] text-white border border-[#2e4070] whitespace-nowrap';
+
+function HqHoldingWoiTable({
+  values,
+  onChange,
+}: {
+  values: Record<AccKey, number>;
+  onChange: (key: AccKey, value: number) => void;
+}) {
+  const [editingKey, setEditingKey] = useState<AccKey | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const startEdit = (key: AccKey) => {
+    setEditingKey(key);
+    setEditValue(String(values[key]));
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const commitEdit = (key: AccKey) => {
+    const v = parseFloat(editValue);
+    if (!isNaN(v) && v > 0) onChange(key, v);
+    setEditingKey(null);
+    setEditValue('');
+  };
+
+  return (
+    <div className="flex-shrink-0">
+      <div className="rounded border border-gray-200 shadow-sm">
+        <table className="border-collapse text-xs">
+          <thead>
+            <tr>
+              <th className={TH_SMALL} style={{ minWidth: 70 }}>
+                본사판매용
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {ACC_KEYS_ORDER.map((key) => (
+              <tr key={key} className="bg-white hover:bg-gray-50">
+                <td
+                  className="px-3 py-1.5 text-right text-xs border-b border-gray-200 tabular-nums align-middle cursor-text"
+                  onClick={() => editingKey !== key && startEdit(key)}
+                >
+                  {editingKey === key ? (
+                    <input
+                      ref={inputRef}
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => commitEdit(key)}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget.blur(), e.preventDefault())}
+                      className="w-12 text-right text-xs border-0 bg-transparent outline-none tabular-nums"
+                    />
+                  ) : (
+                    <span className="text-blue-700 font-medium">{values[key]}주</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function normalizeAnnualShipmentPlan(source: unknown): AnnualShipmentPlan {
   const base = createEmptyAnnualShipmentPlan();
   const parsed = (source ?? {}) as Partial<AnnualShipmentPlan>;
@@ -207,6 +298,7 @@ export default function InventoryDashboard() {
   const [year, setYear] = useState<number>(2026);
   const [brand, setBrand] = useState<Brand>('MLB');
   const [growthRate, setGrowthRate] = useState<number>(5);
+  const [growthRateHq, setGrowthRateHq] = useState<number>(10);
 
   // 湲곗〈 Sell-in/Sell-out ???곗씠??
   const [data, setData] = useState<InventoryApiResponse | null>(null);
@@ -245,6 +337,9 @@ export default function InventoryDashboard() {
   const [shipmentOpen, setShipmentOpen] = useState(false);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
   const [annualPlanOpen, setAnnualPlanOpen] = useState(false);
+  const [otbData, setOtbData] = useState<OtbData | null>(null);
+  const [otbLoading, setOtbLoading] = useState(false);
+  const [otbError, setOtbError] = useState<string | null>(null);
   const [annualShipmentPlan2026, setAnnualShipmentPlan2026] = useState<AnnualShipmentPlan>(createEmptyAnnualShipmentPlan);
   const [annualShipmentPlanDraft2026, setAnnualShipmentPlanDraft2026] = useState<AnnualShipmentPlan>(createEmptyAnnualShipmentPlan);
   const [annualPlanEditMode, setAnnualPlanEditMode] = useState(false);
@@ -266,14 +361,24 @@ export default function InventoryDashboard() {
     '가방': 10,
     '기타': 10,
   } as Record<AccKey, number>);
+  const [accHqHoldingWoi, setAccHqHoldingWoi] = useState<Record<AccKey, number>>({
+    '신발': 30,
+    '모자': 20,
+    '가방': 30,
+    '기타': 30,
+  } as Record<AccKey, number>);
   const accTargetWoiDealerRef = useRef(accTargetWoiDealer);
   const accTargetWoiHqRef = useRef(accTargetWoiHq);
+  const accHqHoldingWoiRef = useRef(accHqHoldingWoi);
   useEffect(() => {
     accTargetWoiDealerRef.current = accTargetWoiDealer;
   }, [accTargetWoiDealer]);
   useEffect(() => {
     accTargetWoiHqRef.current = accTargetWoiHq;
   }, [accTargetWoiHq]);
+  useEffect(() => {
+    accHqHoldingWoiRef.current = accHqHoldingWoi;
+  }, [accHqHoldingWoi]);
   // 2026 蹂몄궗 ?곹뭹留ㅼ엯쨌?由ъ긽異쒓퀬 ?몄쭛 怨꾪쉷 (?곌컙 K). 2025???ъ슜?섏? ?딆쓬.
   const [hqSellInPlan, setHqSellInPlan] = useState<Partial<Record<RowKey, number>>>({});
   const [hqSellOutPlan, setHqSellOutPlan] = useState<Partial<Record<RowKey, number>>>({});
@@ -298,6 +403,12 @@ export default function InventoryDashboard() {
     '모자': 8,
     '가방': 10,
     '기타': 10,
+  } as Record<AccKey, number>;
+  const DEFAULT_ACC_HQ_HOLDING_WOI: Record<AccKey, number> = {
+    '신발': 30,
+    '모자': 20,
+    '가방': 30,
+    '기타': 30,
   } as Record<AccKey, number>;
 
   // ?? 湲곗〈 ??fetch ??
@@ -368,7 +479,7 @@ export default function InventoryDashboard() {
       if (brand === '전체') {
         const ress = await Promise.all(
           BRANDS_TO_AGGREGATE.map((b) =>
-            fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand: b, growthRate: String(growthRate) })}`),
+            fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand: b, growthRate: String(growthRate), growthRateHq: String(growthRateHq) })}`),
           ),
         );
         const jsons: RetailSalesResponse[] = await Promise.all(ress.map((r) => r.json()));
@@ -380,7 +491,7 @@ export default function InventoryDashboard() {
         if (aggregated.retail2025) retail2025Ref.current = aggregated.retail2025;
         setRetailData(aggregated);
       } else {
-        const res = await fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand, growthRate: String(growthRate) })}`);
+        const res = await fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand, growthRate: String(growthRate), growthRateHq: String(growthRateHq) })}`);
         if (!res.ok) throw new Error('由ы뀒??留ㅼ텧 ?곗씠??濡쒕뱶 ?ㅽ뙣');
         const json: RetailSalesResponse = await res.json();
         if ((json as { error?: string }).error) throw new Error((json as { error?: string }).error);
@@ -393,7 +504,7 @@ export default function InventoryDashboard() {
     } finally {
       setRetailLoading(false);
     }
-  }, [year, brand, growthRate]);
+  }, [year, brand, growthRate, growthRateHq]);
 
   // ?? 異쒓퀬留ㅼ텧 fetch ??
   const fetchShipmentData = useCallback(async () => {
@@ -471,10 +582,11 @@ export default function InventoryDashboard() {
       if (snap.hqSellOutPlan && Object.keys(snap.hqSellOutPlan).length) setHqSellOutPlan(snap.hqSellOutPlan);
       if (snap.accTargetWoiDealer) setAccTargetWoiDealer(snap.accTargetWoiDealer);
       if (snap.accTargetWoiHq) setAccTargetWoiHq(snap.accTargetWoiHq);
+      if (snap.accHqHoldingWoi) setAccHqHoldingWoi(snap.accHqHoldingWoi);
       if (year === 2026 && snap.planFromMonth && snap.retail2025) {
         retail2025Ref.current = snap.retail2025;
         setRetailData(
-          applyPlanToSnapshot(snap.retailActuals, snap.retail2025 as RetailSalesResponse, snap.planFromMonth, growthRate),
+          applyPlanToSnapshot(snap.retailActuals, snap.retail2025 as RetailSalesResponse, snap.planFromMonth, growthRate, growthRateHq),
         );
       } else {
         setRetailData(snap.retailActuals);
@@ -551,16 +663,48 @@ export default function InventoryDashboard() {
     };
   }, [year]);
 
-  // growthRate 변경 시 저장된 스냅샷이면 계획 구간만 재계산 (API 재조회 없음)
+  // 2026 대리상 OTB 데이터 fetch
+  useEffect(() => {
+    if (year !== 2026) {
+      setOtbData(null);
+      return;
+    }
+    let cancelled = false;
+    setOtbLoading(true);
+    setOtbError(null);
+
+    const run = async () => {
+      try {
+        const res = await fetch('/api/inventory/otb?year=2026', { cache: 'no-store' });
+        if (cancelled) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = (await res.json()) as { data?: OtbData | null; error?: string };
+        if (cancelled) return;
+        if (json.error) throw new Error(json.error);
+        setOtbData(json.data ?? null);
+      } catch (e) {
+        if (!cancelled) setOtbError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!cancelled) setOtbLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [year]);
+
+  // growthRate / growthRateHq 변경 시 저장된 스냅샷이면 계획 구간만 재계산 (API 재조회 없음)
   useEffect(() => {
     if (!snapshotSaved) return;
     const snap = loadSnapshot(year, brand);
     if (!snap || year !== 2026 || !snap.planFromMonth || !snap.retail2025) return;
     setRetailData(
-      applyPlanToSnapshot(snap.retailActuals, snap.retail2025 as RetailSalesResponse, snap.planFromMonth, growthRate),
+      applyPlanToSnapshot(snap.retailActuals, snap.retail2025 as RetailSalesResponse, snap.planFromMonth, growthRate, growthRateHq),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [growthRate]);
+  }, [growthRate, growthRateHq]);
 
   useEffect(() => {
     if (year !== 2026 || brand !== '전체') return;
@@ -696,6 +840,7 @@ export default function InventoryDashboard() {
                   snap.retail2025 as RetailSalesResponse,
                   snap.planFromMonth,
                   growthRate,
+                  growthRateHq,
                 )
               : snap.retailActuals
           )
@@ -715,16 +860,13 @@ export default function InventoryDashboard() {
           retail,
           snap?.accTargetWoiDealer ?? DEFAULT_ACC_WOI_DEALER,
           snap?.accTargetWoiHq ?? DEFAULT_ACC_WOI_HQ,
+          snap?.accHqHoldingWoi ?? DEFAULT_ACC_HQ_HOLDING_WOI,
           year,
         );
-        const derivedSellOutPlan = buildSeasonShipmentDerivedSellOutPlan(
-          b,
-          annualShipmentPlan2026,
-          withWoi.hq,
-        );
+        const otbDealerSellIn = otbToDealerSellInPlan(otbData, b);
         const mergedSellOutPlan = {
           ...(snap?.hqSellOutPlan ?? {}),
-          ...derivedSellOutPlan,
+          ...otbDealerSellIn,
         };
         perBrand.push(
           applyHqSellInSellOutPlanOverlay(
@@ -755,16 +897,13 @@ export default function InventoryDashboard() {
         retailData,
         accTargetWoiDealer,
         accTargetWoiHq,
+        accHqHoldingWoi,
         year,
       );
-      const derivedSellOutPlan = buildSeasonShipmentDerivedSellOutPlan(
-        brand as AnnualPlanBrand,
-        annualShipmentPlan2026,
-        withWoi.hq,
-      );
+      const otbDealerSellIn = otbToDealerSellInPlan(otbData, brand as AnnualPlanBrand);
       const mergedSellOutPlan = {
         ...hqSellOutPlan,
-        ...derivedSellOutPlan,
+        ...otbDealerSellIn,
       };
       return applyHqSellInSellOutPlanOverlay(
         withWoi.dealer,
@@ -775,7 +914,7 @@ export default function InventoryDashboard() {
       );
     }
     return built;
-  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, annualShipmentPlan2026, accTargetWoiDealer, accTargetWoiHq, hqSellInPlan, hqSellOutPlan, savedSnapshotByBrand]);
+  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, annualShipmentPlan2026, accTargetWoiDealer, accTargetWoiHq, accHqHoldingWoi, hqSellInPlan, hqSellOutPlan, savedSnapshotByBrand, growthRate, growthRateHq, otbData]);
 
   const shouldUseTopTableOnly = year === 2025 || year === 2026;
   const dealerTableData = shouldUseTopTableOnly
@@ -821,6 +960,14 @@ export default function InventoryDashboard() {
   }, []);
 
   // 2026 蹂몄궗 ?由ъ긽異쒓퀬(?곌컙) ?몄쭛 ???由ъ긽 ??Sell-in???먮룞 諛섏쁺
+  const handleHqHoldingWoiChange = useCallback((rowKey: AccKey, newWoi: number) => {
+    setAccHqHoldingWoi((prev) => {
+      const next = { ...prev, [rowKey]: newWoi };
+      accHqHoldingWoiRef.current = next;
+      return next;
+    });
+  }, []);
+
   const handleHqSellOutChange = useCallback((rowKey: RowKey, newSellOutTotal: number) => {
     setHqSellOutPlan((prev) => ({ ...prev, [rowKey]: newSellOutTotal }));
   }, []);
@@ -846,6 +993,7 @@ export default function InventoryDashboard() {
       snap.hqSellOutPlan = Object.keys(hqSellOutPlan).length ? hqSellOutPlan : undefined;
       snap.accTargetWoiDealer = accTargetWoiDealerRef.current;
       snap.accTargetWoiHq = accTargetWoiHqRef.current;
+      snap.accHqHoldingWoi = accHqHoldingWoiRef.current;
     }
     saveSnapshot(year, brand, snap);
     await saveSnapshotToServer(year, brand, snap);
@@ -860,6 +1008,7 @@ export default function InventoryDashboard() {
     setHqSellOutPlan({});
     setAccTargetWoiDealer(DEFAULT_ACC_WOI_DEALER);
     setAccTargetWoiHq(DEFAULT_ACC_WOI_HQ);
+    setAccHqHoldingWoi(DEFAULT_ACC_HQ_HOLDING_WOI);
     setEditMode(false);
   }, []);
 
@@ -870,17 +1019,22 @@ export default function InventoryDashboard() {
       setHqSellOutPlan(snap.hqSellOutPlan ?? {});
       const dealerWoi = snap.accTargetWoiDealer ?? DEFAULT_ACC_WOI_DEALER;
       const hqWoi = snap.accTargetWoiHq ?? DEFAULT_ACC_WOI_HQ;
+      const holdingWoi = snap.accHqHoldingWoi ?? DEFAULT_ACC_HQ_HOLDING_WOI;
       setAccTargetWoiDealer(dealerWoi);
       setAccTargetWoiHq(hqWoi);
+      setAccHqHoldingWoi(holdingWoi);
       accTargetWoiDealerRef.current = dealerWoi;
       accTargetWoiHqRef.current = hqWoi;
+      accHqHoldingWoiRef.current = holdingWoi;
     } else {
       setHqSellInPlan({});
       setHqSellOutPlan({});
       setAccTargetWoiDealer(DEFAULT_ACC_WOI_DEALER);
       setAccTargetWoiHq(DEFAULT_ACC_WOI_HQ);
+      setAccHqHoldingWoi(DEFAULT_ACC_HQ_HOLDING_WOI);
       accTargetWoiDealerRef.current = DEFAULT_ACC_WOI_DEALER;
       accTargetWoiHqRef.current = DEFAULT_ACC_WOI_HQ;
+      accHqHoldingWoiRef.current = DEFAULT_ACC_HQ_HOLDING_WOI;
     }
     setEditMode(false);
   }, [year, brand]);
@@ -908,7 +1062,7 @@ export default function InventoryDashboard() {
         fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand })}`).then(
           (r) => r.json() as Promise<MonthlyStockResponse & { error?: string }>,
         ),
-        fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand, growthRate: String(growthRate) })}`).then(
+        fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(year), brand, growthRate: String(growthRate), growthRateHq: String(growthRateHq) })}`).then(
           (r) => r.json() as Promise<RetailSalesResponse & { error?: string }>,
         ),
         fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand })}`).then(
@@ -953,6 +1107,7 @@ export default function InventoryDashboard() {
         freshSnapshot.hqSellOutPlan = Object.keys(hqSellOutPlan).length ? hqSellOutPlan : undefined;
         freshSnapshot.accTargetWoiDealer = accTargetWoiDealerRef.current;
         freshSnapshot.accTargetWoiHq = accTargetWoiHqRef.current;
+        freshSnapshot.accHqHoldingWoi = accHqHoldingWoiRef.current;
       }
 
       saveSnapshot(year, brand, freshSnapshot);
@@ -964,7 +1119,7 @@ export default function InventoryDashboard() {
     } finally {
       setRecalcLoading(false);
     }
-  }, [year, brand, growthRate, fetchMonthlyData, fetchRetailData, fetchShipmentData, fetchPurchaseData, hqSellInPlan, hqSellOutPlan]);
+  }, [year, brand, growthRate, growthRateHq, fetchMonthlyData, fetchRetailData, fetchShipmentData, fetchPurchaseData, hqSellInPlan, hqSellOutPlan]);
 
   const handleAnnualPlanCellChange = useCallback((planBrand: AnnualPlanBrand, season: AnnualPlanSeason, value: string) => {
     if (!annualPlanEditMode) return;
@@ -995,10 +1150,8 @@ export default function InventoryDashboard() {
       <InventoryFilterBar
         year={year}
         brand={brand}
-        growthRate={growthRate}
         onYearChange={setYear}
         onBrandChange={setBrand}
-        onGrowthRateChange={setGrowthRate}
         snapshotSaved={snapshotSaved}
         snapshotSavedAt={snapshotSavedAt}
         recalcLoading={recalcLoading}
@@ -1027,6 +1180,15 @@ export default function InventoryDashboard() {
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
                 title="대리상 (CNY K)"
+                titleRight={
+                  <GrowthRateControl
+                    label="대리상 성장률"
+                    labelCn="FR 成长率"
+                    value={100 + growthRate}
+                    onChange={(v) => setGrowthRate(v)}
+                    title="대리상 리테일 계획매출 전년 대비 성장률"
+                  />
+                }
                 data={dealerTableData!}
                 year={year}
                 editMode={year === 2026 && brand !== '전체' ? editMode : false}
@@ -1045,7 +1207,25 @@ export default function InventoryDashboard() {
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
                 title="본사 (CNY K)"
-                titleNote={year === 2026 && brand !== '전체' ? '편집가능: ①의류 상품매입(본사) ②재고주수 (본사,대리상)' : undefined}
+                titleRight={
+                  <>
+                    <GrowthRateControl
+                      label="본사 성장률"
+                      labelCn="OR 成长率"
+                      value={100 + growthRateHq}
+                      onChange={(v) => setGrowthRateHq(v)}
+                      title="본사 리테일 계획매출 전년 대비 성장률"
+                    />
+                    {year === 2026 && brand !== '전체' && (
+                      <>
+                        <span className="mx-2 text-gray-300">|</span>
+                        <span className="text-xs text-gray-500">
+                          편집가능: ①의류 상품매입(본사): 현지 연간 출고계획 반영 ②재고주수 (본사,대리상)
+                        </span>
+                      </>
+                    )}
+                  </>
+                }
                 data={hqTableData!}
                 year={year}
                 editMode={year === 2026 && brand !== '전체' ? editMode : false}
@@ -1061,15 +1241,19 @@ export default function InventoryDashboard() {
                 prevYearTotalSellIn={prevYearTableData?.hq.rows.find((r) => r.key === '재고자산합계')?.sellInTotal}
                 prevYearTotalSellOut={prevYearTableData?.hq.rows.find((r) => r.key === '재고자산합계')?.sellOutTotal}
                 prevYearTotalHqSales={prevYearTableData?.hq.rows.find((r) => r.key === '재고자산합계')?.hqSalesTotal}
+                sideContent={year === 2026 ? (
+                  <HqHoldingWoiTable values={accHqHoldingWoi} onChange={handleHqHoldingWoiChange} />
+                ) : undefined}
               />
             </div>
           </div>
           </>
         )}
 
-        {/* 2026 시즌별 연간 출고계획 */}
+        {/* 2026 시즌별 연간 출고계획 + 대리상 OTB (좌우 2분할) */}
         {year === 2026 && (
           <div className="mt-10 border-t border-gray-300 pt-8">
+            {/* 공통 헤더 */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -1079,8 +1263,11 @@ export default function InventoryDashboard() {
                 <SectionIcon>
                   <span className="text-lg">{TXT_PLAN_ICON}</span>
                 </SectionIcon>
-                <span className="text-sm font-bold text-gray-700">{TXT_PLAN_SECTION}</span>
-                <span className="text-xs font-normal text-gray-400">{TXT_PLAN_UNIT}</span>
+                <span className="text-sm font-bold text-gray-700">
+                  {TXT_PLAN_SECTION}
+                  <span className="mx-2 text-gray-300">|</span>
+                  {TXT_OTB_SECTION}
+                </span>
                 <span className="ml-auto text-gray-400 text-xs shrink-0">
                   {annualPlanOpen ? TXT_COLLAPSE : TXT_EXPAND}
                 </span>
@@ -1107,44 +1294,101 @@ export default function InventoryDashboard() {
                 </div>
               )}
             </div>
+
+            {/* 좌우 2분할 */}
             {annualPlanOpen && (
-              <div className="mt-3 overflow-x-auto rounded border border-gray-200">
-                <table className="min-w-full border-collapse text-xs">
-                  <thead>
-                    <tr>
-                      <th className="px-3 py-2 text-left bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[120px]">{TXT_BRAND}</th>
-                      {ANNUAL_PLAN_SEASONS.map((season) => (
-                        <th
-                          key={season}
-                          className="px-3 py-2 text-center bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[90px]"
-                        >
-                          {ANNUAL_PLAN_SEASON_LABELS[season]}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ANNUAL_PLAN_BRANDS.map((planBrand) => (
-                      <tr key={planBrand} className="bg-white hover:bg-gray-50">
-                        <td className="px-3 py-2 border-b border-gray-200 font-medium text-gray-700">{planBrand}</td>
-                        {ANNUAL_PLAN_SEASONS.map((season) => (
-                          <td key={`${planBrand}-${season}`} className="px-2 py-1.5 border-b border-gray-200">
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              value={String((annualPlanEditMode ? annualShipmentPlanDraft2026 : annualShipmentPlan2026)[planBrand][season] || 0)}
-                              onChange={(e) => handleAnnualPlanCellChange(planBrand, season, e.target.value)}
-                              disabled={!annualPlanEditMode}
-                              className={`w-full text-right text-xs px-1.5 py-1 rounded border focus:outline-none focus:ring-1 focus:ring-sky-400 ${
-                                annualPlanEditMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 text-gray-600'
-                              }`}
-                            />
-                          </td>
+              <div className="mt-3 flex gap-6 items-start">
+
+                {/* 좌: 연간 출고계획 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-1 mb-1.5">
+                    <span className="text-xs font-semibold text-gray-600">{TXT_PLAN_SECTION}</span>
+                    <span className="text-xs text-gray-400">{TXT_PLAN_UNIT}</span>
+                  </div>
+                  <div className="overflow-x-auto rounded border border-gray-200">
+                    <table className="min-w-full border-collapse text-xs">
+                      <thead>
+                        <tr>
+                          <th className="px-3 py-2 text-left bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[100px]">{TXT_BRAND}</th>
+                          {ANNUAL_PLAN_SEASONS.map((season) => (
+                            <th
+                              key={season}
+                              className="px-3 py-2 text-center bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[80px]"
+                            >
+                              {ANNUAL_PLAN_SEASON_LABELS[season]}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ANNUAL_PLAN_BRANDS.map((planBrand) => (
+                          <tr key={planBrand} className="bg-white hover:bg-gray-50">
+                            <td className="px-3 py-2 border-b border-gray-200 font-medium text-gray-700">{planBrand}</td>
+                            {ANNUAL_PLAN_SEASONS.map((season) => (
+                              <td key={`${planBrand}-${season}`} className="px-2 py-1.5 border-b border-gray-200">
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={String((annualPlanEditMode ? annualShipmentPlanDraft2026 : annualShipmentPlan2026)[planBrand][season] || 0)}
+                                  onChange={(e) => handleAnnualPlanCellChange(planBrand, season, e.target.value)}
+                                  disabled={!annualPlanEditMode}
+                                  className={`w-full text-right text-xs px-1.5 py-1 rounded border focus:outline-none focus:ring-1 focus:ring-sky-400 ${
+                                    annualPlanEditMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 text-gray-600'
+                                  }`}
+                                />
+                              </td>
+                            ))}
+                          </tr>
                         ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 우: 대리상 OTB */}
+                <div className="flex-shrink-0">
+                  <div className="flex items-baseline gap-1 mb-1.5">
+                    <span className="text-xs font-semibold text-gray-600">{TXT_OTB_SECTION}</span>
+                    <span className="text-xs text-gray-400">{TXT_OTB_UNIT}</span>
+                  </div>
+                  <div className="overflow-x-auto rounded border border-gray-200">
+                    {otbLoading ? (
+                      <div className="px-6 py-4 text-xs text-gray-400">불러오는 중...</div>
+                    ) : otbError ? (
+                      <div className="px-6 py-4 text-xs text-red-500">{otbError}</div>
+                    ) : (
+                      <table className="border-collapse text-xs">
+                        <thead>
+                          <tr>
+                            <th className="px-3 py-2 text-left bg-[#2e4a2e] text-white border border-[#3d6b3d] min-w-[60px]">{TXT_SEASON}</th>
+                            {ANNUAL_PLAN_BRANDS.map((b) => (
+                              <th key={b} className="px-3 py-2 text-center bg-[#2e4a2e] text-white border border-[#3d6b3d] min-w-[90px]">
+                                {b}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {OTB_SEASONS_LIST.map((sesn) => (
+                            <tr key={sesn} className="bg-white hover:bg-gray-50">
+                              <td className="px-3 py-2 border-b border-gray-200 font-medium text-gray-700">{sesn}</td>
+                              {ANNUAL_PLAN_BRANDS.map((b) => {
+                                const raw = otbData?.[sesn]?.[b] ?? 0;
+                                const display = raw === 0 ? '-' : Math.round(raw / 1000).toLocaleString();
+                                return (
+                                  <td key={b} className="px-3 py-2 border-b border-gray-200 text-right text-gray-700 tabular-nums">
+                                    {display}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </div>
+
               </div>
             )}
           </div>

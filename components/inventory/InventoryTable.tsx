@@ -8,8 +8,10 @@ interface Props {
   title: string;
   /** 사용 안 함. tableType 기준으로 스타일 적용 */
   titleBg?: string;
-  /** 제목 우측에 표시할 안내 문구 (예: 편집가능 안내) */
+  /** 제목 우측에 표시할 안내 문구 (예: 편집가능 안내). titleRight 사용 시 생략 가능 */
   titleNote?: string;
+  /** 제목 우측에 표시할 컨트롤 (성장률 입력 등). 제목 | titleRight 형태로 렌더 */
+  titleRight?: React.ReactNode;
   data: InventoryTableData;
   year: number;
   /** 편집 모드일 때만 상품매입·대리상출고·재고주수 편집 UI 표시. false면 다른 열과 동일하게 숫자만 표시 */
@@ -28,6 +30,8 @@ interface Props {
   prevYearTotalSellOut?: number;
   /** 전년 재고자산합계 hqSalesTotal (본사판매 YOY 계산용, 본사 전용) */
   prevYearTotalHqSales?: number;
+  /** 테이블 우측에 나란히 렌더할 콘텐츠 (범례 위, 테이블 하단 정렬) */
+  sideContent?: React.ReactNode;
 }
 
 // 헤더 스타일
@@ -87,6 +91,46 @@ function formatWithComma(value: number): string {
   return Number.isFinite(value) ? Math.round(value).toLocaleString() : '';
 }
 
+/** 본사 재고자산표 중요 지표 셀 (YOY 상품매입·기말, ACC 구간 상품매입) */
+const HQ_ACC_KEYS_FOR_HIGHLIGHT = ['ACC합계', '신발', '모자', '가방', '기타'] as const;
+function isHqSellInBoxFirst(row: InventoryRow | YoyRow): boolean {
+  return row.key === 'ACC합계';
+}
+function isHqSellInBoxMiddle(row: InventoryRow | YoyRow): boolean {
+  return row.key === '신발' || row.key === '모자' || row.key === '가방';
+}
+function isHqSellInBoxLast(row: InventoryRow | YoyRow): boolean {
+  return row.key === '기타';
+}
+function getHqSellInBoxClass(tableType: string | undefined, row: InventoryRow | YoyRow): string {
+  if (tableType !== 'hq') return '';
+  if (isYoyRow(row)) return 'shadow-[inset_0_0_0_2px_#f87171]';
+  if (isHqSellInBoxFirst(row)) return 'shadow-[inset_0_2px_0_0_#f87171,inset_2px_0_0_0_#f87171,inset_-2px_0_0_0_#f87171]';
+  if (isHqSellInBoxMiddle(row)) return 'shadow-[inset_2px_0_0_0_#f87171,inset_-2px_0_0_0_#f87171]';
+  if (isHqSellInBoxLast(row)) return 'shadow-[inset_0_-2px_0_0_#f87171,inset_2px_0_0_0_#f87171,inset_-2px_0_0_0_#f87171]';
+  return '';
+}
+function isHqImportantClosingCell(tableType: string | undefined, row: InventoryRow | YoyRow): boolean {
+  return tableType === 'hq' && isYoyRow(row);
+}
+
+/** 대리상 YOY Sell-in·Sell-out 박스 (단일 셀) */
+function getDealerYoySellInBoxClass(tableType: string | undefined, row: InventoryRow | YoyRow): string {
+  return tableType === 'dealer' && isYoyRow(row) ? 'shadow-[inset_0_0_0_2px_#f87171]' : '';
+}
+function getDealerYoySellOutBoxClass(tableType: string | undefined, row: InventoryRow | YoyRow): string {
+  return tableType === 'dealer' && isYoyRow(row) ? 'shadow-[inset_0_0_0_2px_#f87171]' : '';
+}
+
+/** 대리상·본사 ACC 재고주수 박스 (ACC합계~기타 하나의 박스) */
+function getAccWoiBoxClass(tableType: string | undefined, row: InventoryRow | YoyRow): string {
+  if (tableType !== 'dealer' && tableType !== 'hq') return '';
+  if (isHqSellInBoxFirst(row)) return 'shadow-[inset_0_2px_0_0_#f87171,inset_2px_0_0_0_#f87171,inset_-2px_0_0_0_#f87171]';
+  if (isHqSellInBoxMiddle(row)) return 'shadow-[inset_2px_0_0_0_#f87171,inset_-2px_0_0_0_#f87171]';
+  if (isHqSellInBoxLast(row)) return 'shadow-[inset_0_-2px_0_0_#f87171,inset_2px_0_0_0_#f87171,inset_-2px_0_0_0_#f87171]';
+  return '';
+}
+
 const PencilIcon = () => (
   <svg className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -96,6 +140,7 @@ const PencilIcon = () => (
 export default function InventoryTable({
   title,
   titleNote,
+  titleRight,
   data,
   year,
   editMode = false,
@@ -109,6 +154,7 @@ export default function InventoryTable({
   prevYearTotalSellIn,
   prevYearTotalSellOut,
   prevYearTotalHqSales,
+  sideContent,
 }: Props) {
   const isWoiEditable = year === 2026 && !!onWoiChange && editMode;
   const isAccRow = (key: string) => ACC_KEYS.includes(key as AccKey);
@@ -195,14 +241,21 @@ export default function InventoryTable({
         >
           {title}
         </div>
-        {titleNote && (
+        {titleRight && (
+          <>
+            <span className="text-gray-300">|</span>
+            {titleRight}
+          </>
+        )}
+        {titleNote && !titleRight && (
           <span className="text-xs text-gray-500">
             {titleNote}
           </span>
         )}
       </div>
 
-      <div className="overflow-x-auto rounded border border-gray-200 shadow-sm">
+      <div className="flex gap-1 items-end">
+      <div className="flex-1 overflow-x-auto rounded border border-gray-200 shadow-sm">
         <table className="min-w-full border-collapse text-xs">
           <thead>
             <tr>
@@ -258,7 +311,7 @@ export default function InventoryTable({
                     : formatKValue(row.opening)}
                 </td>
                 {/* Sell-in (연간) — 2026 본사 leaf면 편집 가능 */}
-                <td className={cellCls(row)}>
+                <td className={`${cellCls(row)} ${getHqSellInBoxClass(tableType, row)} ${getDealerYoySellInBoxClass(tableType, row)}`}>
                   {isYoyRow(row) ? (yoySellIn != null ? formatPct(yoySellIn * 100) : '-') : isHqSellEditableForRow(row as InventoryRow) && onHqSellInChange ? (
                     <div
                       className={`${editableCellCls} ${editableCellBgCls}`}
@@ -289,7 +342,7 @@ export default function InventoryTable({
                   )}
                 </td>
                 {/* Sell-out (연간) — 2026 본사 leaf면 편집 가능 */}
-                <td className={cellCls(row)}>
+                <td className={`${cellCls(row)} ${getDealerYoySellOutBoxClass(tableType, row)}`}>
                   {isYoyRow(row) ? (yoySellOut != null ? formatPct(yoySellOut * 100) : '-') : isHqSellEditableForRow(row as InventoryRow) && onHqSellOutChange ? (
                     <div
                       className={`${editableCellCls} ${editableCellBgCls}`}
@@ -328,7 +381,7 @@ export default function InventoryTable({
                   </td>
                 )}
                 {/* 기말 */}
-                <td className={cellCls(row)}>
+                <td className={`${cellCls(row)} ${isHqImportantClosingCell(tableType, row) ? 'shadow-[inset_0_0_0_2px_#f87171]' : ''}`}>
                   {isYoyRow(row)
                     ? yoyClosing != null
                       ? formatPct(yoyClosing * 100)
@@ -349,7 +402,7 @@ export default function InventoryTable({
                   {isYoyRow(row) ? '-' : formatPct((row as InventoryRow).sellThrough)}
                 </td>
                 {/* 재고주수 (2026년 리프 행 편집 가능) */}
-                <td className={`${cellCls(row)} ${
+                <td className={`${cellCls(row)} ${getAccWoiBoxClass(tableType, row)} ${
                   isYoyRow(row) ? '' :
                   (row as InventoryRow).woi > 0 && (row as InventoryRow).woi <= 10 ? 'text-green-600' :
                   (row as InventoryRow).woi > 10 && (row as InventoryRow).woi <= 20 ? 'text-yellow-600' :
@@ -396,6 +449,8 @@ export default function InventoryTable({
           </tbody>
         </table>
       </div>
+      {sideContent}
+      </div>
 
       {/* 범례: 토글 가능 */}
       <div className="mt-2 px-1 text-[11px]">
@@ -418,40 +473,42 @@ export default function InventoryTable({
         <div className="mt-1 text-gray-500">
         {year === 2026 ? (
           tableType === 'dealer' ? (
-            <div className="space-y-2">
-              <p><strong className="font-semibold text-gray-700">1. Sell-through</strong></p>
-              <p className="ml-1">- 대리상 = Sell-out ÷ Sell-in</p>
-              <p className="ml-1">- 본사 = (대리상출고+본사판매) ÷ 상품매입</p>
-              <p><strong className="font-semibold text-gray-700">2. 재고주수</strong></p>
-              <p className="ml-1">- 목표 재고주수 입력</p>
-              <p><strong className="font-semibold text-gray-700">3. ACC 재고계산 (재고주수 → 대리상 기말재고 역산 → 본사 상품매입)</strong></p>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-0.5">
+            <div className="flex gap-8 items-start">
+              <div className="space-y-2 min-w-0">
+                <p><strong className="font-semibold text-gray-700">1. Sell-through</strong></p>
+                <p className="ml-1">- 대리상 = Sell-out ÷ Sell-in</p>
+                <p className="ml-1">- 본사 = (대리상출고+본사판매) ÷ 상품매입</p>
+                <p><strong className="font-semibold text-gray-700">2. 재고주수</strong></p>
+                <p className="ml-1">- 목표 재고주수 입력</p>
+              </div>
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <p><strong className="font-semibold text-gray-700">3. ACC 재고계산</strong></p>
                 <div>① Sell-out/본사판매 = 전년동월 × 성장률</div>
-                <div>④ 대리상 Sell-in 산출 (=기말+Sell-out-기초)</div>
                 <div>② 대리상/본사 목표 재고주수 입력</div>
-                <div>⑤ 본사 대리상출고 = ④</div>
-                <div>
-                  <div>③ 목표 기말재고 역산 (=연간매출÷연간일수×7일×목표재고주수)</div>
-                  <div className="ml-3 mt-0.5 text-gray-400">- 대리상: 대리상 판매매출로 역산</div>
-                  <div className="ml-3 text-gray-400">- 본사: 대리상+직영 판매매출로 역산</div>
-                </div>
-                <div>⑥ 본사 상품매입 = 기말+본사판매+대리상출고-기초</div>
+                <div>③ 대리상 기말재고 역산 (= 대리상주간매출×대리상목표재고주수)</div>
+                <div>④ 대리상 Sell-in = 대리상 기말 + Sell-out - 기초</div>
+                <div>⑤ 직영판매용 재고 = 본사 주간매출 × 직영 보유주수</div>
+                <div>⑥ 대리상 출고예정 버퍼 = 대리상 주간매출 × 본사 목표재고주수 (WOI 열)</div>
+                <div>⑦ 본사 기말재고 = ⑤ + ⑥</div>
+                <div>⑧ 본사 대리상출고 = 대리상 ACC Sell-in (④의 결과)</div>
+                <div>⑨ 본사 상품매입 = 기말+본사판매+대리상출고-기초</div>
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <p><strong className="font-semibold text-gray-700">1. Sell-through</strong></p>
-              <p className="ml-1">- Sell-through (대리상) = Sell-out ÷ (기초 + Sell-in)</p>
-              <p className="ml-1">- Sell-through (본사) = (대리상출고+본사판매) ÷ (기초 + 상품매입)</p>
-              <p><strong className="font-semibold text-gray-700">2. 의류 재고계산</strong></p>
-              <div className="space-y-0.5">
-                <div>① Sell-out/본사판매 = 전년동월×성장률</div>
-                <div>② 본사 26년 시즌별 연간 출고계획 = 대리상출고+본사판매</div>
-                <div>③ 대리상출고 = ② - ①</div>
-                <div>④ Sell-in = ③</div>
-                <div>⑤ 대리상 기말재고 = 기초 + Sell-in - Sell-out</div>
-                <div>⑥ 상품매입 = 중국현지 상품매입 계획</div>
-                <div>⑦ 본사 기말재고 = 기초 + 상품매입⑥ - 대리상출고③ - 본사판매</div>
+            <div className="flex gap-8 items-start">
+              <div className="space-y-2 min-w-0">
+                <p><strong className="font-semibold text-gray-700">1. Sell-through</strong></p>
+                <p className="ml-1">- Sell-through (대리상) = Sell-out ÷ (기초 + Sell-in)</p>
+                <p className="ml-1">- Sell-through (본사) = (대리상출고+본사판매) ÷ (기초 + 상품매입)</p>
+              </div>
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <p><strong className="font-semibold text-gray-700">2. 의류 재고계산</strong></p>
+                <div>① Sell-in = OTB (대리상 주문금액, 당년F=26F·당년S=26S·차기시즌=27F+27S)</div>
+                <div>② Sell-out/본사판매 = 전년동월×성장률</div>
+                <div>③ 대리상 기말재고 = 기초 + Sell-in - Sell-out</div>
+                <div>④ 본사 대리상출고 = 대리상 Sell-in (= OTB)</div>
+                <div>⑤ 상품매입 = 중국현지 상품매입 계획</div>
+                <div>⑥ 본사 기말재고 = 기초 + 상품매입⑤ - 대리상출고④ - 본사판매</div>
               </div>
             </div>
           )

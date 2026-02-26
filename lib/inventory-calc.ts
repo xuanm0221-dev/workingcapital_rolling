@@ -36,14 +36,29 @@ function sellThroughDenominator(
   return sellInTotal;
 }
 
+/** Sell-through 분자: 본사 ACC는 대리상출고+본사판매, 그 외는 sellOutTotal */
+function sellThroughNumerator(
+  key: string,
+  sellOutTotal: number,
+  hqSalesTotal?: number
+): number {
+  const isHqAccOrTotal = (key === 'ACC합계' || key === '재고자산합계' || ACC_KEYS.includes(key as AccKey)) && hqSalesTotal != null;
+  if (isHqAccOrTotal) {
+    return sellOutTotal + hqSalesTotal; // 본사 ACC: 대리상출고 + 본사판매
+  }
+  return sellOutTotal;
+}
+
 function calcRow(raw: InventoryRowRaw, yearDays: number): InventoryRow {
   const sellInTotal = raw.sellIn.reduce((s, v) => s + v, 0);
   const sellOutTotal = raw.sellOut.reduce((s, v) => s + v, 0);
   const delta = raw.closing - raw.opening;
 
-  // Sell-through: 행 타입별 분모 적용 (의류=기초+매입, 재고합계·ACC=매입만)
+  // Sell-through: 행 타입별 분모 적용. 본사 ACC는 분자=대리상출고+본사판매
   const stDenominator = sellThroughDenominator(raw.key, raw.opening, sellInTotal);
-  const sellThrough = stDenominator > 0 ? (sellOutTotal / stDenominator) * 100 : 0;
+  const hqSalesTotal = raw.hqSales ? raw.hqSales.reduce((s, v) => s + v, 0) : undefined;
+  const stNumerator = sellThroughNumerator(raw.key, sellOutTotal, hqSalesTotal);
+  const sellThrough = stDenominator > 0 ? (stNumerator / stDenominator) * 100 : 0;
 
   // WOI: 기말재고 / 주매출 (주매출 = woiSellOut / (연도일수 / 7))
   const woiSellOut = raw.woiSellOut ?? raw.sellOut;
@@ -52,7 +67,7 @@ function calcRow(raw: InventoryRowRaw, yearDays: number): InventoryRow {
   const woi = weeklyRate > 0 ? raw.closing / weeklyRate : 0;
 
   const hqSales = raw.hqSales;
-  const hqSalesTotal = hqSales ? hqSales.reduce((s, v) => s + v, 0) : undefined;
+  const hqSalesTotalForRow = hqSales ? hqSales.reduce((s, v) => s + v, 0) : undefined;
 
   return {
     key: raw.key,
@@ -70,7 +85,7 @@ function calcRow(raw: InventoryRowRaw, yearDays: number): InventoryRow {
     sellThrough,
     woi,
     woiSellOut,
-    ...(hqSales && { hqSales, hqSalesTotal }),
+    ...(hqSales && { hqSales, hqSalesTotal: hqSalesTotalForRow }),
   };
 }
 
@@ -88,16 +103,17 @@ function calcSubtotal(
   const sellOutTotal = sellOut.reduce((s, v) => s + v, 0);
   const woiSellOutTotal = woiSellOut.reduce((s, v) => s + v, 0);
   const delta = closing - opening;
-  const stDenominator = sellThroughDenominator(key, opening, sellInTotal);
-  const sellThrough = stDenominator > 0 ? (sellOutTotal / stDenominator) * 100 : 0;
-  const weeklyRate = woiSellOutTotal / (yearDays / 7);
-  const woi = weeklyRate > 0 ? closing / weeklyRate : 0;
 
   const hasHqSales = rows.every((r) => r.hqSales != null);
   const hqSales = hasHqSales
     ? rows.reduce((acc, r) => sumArr(acc, r.hqSales!), new Array(12).fill(0))
     : undefined;
   const hqSalesTotal = hqSales ? hqSales.reduce((s, v) => s + v, 0) : undefined;
+  const stDenominator = sellThroughDenominator(key, opening, sellInTotal);
+  const stNumerator = sellThroughNumerator(key, sellOutTotal, hqSalesTotal);
+  const sellThrough = stDenominator > 0 ? (stNumerator / stDenominator) * 100 : 0;
+  const weeklyRate = woiSellOutTotal / (yearDays / 7);
+  const woi = weeklyRate > 0 ? closing / weeklyRate : 0;
 
   return {
     key,
@@ -212,7 +228,7 @@ function applyTargetClosingToAccRow(
 /**
  * 2026년 ACC만: 목표 재고주수 × 주간매출 → 기말 목표 재고 반영
  * - 대리상 주간매출 = 대리상 연간 리테일(K) / (yearDays/7)
- * - 본사 주간매출 = (대리상+본사) 연간 리테일(K) / (yearDays/7)
+ * - 본사 기말 = 직영판매용(본사주간매출×accHqHoldingWoi) + 대리상출고예정(대리상주간매출×accTargetWoiHq)
  */
 export function applyAccTargetWoiOverlay(
   dealer: InventoryTableData,
@@ -220,6 +236,7 @@ export function applyAccTargetWoiOverlay(
   retailData: RetailSalesResponse,
   accTargetWoiDealer: Record<AccKey, number>,
   accTargetWoiHq: Record<AccKey, number>,
+  accHqHoldingWoi: Record<AccKey, number>,
   year: number
 ): { dealer: InventoryTableData; hq: InventoryTableData } {
   if (year !== 2026) return { dealer, hq };
@@ -252,12 +269,11 @@ export function applyAccTargetWoiOverlay(
     const dealerAnnualK = getAnnualRetailK(retailData.dealer.rows, key);
     const hqAnnualK = getAnnualRetailK(retailData.hq.rows, key);
     const dealerWeekly = dealerAnnualK / (yearDays / 7);
-    const hqCombinedWeekly = (dealerAnnualK + hqAnnualK) / (yearDays / 7);
+    const hqWeekly = hqAnnualK / (yearDays / 7);
 
     const targetClosingDealer = Math.round(dealerWeekly * accTargetWoiDealer[key]);
-    const targetClosingHq = Math.round(hqCombinedWeekly * accTargetWoiHq[key]);
 
-    // 1. 대리상 처리 (기존과 동일)
+    // 1. 대리상 처리 — 먼저 완료하여 Sell-in 결과를 HQ 대리상출고에 사용
     const dRow = dealerByKey[key];
     if (dRow) {
       dealerByKey[key] = applyTargetClosingToAccRow(
@@ -267,31 +283,38 @@ export function applyAccTargetWoiOverlay(
         yearDays
       );
     }
+    const dealerSellInTotal = dealerByKey[key]?.sellInTotal ?? 0;
 
-    // 2. 본사: 대리상출고 = dealer 새 Sell-in, 상품매입 = 기말 + 대리상출고 + 본사판매 − 기초
+    // 2. 본사 기말재고 2단계 계산
+    //    step1: 직영 판매용 재고 = 본사 주간매출 × 직영 보유주수(accHqHoldingWoi)
+    //    step2: 대리상 출고예정 버퍼 = 대리상 주간매출 × 본사 목표재고주수(accTargetWoiHq)
+    //    본사 대리상출고 = 대리상 ACC Sell-in (step2와 별도)
     const hRow = hqByKey[key];
     if (hRow) {
-      // 대리상 Sell-in total을 본사 대리상출고로 사용
-      const newSellOutHq = dealerByKey[key]?.sellInTotal ?? 0;
+      const step1 = Math.round(hqWeekly * accHqHoldingWoi[key]);
+      const step2 = Math.round(dealerWeekly * accTargetWoiHq[key]);
+      const targetClosingHq = step1 + step2;
+      // 본사 대리상출고 = 대리상 ACC Sell-in 결과값
+      const newSellOutHq = dealerSellInTotal;
       const hqSalesTotal = hRow.hqSalesTotal ?? 0;
-      // 본사 기말: WOI × 주간매출 (목표)
-      const targetCls = targetClosingHq;
       // 본사 상품매입 = 기말(목표) + 대리상출고 + 본사판매 − 기초
-      const rawSellInHq = targetCls + newSellOutHq + hqSalesTotal - hRow.opening;
+      const rawSellInHq = targetClosingHq + newSellOutHq + hqSalesTotal - hRow.opening;
 
       // 매입이 음수면(기초재고로 충분) 매입=0, 기말은 실제 공식으로 재계산
       const newSellInHq = Math.max(0, rawSellInHq);
       const actualClosingHq =
         rawSellInHq >= 0
-          ? targetCls
+          ? targetClosingHq
           : Math.max(0, hRow.opening + newSellInHq - newSellOutHq - hqSalesTotal);
 
       const sellOut = scaleSellToTotal(hRow.sellOut, newSellOutHq);
       const sellIn = scaleSellToTotal(hRow.sellIn, newSellInHq);
       const delta = actualClosingHq - hRow.opening;
       const stDenom = sellThroughDenominator(hRow.key, hRow.opening, newSellInHq);
-      const sellThrough = stDenom > 0 ? (hRow.sellOutTotal / stDenom) * 100 : 0;
-      const woiWeekly = hqCombinedWeekly > 0 ? hqCombinedWeekly : 1;
+      const stNum = sellThroughNumerator(hRow.key, newSellOutHq, hqSalesTotal);
+      const sellThrough = stDenom > 0 ? (stNum / stDenom) * 100 : 0;
+      // WOI 표시: 기말 / 대리상주간매출 (대리상 출고예정 재고 기준)
+      const woiWeekly = dealerWeekly > 0 ? dealerWeekly : 1;
       const actualWoi = actualClosingHq / woiWeekly;
 
       hqByKey[key] = {
@@ -374,7 +397,8 @@ export function applyHqSellInSellOutPlanOverlay(
     const closing = Math.round(row.opening + newSellInTotal - newSellOutTotal - hqSalesTotal);
     const delta = closing - row.opening;
     const stDenom = sellThroughDenominator(row.key, row.opening, newSellInTotal);
-    const sellThrough = stDenom > 0 ? (newSellOutTotal / stDenom) * 100 : 0;
+    const stNum = sellThroughNumerator(row.key, newSellOutTotal, hqSalesTotal);
+    const sellThrough = stDenom > 0 ? (stNum / stDenom) * 100 : 0;
     const woiSellOutTotal = row.woiSellOut.reduce((s, v) => s + v, 0);
     const weeklyRate = woiSellOutTotal / (yearDays / 7);
     const woi = weeklyRate > 0 ? closing / weeklyRate : 0;
@@ -542,7 +566,8 @@ function recalcLeafFromWoi(row: InventoryRow, newWoi: number, yearDays: number =
 
   const delta = newClosing - row.opening;
   const stDenom = sellThroughDenominator(row.key, row.opening, newSellInTotal);
-  const sellThrough = stDenom > 0 ? (sellOutTotal / stDenom) * 100 : 0;
+  const stNum = sellThroughNumerator(row.key, sellOutTotal, row.hqSalesTotal);
+  const sellThrough = stDenom > 0 ? (stNum / stDenom) * 100 : 0;
 
   return {
     ...row,
@@ -608,6 +633,7 @@ export function recalcOnDealerWoiChange(
     }
 
     const stDenom = sellThroughDenominator(rowKey, hqRow.opening, newSellInTotal);
+    const stNum = sellThroughNumerator(rowKey, sellOutTotal, hqRow.hqSalesTotal);
     hqByKey[rowKey] = {
       ...hqRow,
       sellOut,
@@ -616,7 +642,7 @@ export function recalcOnDealerWoiChange(
       sellInTotal: newSellInTotal,
       closing: newClosing,
       delta: newClosing - hqRow.opening,
-      sellThrough: stDenom > 0 ? (sellOutTotal / stDenom) * 100 : 0,
+      sellThrough: stDenom > 0 ? (stNum / stDenom) * 100 : 0,
     };
   }
   const newHqLeafs = leafRows.map((k) => hqByKey[k]!);

@@ -90,9 +90,11 @@ export function applyPlanToSnapshot(
   retailActuals: RetailSalesResponse,
   retail2025: RetailSalesResponse,
   planFromMonth: number,
-  growthRate: number,
+  growthRateDealer: number,
+  growthRateHq: number,
 ): RetailSalesResponse {
-  const factor = 1 + growthRate / 100;
+  const factorDealer = 1 + growthRateDealer / 100;
+  const factorHq = 1 + growthRateHq / 100;
   return {
     ...retailActuals,
     dealer: {
@@ -100,7 +102,7 @@ export function applyPlanToSnapshot(
         retailActuals.dealer.rows,
         retail2025.dealer.rows,
         planFromMonth,
-        factor,
+        factorDealer,
       ),
     },
     hq: {
@@ -108,7 +110,7 @@ export function applyPlanToSnapshot(
         retailActuals.hq.rows,
         retail2025.hq.rows,
         planFromMonth,
-        factor,
+        factorHq,
       ),
     },
     planFromMonth,

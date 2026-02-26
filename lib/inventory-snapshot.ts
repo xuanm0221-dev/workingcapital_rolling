@@ -31,6 +31,8 @@ export interface SnapshotData {
   accTargetWoiDealer?: Record<AccKey, number>;
   /** 2026 본사 ACC 목표 재고주수 — 저장 시 포함 */
   accTargetWoiHq?: Record<AccKey, number>;
+  /** 2026 본사 직영 ACC 보유주수 — 저장 시 포함 */
+  accHqHoldingWoi?: Record<AccKey, number>;
 }
 
 const SNAPSHOT_SCHEMA_VERSION = 2;

@@ -6,14 +6,60 @@ import { Brand } from '@/lib/inventory-types';
 const BRANDS: Brand[] = ['전체', 'MLB', 'MLB KIDS', 'DISCOVERY'];
 const YEARS = [2025, 2026];
 
-function GrowthRateIcon() {
+/** 성장률 입력 컨트롤 — 표 제목 우측용 */
+export interface GrowthRateControlProps {
+  label: string;
+  labelCn: string;
+  value: number;
+  onChange: (displayedMinus100: number) => void;
+  title?: string;
+}
+export function GrowthRateControl({ label, labelCn, value, onChange, title }: GrowthRateControlProps) {
   return (
-    <div
-      className="flex items-center justify-center rounded w-8 h-8 flex-shrink-0 text-lg"
-      style={{ backgroundColor: '#e0f2fe' }}
-      title="전년 대비"
-    >
-      📈
+    <div className="flex items-center gap-2" title={title}>
+      <div className="flex flex-col">
+        <span className="text-xs font-medium text-gray-800 leading-tight">{label}</span>
+        <span className="text-[10px] text-gray-500 leading-tight">{labelCn}</span>
+      </div>
+      <div className="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white">
+        <input
+          type="number"
+          min={0}
+          max={200}
+          step={1}
+          value={value}
+          onChange={(e) => {
+            const raw = e.target.value === '' ? 100 : Number(e.target.value);
+            const clamped = Math.min(200, Math.max(0, Math.round(raw)));
+            onChange(clamped - 100);
+          }}
+          onBlur={(e) => {
+            const raw = e.target.value === '' ? 100 : Number(e.target.value);
+            const clamped = Math.min(200, Math.max(0, Math.round(raw)));
+            onChange(clamped - 100);
+          }}
+          className="w-14 py-1.5 pl-2 pr-1 text-sm text-right font-medium text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        />
+        <div className="flex flex-col border-l border-gray-200 bg-gray-50">
+          <button
+            type="button"
+            onClick={() => onChange(Math.min(100, value - 100 + 1))}
+            className="flex items-center justify-center w-6 h-[18px] text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+            aria-label="증가"
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 2L8 6H2z" /></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange(Math.max(-100, value - 100 - 1))}
+            className="flex items-center justify-center w-6 h-[18px] text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors border-t border-gray-200"
+            aria-label="감소"
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 4h6L5 8z" /></svg>
+          </button>
+        </div>
+      </div>
+      <span className="text-sm font-medium text-gray-600">%</span>
     </div>
   );
 }
@@ -21,10 +67,8 @@ function GrowthRateIcon() {
 interface Props {
   year: number;
   brand: Brand;
-  growthRate: number;
   onYearChange: (y: number) => void;
   onBrandChange: (b: Brand) => void;
-  onGrowthRateChange: (v: number) => void;
   snapshotSaved: boolean;
   snapshotSavedAt: string | null;
   recalcLoading: boolean;
@@ -44,10 +88,8 @@ interface Props {
 export default function InventoryFilterBar({
   year,
   brand,
-  growthRate,
   onYearChange,
   onBrandChange,
-  onGrowthRateChange,
   snapshotSaved,
   snapshotSavedAt,
   recalcLoading,
@@ -98,58 +140,8 @@ export default function InventoryFilterBar({
         ))}
       </div>
 
-      {/* 2레벨: 성장률 · 브랜드 · 월별 보기 — 1행 */}
+      {/* 2레벨: 브랜드 · 저장 · 수정 */}
       <div className="flex flex-wrap items-center gap-4 px-6 py-2.5">
-        {/* 성장률 가정 — 아이콘 + 라벨 + 숫자 입력(직접/화살표) + % */}
-        <div className="flex items-center gap-2" title="전년 대비 성장률 가정">
-          <GrowthRateIcon />
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-gray-800 leading-tight">성장률</span>
-            <span className="text-[10px] text-gray-500 leading-tight">成長率</span>
-          </div>
-          <div className="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white">
-            <input
-              type="number"
-              min={0}
-              max={200}
-              step={1}
-              value={100 + growthRate}
-              onChange={(e) => {
-                const raw = e.target.value === '' ? 100 : Number(e.target.value);
-                const clamped = Math.min(200, Math.max(0, Math.round(raw)));
-                onGrowthRateChange(clamped - 100);
-              }}
-              onBlur={(e) => {
-                const raw = e.target.value === '' ? 100 : Number(e.target.value);
-                const clamped = Math.min(200, Math.max(0, Math.round(raw)));
-                onGrowthRateChange(clamped - 100);
-              }}
-              className="w-14 py-1.5 pl-2 pr-1 text-sm text-right font-medium text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
-            <div className="flex flex-col border-l border-gray-200 bg-gray-50">
-              <button
-                type="button"
-                onClick={() => onGrowthRateChange(Math.min(100, growthRate + 1))}
-                className="flex items-center justify-center w-6 h-[18px] text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
-                aria-label="증가"
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 2L8 6H2z" /></svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => onGrowthRateChange(Math.max(-100, growthRate - 1))}
-                className="flex items-center justify-center w-6 h-[18px] text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors border-t border-gray-200"
-                aria-label="감소"
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 4h6L5 8z" /></svg>
-              </button>
-            </div>
-          </div>
-          <span className="text-sm font-medium text-gray-600">%</span>
-        </div>
-
-        <div className="h-4 w-px bg-gray-300" />
-
         {/* 브랜드 — iOS 스타일 세그먼트 컨트롤 */}
         <div className="inline-flex rounded-lg border border-gray-200 bg-gray-100/80 p-0.5 overflow-hidden">
           {BRANDS.map((b, i) => (
@@ -275,7 +267,7 @@ export default function InventoryFilterBar({
               disabled={!canSave || recalcLoading}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
                 canSave && !recalcLoading
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-400 hover:bg-emerald-100'
+                  ? 'bg-[#8b7bb8]/10 text-[#7a6aa7] border-[#8b7bb8]/50 hover:bg-[#8b7bb8]/20'
                   : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
               }`}
               title="편집 내용을 포함해 현재 데이터를 저장합니다"

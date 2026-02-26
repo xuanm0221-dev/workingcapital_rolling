@@ -2541,31 +2541,10 @@
     },
     "purchase": {
       "year": 2026,
-      "brand": "MLB",
+      "brand": "전체",
       "closedThrough": "202601",
       "data": {
         "rows": [
-          {
-            "key": "매입합계",
-            "label": "매입합계",
-            "isTotal": true,
-            "isSubtotal": false,
-            "isLeaf": false,
-            "monthly": [
-              1772549888,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
-            ]
-          },
           {
             "key": "의류합계",
             "label": "의류합계",
@@ -2573,18 +2552,18 @@
             "isSubtotal": true,
             "isLeaf": false,
             "monthly": [
-              1132451024,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              1201881582,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2594,18 +2573,18 @@
             "isSubtotal": false,
             "isLeaf": true,
             "monthly": [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2615,18 +2594,18 @@
             "isSubtotal": false,
             "isLeaf": true,
             "monthly": [
-              1132451024,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              1201881582,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2637,17 +2616,17 @@
             "isLeaf": true,
             "monthly": [
               0,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2658,17 +2637,17 @@
             "isLeaf": true,
             "monthly": [
               0,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2678,18 +2657,18 @@
             "isSubtotal": false,
             "isLeaf": true,
             "monthly": [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2700,17 +2679,17 @@
             "isLeaf": true,
             "monthly": [
               0,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2720,18 +2699,18 @@
             "isSubtotal": true,
             "isLeaf": false,
             "monthly": [
-              640098864,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              665966946,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2741,18 +2720,18 @@
             "isSubtotal": false,
             "isLeaf": true,
             "monthly": [
-              407848480,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              423204880,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2762,18 +2741,18 @@
             "isSubtotal": false,
             "isLeaf": true,
             "monthly": [
-              170781401,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              175359005,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2783,18 +2762,18 @@
             "isSubtotal": false,
             "isLeaf": true,
             "monthly": [
-              56508505,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              62286505,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           },
           {
@@ -2804,24 +2783,45 @@
             "isSubtotal": false,
             "isLeaf": true,
             "monthly": [
-              4960478,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
+              5116556,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "key": "매입합계",
+            "label": "매입합계",
+            "isTotal": true,
+            "isSubtotal": false,
+            "isLeaf": false,
+            "monthly": [
+              1867848528,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           }
         ]
       }
     },
-    "savedAt": "2026-02-25T17:25:42.367Z",
+    "savedAt": "2026-02-26T07:14:16.885Z",
     "planFromMonth": 2,
     "hqSellInPlan": {
       "당년F": 3000639,
@@ -2831,8 +2831,8 @@
     },
     "accTargetWoiDealer": {
       "신발": 29,
-      "모자": 29,
-      "가방": 25,
+      "모자": 20,
+      "가방": 25.5,
       "기타": 39
     },
     "accTargetWoiHq": {
@@ -2840,6 +2840,12 @@
       "모자": 8,
       "가방": 10,
       "기타": 10
+    },
+    "accHqHoldingWoi": {
+      "신발": 30,
+      "모자": 20,
+      "가방": 30,
+      "기타": 30
     }
   },
   "2026:MLB KIDS": {

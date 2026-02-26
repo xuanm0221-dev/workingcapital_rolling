@@ -45,7 +45,9 @@ export async function GET(request: NextRequest) {
   const year = parseInt(searchParams.get('year') ?? '2025', 10);
   const brand = searchParams.get('brand') ?? 'MLB';
   const growthRate = parseFloat(searchParams.get('growthRate') ?? '5');
-  const factor = 1 + growthRate / 100;
+  const growthRateHq = parseFloat(searchParams.get('growthRateHq') ?? '10');
+  const factorDealer = 1 + growthRate / 100;
+  const factorHq = 1 + growthRateHq / 100;
 
   const { all: allYymms, queryable } = buildYyymmList(year);
 
@@ -92,8 +94,8 @@ export async function GET(request: NextRequest) {
           year: 2026,
           brand,
           closedThrough: CLOSED_THROUGH,
-          dealer: { rows: mergePlanMonths(emptyCurrDealer, data2025.dealer.rows, planFromMonth, factor) },
-          hq: { rows: mergePlanMonths(emptyCurrHq, data2025.hq.rows, planFromMonth, factor) },
+          dealer: { rows: mergePlanMonths(emptyCurrDealer, data2025.dealer.rows, planFromMonth, factorDealer) },
+          hq: { rows: mergePlanMonths(emptyCurrHq, data2025.hq.rows, planFromMonth, factorHq) },
           planFromMonth,
           retail2025: { dealer: data2025.dealer, hq: data2025.hq },
         };
@@ -104,8 +106,8 @@ export async function GET(request: NextRequest) {
           year: 2026,
           brand,
           closedThrough: CLOSED_THROUGH,
-          dealer: { rows: mergePlanMonths(data2026.dealer.rows, data2025.dealer.rows, planFromMonth, factor) },
-          hq: { rows: mergePlanMonths(data2026.hq.rows, data2025.hq.rows, planFromMonth, factor) },
+          dealer: { rows: mergePlanMonths(data2026.dealer.rows, data2025.dealer.rows, planFromMonth, factorDealer) },
+          hq: { rows: mergePlanMonths(data2026.hq.rows, data2025.hq.rows, planFromMonth, factorHq) },
           planFromMonth,
           retail2025: { dealer: data2025.dealer, hq: data2025.hq },
         };
