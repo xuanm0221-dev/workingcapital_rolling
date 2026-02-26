@@ -254,37 +254,37 @@ export default function InventoryTable({
         )}
       </div>
 
-      <div className="flex gap-1 items-end">
-      <div className="flex-1 overflow-x-auto rounded border border-gray-200 shadow-sm">
-        <table className="min-w-full border-collapse text-xs">
+      <div className="flex items-end" style={{ gap: '1.5%' }}>
+      <div className="flex-1 min-w-0 overflow-x-auto rounded border border-gray-200 shadow-sm">
+        <table className="min-w-full border-collapse text-xs" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
-              <th className={TH} style={{ minWidth: 100 }}>구분</th>
-              <th className={TH} style={{ minWidth: 70 }}>
+              <th className={TH} style={{ width: '7%', minWidth: 80 }}>구분</th>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>
                 기초<br />
                 <span className="font-normal text-[10px] text-blue-200">({prevYear}년기말)</span>
               </th>
-              <th className={TH} style={{ minWidth: 70 }}>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>
                 {sellInLabel}<br />
                 <span className="font-normal text-[10px] text-blue-200">(연간)</span>
               </th>
-              <th className={TH} style={{ minWidth: 70 }}>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>
                 {sellOutLabel}<br />
                 <span className="font-normal text-[10px] text-blue-200">(연간)</span>
               </th>
               {tableType === 'hq' && (
-                <th className={TH} style={{ minWidth: 70 }}>
+                <th className={TH} style={{ width: '5%', minWidth: 50 }}>
                   본사판매<br />
                   <span className="font-normal text-[10px] text-blue-200">(연간)</span>
                 </th>
               )}
-              <th className={TH} style={{ minWidth: 70 }}>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>
                 기말<br />
                 <span className="font-normal text-[10px] text-blue-200">({year}년기말)</span>
               </th>
-              <th className={TH} style={{ minWidth: 55 }}>증감</th>
-              <th className={TH} style={{ minWidth: 65 }}>Sell-through</th>
-              <th className={TH} style={{ minWidth: 55 }}>재고주수</th>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>증감</th>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>Sell-through</th>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>재고주수</th>
             </tr>
           </thead>
           <tbody>
@@ -449,7 +449,7 @@ export default function InventoryTable({
           </tbody>
         </table>
       </div>
-      {sideContent}
+      {sideContent ? <div style={{ flex: '0 0 5%', minWidth: 0 }}>{sideContent}</div> : null}
       </div>
 
       {/* 범례: 토글 가능 */}

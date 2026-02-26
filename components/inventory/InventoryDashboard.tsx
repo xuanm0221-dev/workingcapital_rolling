@@ -1176,8 +1176,8 @@ export default function InventoryDashboard() {
         )}
         {dealerTableData && hqTableData && (
           <>
-            <div className="flex flex-wrap gap-6 items-start">
-            <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
+            <div className="flex flex-wrap items-start" style={{ gap: '1.5%', paddingLeft: '1.5%', paddingRight: '1.5%' }}>
+            <div className="min-w-0" style={{ flex: '0 0 46.15%', minWidth: '320px' }}>
               <InventoryTable
                 title="대리상 (CNY K)"
                 titleRight={
@@ -1204,7 +1204,7 @@ export default function InventoryDashboard() {
                 prevYearTotalSellOut={prevYearTableData?.dealer.rows.find((r) => r.key === '재고자산합계')?.sellOutTotal}
               />
             </div>
-            <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
+            <div className="min-w-0 flex-1" style={{ flex: '1 1 0', minWidth: '320px' }}>
               <InventoryTable
                 title="본사 (CNY K)"
                 titleRight={
@@ -1220,7 +1220,7 @@ export default function InventoryDashboard() {
                       <>
                         <span className="mx-2 text-gray-300">|</span>
                         <span className="text-xs text-gray-500">
-                          편집가능: ①의류 상품매입(본사): 현지 연간 출고계획 반영 ②재고주수 (본사,대리상)
+                          편집가능: ①의류 상품매입(본사): 현지 매입계획 반영 ②재고주수 (본사,대리상)
                         </span>
                       </>
                     )}
