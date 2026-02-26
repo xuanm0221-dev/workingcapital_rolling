@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Brand, InventoryApiResponse, InventoryTableData, InventoryRowRaw, AccKey, ACC_KEYS, SEASON_KEYS, RowKey } from '@/lib/inventory-types';
@@ -45,7 +45,7 @@ const ANNUAL_PLAN_SEASON_LABELS: Record<AnnualPlanSeason, string> = {
 const TXT_HQ_PURCHASE_HEADER = '본사 매입';
 const TXT_ANNUAL_PLAN_TITLE = '26년 시즌별 연간 출고계획표';
 const TXT_BRAND = '브랜드';
-const TXT_PLAN_SECTION = '26년 시즌별 연간 출고계획';
+const TXT_PLAN_SECTION = '26년 시즌별 연간 출고계획 (중국법인 제공)';
 const TXT_PLAN_UNIT = '(단위: CNY K)';
 const TXT_EDIT = '수정';
 const TXT_SAVE = '저장';
@@ -205,7 +205,7 @@ async function saveAnnualPlanToServer(year: number, data: AnnualShipmentPlan): P
 
 export default function InventoryDashboard() {
   const [year, setYear] = useState<number>(2026);
-  const [brand, setBrand] = useState<Brand>('전체');
+  const [brand, setBrand] = useState<Brand>('MLB');
   const [growthRate, setGrowthRate] = useState<number>(5);
 
   // 湲곗〈 Sell-in/Sell-out ???곗씠??
@@ -217,6 +217,12 @@ export default function InventoryDashboard() {
   const [monthlyData, setMonthlyData] = useState<MonthlyStockResponse | null>(null);
   const [monthlyLoading, setMonthlyLoading] = useState<boolean>(false);
   const [monthlyError, setMonthlyError] = useState<string | null>(null);
+
+  // 2026 YOY 계산용 전년(year-1) 데이터
+  const [prevYearMonthlyData, setPrevYearMonthlyData] = useState<MonthlyStockResponse | null>(null);
+  const [prevYearRetailData, setPrevYearRetailData] = useState<RetailSalesResponse | null>(null);
+  const [prevYearShipmentData, setPrevYearShipmentData] = useState<ShipmentSalesResponse | null>(null);
+  const [prevYearPurchaseData, setPrevYearPurchaseData] = useState<PurchaseResponse | null>(null);
 
   // 由ы뀒??留ㅼ텧 ???곗씠??
   const [retailData, setRetailData] = useState<RetailSalesResponse | null>(null);
@@ -583,6 +589,84 @@ export default function InventoryDashboard() {
     };
   }, [year, brand]);
 
+  // 2026 YOY 계산용: 전년(year-1) monthly/retail/shipment/purchase fetch
+  useEffect(() => {
+    if (year !== 2026) {
+      setPrevYearMonthlyData(null);
+      setPrevYearRetailData(null);
+      setPrevYearShipmentData(null);
+      setPrevYearPurchaseData(null);
+      return;
+    }
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const prevYear = year - 1;
+        if (brand === '전체') {
+          const [monthlyRess, retailRess, shipmentRess, purchaseRess] = await Promise.all([
+            Promise.all(BRANDS_TO_AGGREGATE.map((b) =>
+              fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(prevYear), brand: b })}`),
+            )),
+            Promise.all(BRANDS_TO_AGGREGATE.map((b) =>
+              fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(prevYear), brand: b, growthRate: '0' })}`),
+            )),
+            Promise.all(BRANDS_TO_AGGREGATE.map((b) =>
+              fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(prevYear), brand: b })}`),
+            )),
+            Promise.all(BRANDS_TO_AGGREGATE.map((b) =>
+              fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(prevYear), brand: b })}`),
+            )),
+          ]);
+          if (cancelled) return;
+          const [monthlyJsons, retailJsons, shipmentJsons, purchaseJsons] = await Promise.all([
+            Promise.all(monthlyRess.map((r) => r.json() as Promise<MonthlyStockResponse>)),
+            Promise.all(retailRess.map((r) => r.json() as Promise<RetailSalesResponse>)),
+            Promise.all(shipmentRess.map((r) => r.json() as Promise<ShipmentSalesResponse>)),
+            Promise.all(purchaseRess.map((r) => r.json() as Promise<PurchaseResponse>)),
+          ]);
+          if (cancelled) return;
+          setPrevYearMonthlyData(aggregateMonthlyStock(monthlyJsons));
+          setPrevYearRetailData(aggregateRetailSales(retailJsons));
+          setPrevYearShipmentData(aggregateShipmentSales(shipmentJsons));
+          setPrevYearPurchaseData(aggregatePurchase(purchaseJsons));
+        } else {
+          const [mRes, rRes, sRes, pRes] = await Promise.all([
+            fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(prevYear), brand })}`),
+            fetch(`/api/inventory/retail-sales?${new URLSearchParams({ year: String(prevYear), brand, growthRate: '0' })}`),
+            fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(prevYear), brand })}`),
+            fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(prevYear), brand })}`),
+          ]);
+          if (cancelled) return;
+          const [mJson, rJson, sJson, pJson] = await Promise.all([
+            mRes.json() as Promise<MonthlyStockResponse>,
+            rRes.json() as Promise<RetailSalesResponse>,
+            sRes.json() as Promise<ShipmentSalesResponse>,
+            pRes.json() as Promise<PurchaseResponse>,
+          ]);
+          if (cancelled) return;
+          if (!mRes.ok || (mJson as { error?: string }).error) return;
+          setPrevYearMonthlyData(mJson);
+          setPrevYearRetailData(rJson);
+          setPrevYearShipmentData(sJson);
+          setPrevYearPurchaseData(pJson);
+        }
+      } catch {
+        if (!cancelled) {
+          setPrevYearMonthlyData(null);
+          setPrevYearRetailData(null);
+          setPrevYearShipmentData(null);
+          setPrevYearPurchaseData(null);
+        }
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [year, brand]);
+
   // 2025쨌2026?????곷떒 ?쒕뒗 ?붾퀎 ?ш퀬?붿븸 + 由ы뀒??留ㅼ텧 + 異쒓퀬留ㅼ텧 + 留ㅼ엯?곹뭹?쇰줈 援ъ꽦
   // 2026???뚮쭔 ACC 紐⑺몴 ?ш퀬二쇱닔 ?ㅻ쾭?덉씠 ?곸슜
   const topTableData = useMemo(() => {
@@ -701,6 +785,18 @@ export default function InventoryDashboard() {
     ? (topTableData?.hq ?? null)
     : (topTableData?.hq ?? data?.hq ?? null);
 
+  // 2026 YOY: 전년(2025) 테이블 구성 → 재고자산합계 sellIn/sellOut/hqSales 추출
+  const prevYearTableData = useMemo(() => {
+    if (year !== 2026 || !prevYearMonthlyData || !prevYearRetailData || !prevYearShipmentData) return null;
+    return buildTableDataFromMonthly(
+      prevYearMonthlyData,
+      prevYearRetailData,
+      prevYearShipmentData,
+      prevYearPurchaseData ?? undefined,
+      year - 1,
+    );
+  }, [year, prevYearMonthlyData, prevYearRetailData, prevYearShipmentData, prevYearPurchaseData]);
+
   // 2026 ACC ???ш퀬二쇱닔 ?몄쭛 ???곹깭 諛섏쁺 (??? ?먮뒗 湲곕낯媛?釉붾줉怨??곕룞)
   const handleWoiChange = useCallback((tableType: 'dealer' | 'hq', rowKey: string, newWoi: number) => {
     if (!ACC_KEYS.includes(rowKey as AccKey)) return;
@@ -766,6 +862,28 @@ export default function InventoryDashboard() {
     setAccTargetWoiHq(DEFAULT_ACC_WOI_HQ);
     setEditMode(false);
   }, []);
+
+  const handleEditModeCancel = useCallback(() => {
+    const snap = loadSnapshot(year, brand);
+    if (snap) {
+      setHqSellInPlan(snap.hqSellInPlan ?? {});
+      setHqSellOutPlan(snap.hqSellOutPlan ?? {});
+      const dealerWoi = snap.accTargetWoiDealer ?? DEFAULT_ACC_WOI_DEALER;
+      const hqWoi = snap.accTargetWoiHq ?? DEFAULT_ACC_WOI_HQ;
+      setAccTargetWoiDealer(dealerWoi);
+      setAccTargetWoiHq(hqWoi);
+      accTargetWoiDealerRef.current = dealerWoi;
+      accTargetWoiHqRef.current = hqWoi;
+    } else {
+      setHqSellInPlan({});
+      setHqSellOutPlan({});
+      setAccTargetWoiDealer(DEFAULT_ACC_WOI_DEALER);
+      setAccTargetWoiHq(DEFAULT_ACC_WOI_HQ);
+      accTargetWoiDealerRef.current = DEFAULT_ACC_WOI_DEALER;
+      accTargetWoiHqRef.current = DEFAULT_ACC_WOI_HQ;
+    }
+    setEditMode(false);
+  }, [year, brand]);
 
   // ?? ?ш퀎????
   const handleRecalc = useCallback(async (mode: 'current' | 'annual') => {
@@ -889,6 +1007,7 @@ export default function InventoryDashboard() {
         canSave={!!(monthlyData && retailData && shipmentData && purchaseData)}
         editMode={year === 2026 && brand !== '전체' ? editMode : false}
         onEditModeEnter={year === 2026 && brand !== '전체' ? () => setEditMode(true) : undefined}
+        onEditModeCancel={year === 2026 && brand !== '전체' ? handleEditModeCancel : undefined}
         onResetToDefault={year === 2026 && brand !== '전체' ? handleResetToDefault : undefined}
       />
 
@@ -915,12 +1034,18 @@ export default function InventoryDashboard() {
                 sellOutLabel="Sell-out"
                 tableType="dealer"
                 onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
+                prevYearTotalOpening={(() => {
+                  const v = prevYearMonthlyData?.dealer.rows.find((r) => r.key === '재고자산합계')?.opening;
+                  return v != null ? v / 1000 : undefined;
+                })()}
+                prevYearTotalSellIn={prevYearTableData?.dealer.rows.find((r) => r.key === '재고자산합계')?.sellInTotal}
+                prevYearTotalSellOut={prevYearTableData?.dealer.rows.find((r) => r.key === '재고자산합계')?.sellOutTotal}
               />
             </div>
             <div className="min-w-0 flex-1" style={{ minWidth: '320px' }}>
               <InventoryTable
                 title="본사 (CNY K)"
-                titleNote={year === 2026 && brand !== '전체' ? '편집가능: 의류 상품매입, 대리상출고 | ACC: 재고주수' : undefined}
+                titleNote={year === 2026 && brand !== '전체' ? '편집가능: ①의류 상품매입(본사) ②재고주수 (본사,대리상)' : undefined}
                 data={hqTableData!}
                 year={year}
                 editMode={year === 2026 && brand !== '전체' ? editMode : false}
@@ -929,14 +1054,103 @@ export default function InventoryDashboard() {
                 tableType="hq"
                 onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
                 onHqSellInChange={year === 2026 && brand !== '전체' ? handleHqSellInChange : undefined}
-                onHqSellOutChange={year === 2026 && brand !== '전체' ? handleHqSellOutChange : undefined}
+                prevYearTotalOpening={(() => {
+                  const v = prevYearMonthlyData?.hq.rows.find((r) => r.key === '재고자산합계')?.opening;
+                  return v != null ? v / 1000 : undefined;
+                })()}
+                prevYearTotalSellIn={prevYearTableData?.hq.rows.find((r) => r.key === '재고자산합계')?.sellInTotal}
+                prevYearTotalSellOut={prevYearTableData?.hq.rows.find((r) => r.key === '재고자산합계')?.sellOutTotal}
+                prevYearTotalHqSales={prevYearTableData?.hq.rows.find((r) => r.key === '재고자산합계')?.hqSalesTotal}
               />
             </div>
           </div>
           </>
         )}
 
-        {/* ?? ?붾퀎 ?ш퀬?붿븸 ???? */}
+        {/* 2026 시즌별 연간 출고계획 */}
+        {year === 2026 && (
+          <div className="mt-10 border-t border-gray-300 pt-8">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAnnualPlanOpen((v) => !v)}
+                className="flex items-center gap-2 flex-1 text-left py-1"
+              >
+                <SectionIcon>
+                  <span className="text-lg">{TXT_PLAN_ICON}</span>
+                </SectionIcon>
+                <span className="text-sm font-bold text-gray-700">{TXT_PLAN_SECTION}</span>
+                <span className="text-xs font-normal text-gray-400">{TXT_PLAN_UNIT}</span>
+                <span className="ml-auto text-gray-400 text-xs shrink-0">
+                  {annualPlanOpen ? TXT_COLLAPSE : TXT_EXPAND}
+                </span>
+              </button>
+              {annualPlanOpen && (
+                <div className="flex items-center gap-2">
+                  {!annualPlanEditMode ? (
+                    <button
+                      type="button"
+                      onClick={handleAnnualPlanEditStart}
+                      className="px-3 py-1.5 text-xs rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                    >
+                      {TXT_EDIT}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAnnualPlanSave}
+                      className="px-3 py-1.5 text-xs rounded border border-sky-600 bg-sky-600 text-white hover:bg-sky-700"
+                    >
+                      {TXT_SAVE}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {annualPlanOpen && (
+              <div className="mt-3 overflow-x-auto rounded border border-gray-200">
+                <table className="min-w-full border-collapse text-xs">
+                  <thead>
+                    <tr>
+                      <th className="px-3 py-2 text-left bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[120px]">{TXT_BRAND}</th>
+                      {ANNUAL_PLAN_SEASONS.map((season) => (
+                        <th
+                          key={season}
+                          className="px-3 py-2 text-center bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[90px]"
+                        >
+                          {ANNUAL_PLAN_SEASON_LABELS[season]}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ANNUAL_PLAN_BRANDS.map((planBrand) => (
+                      <tr key={planBrand} className="bg-white hover:bg-gray-50">
+                        <td className="px-3 py-2 border-b border-gray-200 font-medium text-gray-700">{planBrand}</td>
+                        {ANNUAL_PLAN_SEASONS.map((season) => (
+                          <td key={`${planBrand}-${season}`} className="px-2 py-1.5 border-b border-gray-200">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={String((annualPlanEditMode ? annualShipmentPlanDraft2026 : annualShipmentPlan2026)[planBrand][season] || 0)}
+                              onChange={(e) => handleAnnualPlanCellChange(planBrand, season, e.target.value)}
+                              disabled={!annualPlanEditMode}
+                              className={`w-full text-right text-xs px-1.5 py-1 rounded border focus:outline-none focus:ring-1 focus:ring-sky-400 ${
+                                annualPlanEditMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 text-gray-600'
+                              }`}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 월별 재고잔액 */}
         <div className="mt-10 border-t border-gray-300 pt-8">
           <button
             type="button"
@@ -1159,89 +1373,6 @@ export default function InventoryDashboard() {
             </>
           )}
         </div>
-
-        {/* 2026 ?쒖쫵蹂??곌컙 異쒓퀬怨꾪쉷 */}
-        {year === 2026 && (
-          <div className="mt-10 border-t border-gray-300 pt-8">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setAnnualPlanOpen((v) => !v)}
-                className="flex items-center gap-2 flex-1 text-left py-1"
-              >
-                <SectionIcon>
-                  <span className="text-lg">{TXT_PLAN_ICON}</span>
-                </SectionIcon>
-                <span className="text-sm font-bold text-gray-700">{TXT_PLAN_SECTION}</span>
-                <span className="text-xs font-normal text-gray-400">{TXT_PLAN_UNIT}</span>
-                <span className="ml-auto text-gray-400 text-xs shrink-0">
-                  {annualPlanOpen ? TXT_COLLAPSE : TXT_EXPAND}
-                </span>
-              </button>
-              {annualPlanOpen && (
-                <div className="flex items-center gap-2">
-                  {!annualPlanEditMode ? (
-                    <button
-                      type="button"
-                      onClick={handleAnnualPlanEditStart}
-                      className="px-3 py-1.5 text-xs rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                    >
-                      {TXT_EDIT}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleAnnualPlanSave}
-                      className="px-3 py-1.5 text-xs rounded border border-sky-600 bg-sky-600 text-white hover:bg-sky-700"
-                    >
-                      {TXT_SAVE}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-            {annualPlanOpen && (
-              <div className="mt-3 overflow-x-auto rounded border border-gray-200">
-                <table className="min-w-full border-collapse text-xs">
-                  <thead>
-                    <tr>
-                      <th className="px-3 py-2 text-left bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[120px]">{TXT_BRAND}</th>
-                      {ANNUAL_PLAN_SEASONS.map((season) => (
-                        <th
-                          key={season}
-                          className="px-3 py-2 text-center bg-[#1a2e5a] text-white border border-[#2e4070] min-w-[90px]"
-                        >
-                          {ANNUAL_PLAN_SEASON_LABELS[season]}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ANNUAL_PLAN_BRANDS.map((planBrand) => (
-                      <tr key={planBrand} className="bg-white hover:bg-gray-50">
-                        <td className="px-3 py-2 border-b border-gray-200 font-medium text-gray-700">{planBrand}</td>
-                        {ANNUAL_PLAN_SEASONS.map((season) => (
-                          <td key={`${planBrand}-${season}`} className="px-2 py-1.5 border-b border-gray-200">
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              value={String((annualPlanEditMode ? annualShipmentPlanDraft2026 : annualShipmentPlan2026)[planBrand][season] || 0)}
-                              onChange={(e) => handleAnnualPlanCellChange(planBrand, season, e.target.value)}
-                              disabled={!annualPlanEditMode}
-                              className={`w-full text-right text-xs px-1.5 py-1 rounded border focus:outline-none focus:ring-1 focus:ring-sky-400 ${
-                                annualPlanEditMode ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 text-gray-600'
-                              }`}
-                            />
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
