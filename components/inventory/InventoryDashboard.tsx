@@ -50,7 +50,7 @@ type OtbData = Record<OtbSeason, Record<OtbBrand, number>>;
 const TXT_HQ_PURCHASE_HEADER = '본사 매입';
 const TXT_ANNUAL_PLAN_TITLE = '26년 시즌별 연간 출고계획표';
 const TXT_BRAND = '브랜드';
-const TXT_PLAN_SECTION = '26년 시즌별 연간 출고계획 (중국법인 제공)';
+const TXT_PLAN_SECTION = '본사 의류매입';
 const TXT_PLAN_UNIT = '(단위: CNY K)';
 const TXT_OTB_SECTION = '대리상 OTB';
 const TXT_OTB_UNIT = '(단위: CNY K)';
@@ -60,6 +60,23 @@ const TXT_SAVE = '저장';
 const TXT_PLAN_ICON = '📋';
 const TXT_COLLAPSE = '▲ 접기';
 const TXT_EXPAND = '▼ 펼치기';
+
+/** 본사 의류매입 표(annualPlan) → hqSellInPlan 시즌 행 매핑 */
+function annualPlanToHqSellInPlan(plan: AnnualShipmentPlan, planBrand: AnnualPlanBrand): Partial<Record<RowKey, number>> {
+  const row = plan[planBrand];
+  if (!row) return {};
+  const SEASON_MAP: { plan: AnnualPlanSeason; key: RowKey }[] = [
+    { plan: 'currF', key: '당년F' }, { plan: 'currS', key: '당년S' },
+    { plan: 'year1', key: '1년차' }, { plan: 'year2', key: '2년차' },
+    { plan: 'next', key: '차기시즌' }, { plan: 'past', key: '과시즌' },
+  ];
+  const out: Partial<Record<RowKey, number>> = {};
+  for (const { plan: p, key } of SEASON_MAP) {
+    const v = row[p];
+    out[key] = typeof v === 'number' && Number.isFinite(v) ? v : 0;
+  }
+  return out;
+}
 
 /** OTB(CNY) → 대리상 의류 Sell-in(CNY K) 매핑. 당년F=26F, 당년S=26S, 차기시즌=27F+27S. 1년차/2년차/과시즌=0 */
 function otbToDealerSellInPlan(otbData: OtbData | null, planBrand: OtbBrand): Partial<Record<RowKey, number>> {
@@ -351,8 +368,8 @@ export default function InventoryDashboard() {
   // 2026 ACC 湲곕쭚 紐⑺몴 ?ш퀬二쇱닔 (?由ъ긽/蹂몄궗蹂??좊컻쨌紐⑥옄쨌媛諛㈑룰린?)
   const [accTargetWoiDealer, setAccTargetWoiDealer] = useState<Record<AccKey, number>>({
     '신발': 29,
-    '모자': 29,
-    '가방': 25,
+    '모자': 20,
+    '가방': 25.5,
     '기타': 39,
   } as Record<AccKey, number>);
   const [accTargetWoiHq, setAccTargetWoiHq] = useState<Record<AccKey, number>>({
@@ -379,23 +396,22 @@ export default function InventoryDashboard() {
   useEffect(() => {
     accHqHoldingWoiRef.current = accHqHoldingWoi;
   }, [accHqHoldingWoi]);
-  // 2026 蹂몄궗 ?곹뭹留ㅼ엯쨌?由ъ긽異쒓퀬 ?몄쭛 怨꾪쉷 (?곌컙 K). 2025???ъ슜?섏? ?딆쓬.
-  const [hqSellInPlan, setHqSellInPlan] = useState<Partial<Record<RowKey, number>>>({});
   const [hqSellOutPlan, setHqSellOutPlan] = useState<Partial<Record<RowKey, number>>>({});
-  // 2026 ?ш퀬?먯궛???몄쭛 紐⑤뱶 (?섏젙 ?대┃ ?쒖뿉留??몄쭛 媛?ν븳 諛뺤뒪 ?쒖떆)
-  const [editMode, setEditMode] = useState(false);
-  // 2026 怨꾪쉷??怨꾩궛??2025 ?ㅼ쟻 蹂닿? (API ?묐떟???ы븿??
   const retail2025Ref = useRef<RetailSalesResponse['retail2025'] | null>(null);
   const monthlyByBrandRef = useRef<Partial<Record<LeafBrand, MonthlyStockResponse>>>({});
   const retailByBrandRef = useRef<Partial<Record<LeafBrand, RetailSalesResponse>>>({});
   const shipmentByBrandRef = useRef<Partial<Record<LeafBrand, ShipmentSalesResponse>>>({});
   const purchaseByBrandRef = useRef<Partial<Record<LeafBrand, PurchaseResponse>>>({});
   const [savedSnapshotByBrand, setSavedSnapshotByBrand] = useState<Partial<Record<LeafBrand, SnapshotData>>>({});
+  const [monthlyDataByBrand, setMonthlyDataByBrand] = useState<Partial<Record<LeafBrand, MonthlyStockResponse>>>({});
+  const [retailDataByBrand, setRetailDataByBrand] = useState<Partial<Record<LeafBrand, RetailSalesResponse>>>({});
+  const [shipmentDataByBrand, setShipmentDataByBrand] = useState<Partial<Record<LeafBrand, ShipmentSalesResponse>>>({});
+  const [purchaseDataByBrand, setPurchaseDataByBrand] = useState<Partial<Record<LeafBrand, PurchaseResponse>>>({});
 
   const DEFAULT_ACC_WOI_DEALER: Record<AccKey, number> = {
     '신발': 29,
-    '모자': 29,
-    '가방': 25,
+    '모자': 20,
+    '가방': 25.5,
     '기타': 39,
   } as Record<AccKey, number>;
   const DEFAULT_ACC_WOI_HQ: Record<AccKey, number> = {
@@ -455,6 +471,7 @@ export default function InventoryDashboard() {
         BRANDS_TO_AGGREGATE.forEach((b, i) => {
           monthlyByBrandRef.current[b] = jsons[i];
         });
+        setMonthlyDataByBrand(Object.fromEntries(BRANDS_TO_AGGREGATE.map((b, i) => [b, jsons[i]])) as Record<LeafBrand, MonthlyStockResponse>);
         setMonthlyData(aggregateMonthlyStock(jsons));
       } else {
         const res = await fetch(`/api/inventory/monthly-stock?${new URLSearchParams({ year: String(year), brand })}`);
@@ -487,6 +504,7 @@ export default function InventoryDashboard() {
         BRANDS_TO_AGGREGATE.forEach((b, i) => {
           retailByBrandRef.current[b] = jsons[i];
         });
+        setRetailDataByBrand(Object.fromEntries(BRANDS_TO_AGGREGATE.map((b, i) => [b, jsons[i]])) as Record<LeafBrand, RetailSalesResponse>);
         const aggregated = aggregateRetailSales(jsons);
         if (aggregated.retail2025) retail2025Ref.current = aggregated.retail2025;
         setRetailData(aggregated);
@@ -522,6 +540,7 @@ export default function InventoryDashboard() {
         BRANDS_TO_AGGREGATE.forEach((b, i) => {
           shipmentByBrandRef.current[b] = jsons[i];
         });
+        setShipmentDataByBrand(Object.fromEntries(BRANDS_TO_AGGREGATE.map((b, i) => [b, jsons[i]])) as Record<LeafBrand, ShipmentSalesResponse>);
         setShipmentData(aggregateShipmentSales(jsons));
       } else {
         const res = await fetch(`/api/inventory/shipment-sales?${new URLSearchParams({ year: String(year), brand })}`);
@@ -553,6 +572,7 @@ export default function InventoryDashboard() {
         BRANDS_TO_AGGREGATE.forEach((b, i) => {
           purchaseByBrandRef.current[b] = jsons[i];
         });
+        setPurchaseDataByBrand(Object.fromEntries(BRANDS_TO_AGGREGATE.map((b, i) => [b, jsons[i]])) as Record<LeafBrand, PurchaseResponse>);
         setPurchaseData(aggregatePurchase(jsons));
       } else {
         const res = await fetch(`/api/inventory/purchase?${new URLSearchParams({ year: String(year), brand })}`);
@@ -578,15 +598,16 @@ export default function InventoryDashboard() {
       setMonthlyData(snap.monthly);
       setShipmentData(snap.shipment);
       setPurchaseData(snap.purchase);
-      if (snap.hqSellInPlan && Object.keys(snap.hqSellInPlan).length) setHqSellInPlan(snap.hqSellInPlan);
-      if (snap.hqSellOutPlan && Object.keys(snap.hqSellOutPlan).length) setHqSellOutPlan(snap.hqSellOutPlan);
-      if (snap.accTargetWoiDealer) setAccTargetWoiDealer(snap.accTargetWoiDealer);
-      if (snap.accTargetWoiHq) setAccTargetWoiHq(snap.accTargetWoiHq);
-      if (snap.accHqHoldingWoi) setAccHqHoldingWoi(snap.accHqHoldingWoi);
-      if (year === 2026 && snap.planFromMonth && snap.retail2025) {
-        retail2025Ref.current = snap.retail2025;
+      // 4개 항목만 저장하므로 hqSellOutPlan·accTargetWoi·accHqHoldingWoi는 적용하지 않음
+      if (year === 2026 && snap.planFromMonth != null && snap.retail2025) {
         setRetailData(
-          applyPlanToSnapshot(snap.retailActuals, snap.retail2025 as RetailSalesResponse, snap.planFromMonth, growthRate, growthRateHq),
+          applyPlanToSnapshot(
+            snap.retailActuals,
+            snap.retail2025 as RetailSalesResponse,
+            snap.planFromMonth,
+            growthRate,
+            growthRateHq,
+          ),
         );
       } else {
         setRetailData(snap.retailActuals);
@@ -632,10 +653,6 @@ export default function InventoryDashboard() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, brand]); // growthRate???섎룄?곸쑝濡??쒖쇅
-
-  useEffect(() => {
-    setEditMode(false);
-  }, [year, brand]);
 
   useEffect(() => {
     if (year !== 2026) return;
@@ -742,6 +759,11 @@ export default function InventoryDashboard() {
       setPrevYearPurchaseData(null);
       return;
     }
+    // 탭 전환 시 즉시 전년 데이터 초기화 → YOY가 '- → 정상'으로 표시 (잘못된 숫자 방지)
+    setPrevYearMonthlyData(null);
+    setPrevYearRetailData(null);
+    setPrevYearShipmentData(null);
+    setPrevYearPurchaseData(null);
     let cancelled = false;
 
     const run = async () => {
@@ -826,61 +848,35 @@ export default function InventoryDashboard() {
       return null;
     }
     if (year === 2026 && brand === '전체') {
-      const perBrand: TopTablePair[] = [];
-      for (const b of BRANDS_TO_AGGREGATE) {
-        const snap = savedSnapshotByBrand[b];
-        const monthly = snap?.monthly ?? monthlyByBrandRef.current[b];
-        const shipment = snap?.shipment ?? shipmentByBrandRef.current[b];
-        const purchase = snap?.purchase ?? purchaseByBrandRef.current[b];
-        const retail = snap
-          ? (
-            snap.planFromMonth && snap.retail2025
-              ? applyPlanToSnapshot(
-                  snap.retailActuals,
-                  snap.retail2025 as RetailSalesResponse,
-                  snap.planFromMonth,
-                  growthRate,
-                  growthRateHq,
-                )
-              : snap.retailActuals
-          )
-          : retailByBrandRef.current[b];
-        if (!monthly || !retail || !shipment || !purchase) continue;
-
-        const builtByBrand = buildTableDataFromMonthly(
-          monthly,
-          retail,
-          shipment,
-          purchase,
-          year,
-        );
+      if (BRANDS_TO_AGGREGATE.some((b) => !monthlyDataByBrand[b] || !retailDataByBrand[b] || !shipmentDataByBrand[b])) {
+        return null;
+      }
+      const perBrandTables: TopTablePair[] = BRANDS_TO_AGGREGATE.map((b) => {
+        const mData = monthlyDataByBrand[b]!;
+        const rData = retailDataByBrand[b]!;
+        const sData = shipmentDataByBrand[b]!;
+        const pData = purchaseDataByBrand[b];
+        const built = buildTableDataFromMonthly(mData, rData, sData, pData ?? undefined, year);
         const withWoi = applyAccTargetWoiOverlay(
-          builtByBrand.dealer,
-          builtByBrand.hq,
-          retail,
-          snap?.accTargetWoiDealer ?? DEFAULT_ACC_WOI_DEALER,
-          snap?.accTargetWoiHq ?? DEFAULT_ACC_WOI_HQ,
-          snap?.accHqHoldingWoi ?? DEFAULT_ACC_HQ_HOLDING_WOI,
+          built.dealer,
+          built.hq,
+          rData,
+          accTargetWoiDealer,
+          accTargetWoiHq,
+          accHqHoldingWoi,
           year,
         );
         const otbDealerSellIn = otbToDealerSellInPlan(otbData, b);
-        const mergedSellOutPlan = {
-          ...(snap?.hqSellOutPlan ?? {}),
-          ...otbDealerSellIn,
-        };
-        perBrand.push(
-          applyHqSellInSellOutPlanOverlay(
-            withWoi.dealer,
-            withWoi.hq,
-            snap?.hqSellInPlan ?? {},
-            mergedSellOutPlan,
-            year,
-          ),
+        const mergedSellOutPlan = { ...hqSellOutPlan, ...otbDealerSellIn };
+        return applyHqSellInSellOutPlanOverlay(
+          withWoi.dealer,
+          withWoi.hq,
+          annualPlanToHqSellInPlan(annualShipmentPlan2026, b),
+          mergedSellOutPlan,
+          year,
         );
-      }
-      if (perBrand.length > 0) {
-        return aggregateTopTables(perBrand, year);
-      }
+      });
+      return aggregateTopTables(perBrandTables, year);
     }
 
     const built = buildTableDataFromMonthly(
@@ -908,13 +904,13 @@ export default function InventoryDashboard() {
       return applyHqSellInSellOutPlanOverlay(
         withWoi.dealer,
         withWoi.hq,
-        hqSellInPlan,
+        annualPlanToHqSellInPlan(annualShipmentPlan2026, brand as AnnualPlanBrand),
         mergedSellOutPlan,
         year,
       );
     }
     return built;
-  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, annualShipmentPlan2026, accTargetWoiDealer, accTargetWoiHq, accHqHoldingWoi, hqSellInPlan, hqSellOutPlan, savedSnapshotByBrand, growthRate, growthRateHq, otbData]);
+  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, monthlyDataByBrand, retailDataByBrand, shipmentDataByBrand, purchaseDataByBrand, annualShipmentPlan2026, accTargetWoiDealer, accTargetWoiHq, accHqHoldingWoi, hqSellOutPlan, savedSnapshotByBrand, growthRate, growthRateHq, otbData]);
 
   const shouldUseTopTableOnly = year === 2025 || year === 2026;
   const dealerTableData = shouldUseTopTableOnly
@@ -954,11 +950,6 @@ export default function InventoryDashboard() {
     }
   }, []);
 
-  // 2026 蹂몄궗 ?곹뭹留ㅼ엯(?곌컙) ?몄쭛
-  const handleHqSellInChange = useCallback((rowKey: RowKey, newSellInTotal: number) => {
-    setHqSellInPlan((prev) => ({ ...prev, [rowKey]: newSellInTotal }));
-  }, []);
-
   // 2026 蹂몄궗 ?由ъ긽異쒓퀬(?곌컙) ?몄쭛 ???由ъ긽 ??Sell-in???먮룞 諛섏쁺
   const handleHqHoldingWoiChange = useCallback((rowKey: AccKey, newWoi: number) => {
     setAccHqHoldingWoi((prev) => {
@@ -972,7 +963,7 @@ export default function InventoryDashboard() {
     setHqSellOutPlan((prev) => ({ ...prev, [rowKey]: newSellOutTotal }));
   }, []);
 
-  // ?? ?ㅻ깄???????
+  // 저장 시 월별 재고잔액·리테일 매출·출고·매입 4개만 저장
   const handleSave = useCallback(async () => {
     if (!monthlyData || !retailData || !shipmentData || !purchaseData) return;
     const retailActuals =
@@ -982,62 +973,17 @@ export default function InventoryDashboard() {
     const snap: SnapshotData = {
       monthly: monthlyData,
       retailActuals,
-      retail2025: retail2025Ref.current ?? null,
+      retail2025: retailData.retail2025 ?? retail2025Ref.current ?? null,
       shipment: shipmentData,
       purchase: purchaseData,
       savedAt: new Date().toISOString(),
       planFromMonth: retailData.planFromMonth,
     };
-    if (year === 2026) {
-      snap.hqSellInPlan = Object.keys(hqSellInPlan).length ? hqSellInPlan : undefined;
-      snap.hqSellOutPlan = Object.keys(hqSellOutPlan).length ? hqSellOutPlan : undefined;
-      snap.accTargetWoiDealer = accTargetWoiDealerRef.current;
-      snap.accTargetWoiHq = accTargetWoiHqRef.current;
-      snap.accHqHoldingWoi = accHqHoldingWoiRef.current;
-    }
     saveSnapshot(year, brand, snap);
     await saveSnapshotToServer(year, brand, snap);
     setSnapshotSaved(true);
     setSnapshotSavedAt(snap.savedAt);
-    setEditMode(false);
-  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData, hqSellInPlan, hqSellOutPlan]);
-
-  // ?? 2026 ?몄쭛媛?珥덇린媛?由ъ뀑 ??
-  const handleResetToDefault = useCallback(() => {
-    setHqSellInPlan({});
-    setHqSellOutPlan({});
-    setAccTargetWoiDealer(DEFAULT_ACC_WOI_DEALER);
-    setAccTargetWoiHq(DEFAULT_ACC_WOI_HQ);
-    setAccHqHoldingWoi(DEFAULT_ACC_HQ_HOLDING_WOI);
-    setEditMode(false);
-  }, []);
-
-  const handleEditModeCancel = useCallback(() => {
-    const snap = loadSnapshot(year, brand);
-    if (snap) {
-      setHqSellInPlan(snap.hqSellInPlan ?? {});
-      setHqSellOutPlan(snap.hqSellOutPlan ?? {});
-      const dealerWoi = snap.accTargetWoiDealer ?? DEFAULT_ACC_WOI_DEALER;
-      const hqWoi = snap.accTargetWoiHq ?? DEFAULT_ACC_WOI_HQ;
-      const holdingWoi = snap.accHqHoldingWoi ?? DEFAULT_ACC_HQ_HOLDING_WOI;
-      setAccTargetWoiDealer(dealerWoi);
-      setAccTargetWoiHq(hqWoi);
-      setAccHqHoldingWoi(holdingWoi);
-      accTargetWoiDealerRef.current = dealerWoi;
-      accTargetWoiHqRef.current = hqWoi;
-      accHqHoldingWoiRef.current = holdingWoi;
-    } else {
-      setHqSellInPlan({});
-      setHqSellOutPlan({});
-      setAccTargetWoiDealer(DEFAULT_ACC_WOI_DEALER);
-      setAccTargetWoiHq(DEFAULT_ACC_WOI_HQ);
-      setAccHqHoldingWoi(DEFAULT_ACC_HQ_HOLDING_WOI);
-      accTargetWoiDealerRef.current = DEFAULT_ACC_WOI_DEALER;
-      accTargetWoiHqRef.current = DEFAULT_ACC_WOI_HQ;
-      accHqHoldingWoiRef.current = DEFAULT_ACC_HQ_HOLDING_WOI;
-    }
-    setEditMode(false);
-  }, [year, brand]);
+  }, [year, brand, monthlyData, retailData, shipmentData, purchaseData]);
 
   // ?? ?ш퀎????
   const handleRecalc = useCallback(async (mode: 'current' | 'annual') => {
@@ -1102,13 +1048,6 @@ export default function InventoryDashboard() {
         savedAt: new Date().toISOString(),
         planFromMonth: fr.planFromMonth,
       };
-      if (year === 2026) {
-        freshSnapshot.hqSellInPlan = Object.keys(hqSellInPlan).length ? hqSellInPlan : undefined;
-        freshSnapshot.hqSellOutPlan = Object.keys(hqSellOutPlan).length ? hqSellOutPlan : undefined;
-        freshSnapshot.accTargetWoiDealer = accTargetWoiDealerRef.current;
-        freshSnapshot.accTargetWoiHq = accTargetWoiHqRef.current;
-        freshSnapshot.accHqHoldingWoi = accHqHoldingWoiRef.current;
-      }
 
       saveSnapshot(year, brand, freshSnapshot);
       await saveSnapshotToServer(year, brand, freshSnapshot);
@@ -1119,7 +1058,7 @@ export default function InventoryDashboard() {
     } finally {
       setRecalcLoading(false);
     }
-  }, [year, brand, growthRate, growthRateHq, fetchMonthlyData, fetchRetailData, fetchShipmentData, fetchPurchaseData, hqSellInPlan, hqSellOutPlan]);
+  }, [year, brand, growthRate, growthRateHq, fetchMonthlyData, fetchRetailData, fetchShipmentData, fetchPurchaseData]);
 
   const handleAnnualPlanCellChange = useCallback((planBrand: AnnualPlanBrand, season: AnnualPlanSeason, value: string) => {
     if (!annualPlanEditMode) return;
@@ -1158,10 +1097,6 @@ export default function InventoryDashboard() {
         onSave={handleSave}
         onRecalc={handleRecalc}
         canSave={!!(monthlyData && retailData && shipmentData && purchaseData)}
-        editMode={year === 2026 && brand !== '전체' ? editMode : false}
-        onEditModeEnter={year === 2026 && brand !== '전체' ? () => setEditMode(true) : undefined}
-        onEditModeCancel={year === 2026 && brand !== '전체' ? handleEditModeCancel : undefined}
-        onResetToDefault={year === 2026 && brand !== '전체' ? handleResetToDefault : undefined}
       />
 
       <div className="px-6 py-5">
@@ -1191,11 +1126,11 @@ export default function InventoryDashboard() {
                 }
                 data={dealerTableData!}
                 year={year}
-                editMode={year === 2026 && brand !== '전체' ? editMode : false}
                 sellInLabel="Sell-in"
                 sellOutLabel="Sell-out"
                 tableType="dealer"
                 onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
+                use2025Legend={year === 2026 && brand === '전체'}
                 prevYearTotalOpening={(() => {
                   const v = prevYearMonthlyData?.dealer.rows.find((r) => r.key === '재고자산합계')?.opening;
                   return v != null ? v / 1000 : undefined;
@@ -1216,24 +1151,16 @@ export default function InventoryDashboard() {
                       onChange={(v) => setGrowthRateHq(v)}
                       title="본사 리테일 계획매출 전년 대비 성장률"
                     />
-                    {year === 2026 && brand !== '전체' && (
-                      <>
-                        <span className="mx-2 text-gray-300">|</span>
-                        <span className="text-xs text-gray-500">
-                          편집가능: ①의류 상품매입(본사): 현지 매입계획 반영 ②재고주수 (본사,대리상)
-                        </span>
-                      </>
-                    )}
                   </>
                 }
                 data={hqTableData!}
                 year={year}
-                editMode={year === 2026 && brand !== '전체' ? editMode : false}
                 sellInLabel="상품매입"
                 sellOutLabel="대리상출고"
                 tableType="hq"
                 onWoiChange={year === 2026 && brand !== '전체' ? handleWoiChange : undefined}
-                onHqSellInChange={year === 2026 && brand !== '전체' ? handleHqSellInChange : undefined}
+                use2025Legend={year === 2026 && brand === '전체'}
+                onHqSellInChange={undefined}
                 prevYearTotalOpening={(() => {
                   const v = prevYearMonthlyData?.hq.rows.find((r) => r.key === '재고자산합계')?.opening;
                   return v != null ? v / 1000 : undefined;

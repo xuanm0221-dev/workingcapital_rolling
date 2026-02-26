@@ -14,8 +14,6 @@ interface Props {
   titleRight?: React.ReactNode;
   data: InventoryTableData;
   year: number;
-  /** 편집 모드일 때만 상품매입·대리상출고·재고주수 편집 UI 표시. false면 다른 열과 동일하게 숫자만 표시 */
-  editMode?: boolean;
   sellInLabel?: string;
   sellOutLabel?: string;
   tableType?: 'dealer' | 'hq';
@@ -32,6 +30,8 @@ interface Props {
   prevYearTotalHqSales?: number;
   /** 테이블 우측에 나란히 렌더할 콘텐츠 (범례 위, 테이블 하단 정렬) */
   sideContent?: React.ReactNode;
+  /** 2026 전체탭: 2025 스타일 범례 표시 (Sell-through·재고주수 기본 공식) */
+  use2025Legend?: boolean;
 }
 
 // 헤더 스타일
@@ -143,7 +143,6 @@ export default function InventoryTable({
   titleRight,
   data,
   year,
-  editMode = false,
   sellInLabel = 'Sell-in',
   sellOutLabel = 'Sell-out',
   tableType = 'dealer',
@@ -155,17 +154,18 @@ export default function InventoryTable({
   prevYearTotalSellOut,
   prevYearTotalHqSales,
   sideContent,
+  use2025Legend = false,
 }: Props) {
-  const isWoiEditable = year === 2026 && !!onWoiChange && editMode;
+  const isWoiEditable = year === 2026 && !!onWoiChange;
   const isAccRow = (key: string) => ACC_KEYS.includes(key as AccKey);
+  const isClothingLeafRow = (row: InventoryRow | YoyRow) => !isYoyRow(row) && SEASON_KEYS.includes((row as InventoryRow).key as SeasonKey);
   const isWoiEditableForRow = (row: InventoryRow) => isWoiEditable && row.isLeaf && isAccRow(row.key);
   const isHqSellEditableForRow = (row: InventoryRow) =>
     year === 2026 &&
     tableType === 'hq' &&
     row.isLeaf &&
     SEASON_KEYS.includes(row.key as SeasonKey) &&
-    (!!onHqSellInChange || !!onHqSellOutChange) &&
-    editMode;
+    (!!onHqSellInChange || !!onHqSellOutChange);
   const prevYear = year - 1;
 
   const totalRow = data.rows.find((r) => r.key === '재고자산합계');
@@ -284,7 +284,10 @@ export default function InventoryTable({
               </th>
               <th className={TH} style={{ width: '5%', minWidth: 50 }}>증감</th>
               <th className={TH} style={{ width: '5%', minWidth: 50 }}>Sell-through</th>
-              <th className={TH} style={{ width: '5%', minWidth: 50 }}>재고주수</th>
+              <th className={TH} style={{ width: '5%', minWidth: 50 }}>
+                재고주수<br />
+                <span className="font-normal text-[10px] text-blue-200">(목표)</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -401,45 +404,32 @@ export default function InventoryTable({
                 }`}>
                   {isYoyRow(row) ? '-' : formatPct((row as InventoryRow).sellThrough)}
                 </td>
-                {/* 재고주수 (2026년 리프 행 편집 가능) */}
-                <td className={`${cellCls(row)} ${getAccWoiBoxClass(tableType, row)} ${
-                  isYoyRow(row) ? '' :
-                  (row as InventoryRow).woi > 0 && (row as InventoryRow).woi <= 10 ? 'text-green-600' :
-                  (row as InventoryRow).woi > 10 && (row as InventoryRow).woi <= 20 ? 'text-yellow-600' :
-                  (row as InventoryRow).woi > 20 ? 'text-red-500' : ''
-                }`}>
-                  {isYoyRow(row) ? '-' : isWoiEditableForRow(row as InventoryRow) ? (
-                    <span
-                      className={`flex items-center justify-end gap-0.5 ${editableCellCls} ${editableCellBgCls}`}
-                      onClick={() => !isEditing(row.key, 'woi') && startEdit(row, 'woi', row.woi || 0)}
-                    >
-                      {isEditing(row.key, 'woi') ? (
-                        <input
-                          ref={inputRef}
-                          type="text"
-                          inputMode="decimal"
-                          value={editValue}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^\d.]/g, '');
-                            const parts = raw.split('.');
-                            if (parts.length <= 2 && (parts[1]?.length ?? 0) <= 1) setEditValue(raw);
-                          }}
-                          onBlur={() => commitEdit(row.key, 'woi', row.woi || 1)}
-                          onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget.blur(), e.preventDefault())}
-                          className={`${inputCls} w-12`}
-                        />
-                      ) : (
-                        <>
-                          <span className="flex-1 text-right">{formatWoi(row.woi)}</span>
-                          <span
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => { e.stopPropagation(); startEdit(row, 'woi', row.woi || 0); }}
-                          >
-                            <PencilIcon />
-                          </span>
-                        </>
-                      )}
-                    </span>
+                {/* 재고주수 (2026년 ACC 리프 행 편집 가능, 본사판매용 패턴. 의류 하위는 미표시) */}
+                <td
+                  className={`${cellCls(row)} ${getAccWoiBoxClass(tableType, row)} ${
+                    isYoyRow(row) || isClothingLeafRow(row) ? '' :
+                    (row as InventoryRow).woi > 0 && (row as InventoryRow).woi <= 10 ? 'text-green-600' :
+                    (row as InventoryRow).woi > 10 && (row as InventoryRow).woi <= 20 ? 'text-yellow-600' :
+                    (row as InventoryRow).woi > 20 ? 'text-red-500' : ''
+                  } ${isWoiEditableForRow(row as InventoryRow) ? `group cursor-text ${editableCellBgCls}` : ''}`}
+                  onClick={isWoiEditableForRow(row as InventoryRow) ? () => !isEditing(row.key, 'woi') && startEdit(row as InventoryRow, 'woi', (row as InventoryRow).woi || 0) : undefined}
+                >
+                  {isYoyRow(row) ? '-' : isClothingLeafRow(row) ? '' : isWoiEditableForRow(row as InventoryRow) ? (
+                    isEditing(row.key, 'woi') ? (
+                      <input
+                        ref={inputRef}
+                        type="number"
+                        min={0.1}
+                        step={0.1}
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={() => commitEdit(row.key, 'woi', row.woi || 1)}
+                        onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget.blur(), e.preventDefault())}
+                        className="w-12 text-right text-xs border-0 bg-transparent outline-none tabular-nums"
+                      />
+                    ) : (
+                      <span>{formatWoi(row.woi)}</span>
+                    )
                   ) : (
                     formatWoi(row.woi)
                   )}
@@ -461,7 +451,7 @@ export default function InventoryTable({
         >
           <span>{legendOpen ? '▼' : '▶'}</span>
           <span>
-            {year === 2026
+            {year === 2026 && !use2025Legend
               ? tableType === 'dealer'
                 ? 'ACC 범례'
                 : '의류 범례'
@@ -471,7 +461,7 @@ export default function InventoryTable({
         </button>
         {legendOpen && (
         <div className="mt-1 text-gray-500">
-        {year === 2026 ? (
+        {year === 2026 && !use2025Legend ? (
           tableType === 'dealer' ? (
             <div className="flex gap-8 items-start">
               <div className="space-y-2 min-w-0">
@@ -491,7 +481,7 @@ export default function InventoryTable({
                 <div>⑥ 대리상 출고예정 버퍼 = 대리상 주간매출 × 본사 목표재고주수 (WOI 열)</div>
                 <div>⑦ 본사 기말재고 = ⑤ + ⑥</div>
                 <div>⑧ 본사 대리상출고 = 대리상 ACC Sell-in (④의 결과)</div>
-                <div>⑨ 본사 상품매입 = 기말+본사판매+대리상출고-기초</div>
+                <div>⑨ 본사 의류매입 = 기말+본사판매+대리상출고-기초</div>
               </div>
             </div>
           ) : (
