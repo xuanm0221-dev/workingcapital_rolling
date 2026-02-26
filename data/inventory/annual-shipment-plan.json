@@ -1,27 +1,27 @@
 {
   "2026": {
     "MLB": {
-      "currF": 2654771,
-      "currS": 2510618,
-      "year1": 367886,
-      "year2": 75568,
-      "next": 252171,
-      "past": 63235
+      "currF": 3000639,
+      "currS": 2188954,
+      "year1": 0,
+      "year2": 0,
+      "next": 754172,
+      "past": 0
     },
     "MLB KIDS": {
-      "currF": 129632,
-      "currS": 106274,
-      "year1": 34605,
-      "year2": 27134,
-      "next": 15039,
-      "past": 13250
+      "currF": 159511,
+      "currS": 85460,
+      "year1": 0,
+      "year2": 0,
+      "next": 51127,
+      "past": 0
     },
     "DISCOVERY": {
-      "currF": 135258,
-      "currS": 76187,
-      "year1": 96559,
-      "year2": 3962,
-      "next": 4989,
+      "currF": 201445,
+      "currS": 112460,
+      "year1": 0,
+      "year2": 0,
+      "next": 68814,
       "past": 0
     }
   }

@@ -36,15 +36,15 @@ function sellThroughDenominator(
   return sellInTotal;
 }
 
-/** Sell-through 분자: 본사 ACC는 대리상출고+본사판매, 그 외는 sellOutTotal */
+/** Sell-through 분자: 본사는 대리상출고+본사판매, 대리상은 sellOutTotal */
 function sellThroughNumerator(
   key: string,
   sellOutTotal: number,
   hqSalesTotal?: number
 ): number {
-  const isHqAccOrTotal = (key === 'ACC합계' || key === '재고자산합계' || ACC_KEYS.includes(key as AccKey)) && hqSalesTotal != null;
-  if (isHqAccOrTotal) {
-    return sellOutTotal + hqSalesTotal; // 본사 ACC: 대리상출고 + 본사판매
+  const isHqRowWithSales = (key === '의류합계' || SEASON_KEYS.includes(key as RowKey) || key === 'ACC합계' || key === '재고자산합계' || ACC_KEYS.includes(key as AccKey)) && hqSalesTotal != null;
+  if (isHqRowWithSales) {
+    return sellOutTotal + hqSalesTotal; // 본사: 대리상출고 + 본사판매
   }
   return sellOutTotal;
 }
@@ -297,7 +297,7 @@ export function applyAccTargetWoiOverlay(
       // 본사 대리상출고 = 대리상 ACC Sell-in 결과값
       const newSellOutHq = dealerSellInTotal;
       const hqSalesTotal = hRow.hqSalesTotal ?? 0;
-      // 본사 상품매입 = 기말(목표) + 대리상출고 + 본사판매 − 기초
+      // 본사 의류매입 = 기말(목표) + 대리상출고 + 본사판매 − 기초
       const rawSellInHq = targetClosingHq + newSellOutHq + hqSalesTotal - hRow.opening;
 
       // 매입이 음수면(기초재고로 충분) 매입=0, 기말은 실제 공식으로 재계산
@@ -345,7 +345,7 @@ export function applyAccTargetWoiOverlay(
 
 const LEAF_ROW_ORDER: RowKey[] = ['당년F', '당년S', '1년차', '2년차', '차기시즌', '과시즌', '신발', '모자', '가방', '기타'];
 
-/** 2026년만: 본사 상품매입·대리상출고 계획 오버레이. 본사 대리상출고 = 대리상 Sell-in 반영. */
+/** 2026년만: 본사 의류매입·대리상출고 계획 오버레이. 본사 대리상출고 = 대리상 Sell-in 반영. */
 export function applyHqSellInSellOutPlanOverlay(
   dealer: InventoryTableData,
   hq: InventoryTableData,

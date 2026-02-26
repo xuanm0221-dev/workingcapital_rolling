@@ -75,14 +75,6 @@ interface Props {
   canSave: boolean;
   onSave: () => void;
   onRecalc: (mode: 'current' | 'annual') => void;
-  /** 2026 재고자산표 편집 모드 (수정 클릭 시 true) */
-  editMode?: boolean;
-  /** 수정 버튼 클릭 시 호출 (편집 모드 진입) */
-  onEditModeEnter?: () => void;
-  /** 수정 취소 버튼 클릭 시 호출 (편집 모드 종료, 저장 없이 되돌림) */
-  onEditModeCancel?: () => void;
-  /** 초기값 버튼 클릭 시 호출 (편집값 리셋) */
-  onResetToDefault?: () => void;
 }
 
 export default function InventoryFilterBar({
@@ -96,10 +88,6 @@ export default function InventoryFilterBar({
   canSave,
   onSave,
   onRecalc,
-  editMode = false,
-  onEditModeEnter,
-  onEditModeCancel,
-  onResetToDefault,
 }: Props) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -115,33 +103,29 @@ export default function InventoryFilterBar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const savedAtLabel = snapshotSavedAt
-    ? (() => {
-        const d = new Date(snapshotSavedAt);
-        return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-      })()
-    : null;
   return (
     <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-      {/* 1레벨: 연도 탭 */}
-      <div className="flex border-b border-gray-200 bg-gray-50 px-6">
-        {YEARS.map((y) => (
-          <button
-            key={y}
-            onClick={() => onYearChange(y)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-              year === y
-                ? 'border-blue-600 text-blue-700 bg-white'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {y}년
-          </button>
-        ))}
-      </div>
+      {/* 1레벨: 연도 탭 | 브랜드 · 저장 (한 줄) */}
+      <div className="flex flex-wrap items-center gap-4 px-6 py-2.5 border-b border-gray-200 bg-gray-50">
+        {/* 연도 탭 */}
+        <div className="flex">
+          {YEARS.map((y) => (
+            <button
+              key={y}
+              onClick={() => onYearChange(y)}
+              className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                year === y
+                  ? 'border-blue-600 text-blue-700 bg-white'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {y}년
+            </button>
+          ))}
+        </div>
 
-      {/* 2레벨: 브랜드 · 저장 · 수정 */}
-      <div className="flex flex-wrap items-center gap-4 px-6 py-2.5">
+        <div className="h-6 w-px bg-gray-300 flex-shrink-0" />
+
         {/* 브랜드 — iOS 스타일 세그먼트 컨트롤 */}
         <div className="inline-flex rounded-lg border border-gray-200 bg-gray-100/80 p-0.5 overflow-hidden">
           {BRANDS.map((b, i) => (
@@ -242,59 +226,6 @@ export default function InventoryFilterBar({
               </div>
             )}
           </div>
-        )}
-
-        <div className="h-4 w-px bg-gray-300" />
-
-        {/* 2026 전용: 수정 · 저장 · 초기값 */}
-        {year === 2026 && (onEditModeEnter || onEditModeCancel || onResetToDefault) && (
-          <>
-            <button
-              type="button"
-              onClick={editMode ? onEditModeCancel : onEditModeEnter}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
-                editMode
-                  ? 'bg-blue-50 text-blue-700 border-blue-300'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-blue-400'
-              }`}
-              title={editMode ? '편집 취소 (저장 없이 되돌림)' : '재고자산표 편집 (상품매입·재고주수)'}
-            >
-              {editMode ? '수정 취소' : '수정'}
-            </button>
-            <button
-              type="button"
-              onClick={onSave}
-              disabled={!canSave || recalcLoading}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
-                canSave && !recalcLoading
-                  ? 'bg-[#8b7bb8]/10 text-[#7a6aa7] border-[#8b7bb8]/50 hover:bg-[#8b7bb8]/20'
-                  : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-              }`}
-              title="편집 내용을 포함해 현재 데이터를 저장합니다"
-            >
-              {recalcLoading ? (
-                <svg className="animate-spin w-3 h-3" viewBox="0 0 12 12" fill="none">
-                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="2" strokeDasharray="8 8" />
-                </svg>
-              ) : (
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" className="flex-shrink-0">
-                  <path d="M10 1H3L1 3v8h10V1zm-4 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM3 1v3h5V1H3z"/>
-                </svg>
-              )}
-              저장
-            </button>
-            <button
-              type="button"
-              onClick={onResetToDefault}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
-              title="편집값을 초기값으로 되돌립니다"
-            >
-              초기값
-            </button>
-          </>
-        )}
-        {savedAtLabel && (
-          <span className="text-[10px] text-gray-400 whitespace-nowrap">저장: {savedAtLabel}</span>
         )}
       </div>
     </div>

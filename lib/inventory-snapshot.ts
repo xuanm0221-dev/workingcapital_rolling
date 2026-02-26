@@ -23,7 +23,7 @@ export interface SnapshotData {
   savedAt: string;
   /** 계획 시작 월 (1-based). 2026: 2, 2025: undefined */
   planFromMonth?: number;
-  /** 2026 본사 상품매입(연간 K) 편집값 — 저장 시 포함 */
+  /** 2026 본사 의류매입(연간 K) 편집값 — 저장 시 포함 */
   hqSellInPlan?: Partial<Record<RowKey, number>>;
   /** 2026 본사 대리상출고(연간 K) 편집값 — 저장 시 포함 */
   hqSellOutPlan?: Partial<Record<RowKey, number>>;
