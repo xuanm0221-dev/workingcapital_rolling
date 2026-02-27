@@ -79,6 +79,18 @@ interface AccShipmentRatioRow {
   monthly: (number | null)[];
 }
 
+interface BrandActualData {
+  tag: { dealer: (number | null)[]; direct: (number | null)[] };
+  sales: { dealer: (number | null)[]; direct: (number | null)[] };
+  accounts: Record<string, (number | null)[]>;
+}
+
+interface BrandActualApiResponse {
+  brands: Record<SalesBrand, BrandActualData>;
+  availableMonths: number[];
+  error?: string;
+}
+
 const INVENTORY_DEALER_ACC_SELLIN_KEY = 'inventory_dealer_acc_sellin';
 
 interface DealerAccSellInPayload {
@@ -89,7 +101,7 @@ type ShipmentRateChannel = 'dealerCloth' | 'dealerAcc' | 'direct';
 const SHIPMENT_RATE_PERCENT_BY_CHANNEL: Record<ShipmentRateChannel, Record<SalesBrand, number>> = {
   dealerCloth: { MLB: 42, 'MLB KIDS': 42, DISCOVERY: 45 },
   dealerAcc: { MLB: 47, 'MLB KIDS': 42, DISCOVERY: 45 },
-  direct: { MLB: 10, 'MLB KIDS': 10, DISCOVERY: 10 },
+  direct: { MLB: 90, 'MLB KIDS': 90, DISCOVERY: 90 },
 };
 
 const BRAND_SHIPMENT_RATE_ROWS: Array<{ category: '대리상(의류)' | '대리상(ACC)' | '직영'; rates: Record<SalesBrand, number> }> = [
@@ -282,6 +294,11 @@ function formatValue(value: number | null, format: 'number' | 'percent' = 'numbe
   return new Intl.NumberFormat('ko-KR').format(kValue);
 }
 
+function formatYoYByAnnual(annual26: number | null, annual25: number | null): string {
+  if (annual26 === null || annual25 === null || Number.isNaN(annual26) || Number.isNaN(annual25) || annual25 === 0) return '-';
+  return `${((annual26 / annual25) * 100).toFixed(1)}%`;
+}
+
 function sumSeries(a: (number | null)[], b: (number | null)[]): (number | null)[] {
   return a.map((v, i) => {
     const x = v ?? null;
@@ -303,6 +320,22 @@ function isSameSeries(a: (number | null)[], b: (number | null)[]): boolean {
   return true;
 }
 
+function splitByPlannedRatio(
+  total: number | null,
+  plannedA: number | null,
+  plannedB: number | null,
+): { a: number | null; b: number | null } {
+  if (total === null) return { a: null, b: null };
+  const pa = plannedA ?? 0;
+  const pb = plannedB ?? 0;
+  const sum = pa + pb;
+  if (sum <= 0) {
+    return { a: total / 2, b: total / 2 };
+  }
+  const a = (total * pa) / sum;
+  return { a, b: total - a };
+}
+
 function readInventoryGrowthParams(): InventoryGrowthParams {
   if (typeof window === 'undefined') return { growthRate: 5, growthRateHq: 10 };
   const raw = window.localStorage.getItem(INVENTORY_GROWTH_PARAMS_KEY);
@@ -320,6 +353,7 @@ function readInventoryGrowthParams(): InventoryGrowthParams {
 export default function PLForecastTab() {
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set(['Tag매출', '매출원가 합계', '직접비', '영업비']));
+  const [logicGuideCollapsed, setLogicGuideCollapsed] = useState<boolean>(true);
   const [monthlyInputs, setMonthlyInputs] = useState<MonthlyInputs>(emptyMonthlyInputs);
   const [salesSectionOpen, setSalesSectionOpen] = useState<boolean>(false);
   const [salesCollapsed, setSalesCollapsed] = useState<Set<string>>(new Set());
@@ -345,6 +379,13 @@ export default function PLForecastTab() {
   const [accRatioLoading, setAccRatioLoading] = useState<boolean>(false);
   const [accRatioError, setAccRatioError] = useState<string | null>(null);
   const [accRatioRows, setAccRatioRows] = useState<AccShipmentRatioRow[]>([]);
+  const [brandActualLoading, setBrandActualLoading] = useState<boolean>(false);
+  const [brandActualError, setBrandActualError] = useState<string | null>(null);
+  const [brandActualByBrand, setBrandActualByBrand] = useState<Record<SalesBrand, BrandActualData>>({
+    MLB: { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
+    'MLB KIDS': { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
+    DISCOVERY: { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -413,6 +454,37 @@ export default function PLForecastTab() {
       }
     };
     fetchAccRatio();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchBrandActual = async () => {
+      setBrandActualLoading(true);
+      setBrandActualError(null);
+      try {
+        const res = await fetch('/api/pl-forecast/brand-actual?year=2026', { cache: 'no-store' });
+        const json = (await res.json()) as BrandActualApiResponse;
+        if (!res.ok) throw new Error(json?.error || '브랜드 실적 데이터를 불러오지 못했습니다.');
+        if (!mounted) return;
+        setBrandActualByBrand(
+          json.brands ?? {
+            MLB: { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
+            'MLB KIDS': { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
+            DISCOVERY: { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
+          },
+        );
+      } catch (err) {
+        if (mounted) {
+          setBrandActualError(err instanceof Error ? err.message : '브랜드 실적 데이터를 불러오지 못했습니다.');
+        }
+      } finally {
+        if (mounted) setBrandActualLoading(false);
+      }
+    };
+    fetchBrandActual();
     return () => {
       mounted = false;
     };
@@ -831,18 +903,6 @@ export default function PLForecastTab() {
     return rowMap;
   }, [salesRows, otbByBrand, directRetailByBrand, dealerSeasonMonthlyByBrand, dealerAccOtbByBrand, accRatioByBrand]);
 
-  const tagSalesMonthlyByBrand = useMemo(() => {
-    return {
-      MLB: salesDerived['brand:MLB']?.monthly ?? new Array(12).fill(null),
-      'MLB KIDS': salesDerived['brand:MLB KIDS']?.monthly ?? new Array(12).fill(null),
-      DISCOVERY: salesDerived['brand:DISCOVERY']?.monthly ?? new Array(12).fill(null),
-    } as Record<SalesBrand, (number | null)[]>;
-  }, [salesDerived]);
-
-  const corporateTagSalesMonthly = useMemo(() => {
-    return sumSeries(sumSeries(tagSalesMonthlyByBrand.MLB, tagSalesMonthlyByBrand['MLB KIDS']), tagSalesMonthlyByBrand.DISCOVERY);
-  }, [tagSalesMonthlyByBrand]);
-
   const salesChannelByBrand = useMemo(() => {
     const buildEmpty = () => new Array(12).fill(null) as (number | null)[];
     const result: Record<SalesBrand, { dealerCloth: (number | null)[]; dealerAcc: (number | null)[]; dealer: (number | null)[]; direct: (number | null)[] }> = {
@@ -851,18 +911,37 @@ export default function PLForecastTab() {
       DISCOVERY: { dealerCloth: buildEmpty(), dealerAcc: buildEmpty(), dealer: buildEmpty(), direct: buildEmpty() },
     };
     for (const brand of SALES_BRANDS) {
-      const dealerCloth = salesDerived[`dealerCloth:${brand}`]?.monthly ?? buildEmpty();
-      const dealerAcc = salesDerived[`dealerACC:${brand}`]?.monthly ?? buildEmpty();
-      const direct = salesDerived[`direct:${brand}`]?.monthly ?? buildEmpty();
+      const plannedDealerCloth = salesDerived[`dealerCloth:${brand}`]?.monthly ?? buildEmpty();
+      const plannedDealerAcc = salesDerived[`dealerACC:${brand}`]?.monthly ?? buildEmpty();
+      const plannedDealer = sumSeries(plannedDealerCloth, plannedDealerAcc);
+      const plannedDirect = salesDerived[`direct:${brand}`]?.monthly ?? buildEmpty();
+
+      const dealerCloth = buildEmpty();
+      const dealerAcc = buildEmpty();
+      const dealer = buildEmpty();
+      const direct = buildEmpty();
+      for (let i = 0; i < 12; i += 1) {
+        const actualDealer = brandActualByBrand[brand]?.tag?.dealer?.[i] ?? null;
+        const actualDirect = brandActualByBrand[brand]?.tag?.direct?.[i] ?? null;
+
+        const dealerValue = actualDealer ?? plannedDealer[i] ?? null;
+        const directValue = actualDirect ?? plannedDirect[i] ?? null;
+        const split = splitByPlannedRatio(dealerValue, plannedDealerCloth[i] ?? null, plannedDealerAcc[i] ?? null);
+
+        dealer[i] = dealerValue;
+        dealerCloth[i] = split.a;
+        dealerAcc[i] = split.b;
+        direct[i] = directValue;
+      }
       result[brand] = {
         dealerCloth,
         dealerAcc,
-        dealer: sumSeries(dealerCloth, dealerAcc),
+        dealer,
         direct,
       };
     }
     return result;
-  }, [salesDerived]);
+  }, [salesDerived, brandActualByBrand]);
 
   const corporateSalesChannel = useMemo(() => {
     return {
@@ -879,6 +958,18 @@ export default function PLForecastTab() {
     };
   }, [salesChannelByBrand]);
 
+  const tagSalesMonthlyByBrand = useMemo(() => {
+    return {
+      MLB: sumSeries(salesChannelByBrand.MLB.dealer, salesChannelByBrand.MLB.direct),
+      'MLB KIDS': sumSeries(salesChannelByBrand['MLB KIDS'].dealer, salesChannelByBrand['MLB KIDS'].direct),
+      DISCOVERY: sumSeries(salesChannelByBrand.DISCOVERY.dealer, salesChannelByBrand.DISCOVERY.direct),
+    } as Record<SalesBrand, (number | null)[]>;
+  }, [salesChannelByBrand]);
+
+  const corporateTagSalesMonthly = useMemo(() => {
+    return sumSeries(sumSeries(tagSalesMonthlyByBrand.MLB, tagSalesMonthlyByBrand['MLB KIDS']), tagSalesMonthlyByBrand.DISCOVERY);
+  }, [tagSalesMonthlyByBrand]);
+
   const salesActualByBrand = useMemo(() => {
     const buildEmpty = () => new Array(12).fill(null) as (number | null)[];
     const result: Record<SalesBrand, { dealerCloth: (number | null)[]; dealerAcc: (number | null)[]; dealer: (number | null)[]; direct: (number | null)[]; total: (number | null)[] }> = {
@@ -887,10 +978,26 @@ export default function PLForecastTab() {
       DISCOVERY: { dealerCloth: buildEmpty(), dealerAcc: buildEmpty(), dealer: buildEmpty(), direct: buildEmpty(), total: buildEmpty() },
     };
     for (const brand of SALES_BRANDS) {
-      const dealerCloth = applyRate(salesChannelByBrand[brand].dealerCloth, SHIPMENT_RATE_PERCENT_BY_CHANNEL.dealerCloth[brand]);
-      const dealerAcc = applyRate(salesChannelByBrand[brand].dealerAcc, SHIPMENT_RATE_PERCENT_BY_CHANNEL.dealerAcc[brand]);
-      const direct = applyRate(salesChannelByBrand[brand].direct, SHIPMENT_RATE_PERCENT_BY_CHANNEL.direct[brand]);
-      const dealer = sumSeries(dealerCloth, dealerAcc);
+      const plannedDealerCloth = applyRate(salesChannelByBrand[brand].dealerCloth, SHIPMENT_RATE_PERCENT_BY_CHANNEL.dealerCloth[brand]);
+      const plannedDealerAcc = applyRate(salesChannelByBrand[brand].dealerAcc, SHIPMENT_RATE_PERCENT_BY_CHANNEL.dealerAcc[brand]);
+      const plannedDealer = sumSeries(plannedDealerCloth, plannedDealerAcc);
+      const plannedDirect = applyRate(salesChannelByBrand[brand].direct, SHIPMENT_RATE_PERCENT_BY_CHANNEL.direct[brand]);
+
+      const dealerCloth = buildEmpty();
+      const dealerAcc = buildEmpty();
+      const dealer = buildEmpty();
+      const direct = buildEmpty();
+      for (let i = 0; i < 12; i += 1) {
+        const actualDealer = brandActualByBrand[brand]?.sales?.dealer?.[i] ?? null;
+        const actualDirect = brandActualByBrand[brand]?.sales?.direct?.[i] ?? null;
+        const dealerValue = actualDealer ?? plannedDealer[i] ?? null;
+        const directValue = actualDirect ?? plannedDirect[i] ?? null;
+        const split = splitByPlannedRatio(dealerValue, plannedDealerCloth[i] ?? null, plannedDealerAcc[i] ?? null);
+        dealer[i] = dealerValue;
+        dealerCloth[i] = split.a;
+        dealerAcc[i] = split.b;
+        direct[i] = directValue;
+      }
       result[brand] = {
         dealerCloth,
         dealerAcc,
@@ -900,7 +1007,7 @@ export default function PLForecastTab() {
       };
     }
     return result;
-  }, [salesChannelByBrand]);
+  }, [salesChannelByBrand, brandActualByBrand]);
 
   const corporateActualSalesChannel = useMemo(() => {
     return {
@@ -941,11 +1048,31 @@ export default function PLForecastTab() {
           next[forecastBrand]['실판매출'] = nextActual;
           changed = true;
         }
+
+        const accountOverrides = brandActualByBrand[salesBrand]?.accounts ?? {};
+        for (const [account, overrideSeries] of Object.entries(accountOverrides)) {
+          if (!RAW_ACCOUNTS.includes(account) || account === 'Tag매출' || account === '실판매출') continue;
+          const current = prev[forecastBrand][account] ?? new Array(12).fill(null);
+          const merged = [...current];
+          let localChanged = false;
+          for (let i = 0; i < 12; i += 1) {
+            const v = overrideSeries?.[i] ?? null;
+            if (v === null) continue;
+            if ((merged[i] ?? null) !== v) {
+              merged[i] = v;
+              localChanged = true;
+            }
+          }
+          if (localChanged) {
+            next[forecastBrand][account] = merged;
+            changed = true;
+          }
+        }
       });
 
       return changed ? next : prev;
     });
-  }, [tagSalesMonthlyByBrand, salesActualByBrand]);
+  }, [tagSalesMonthlyByBrand, salesActualByBrand, brandActualByBrand]);
 
   const visibleSalesRows = useMemo(() => {
     return salesRows.filter((row) => {
@@ -1078,6 +1205,7 @@ export default function PLForecastTab() {
               {visibleRows.map((row) => {
                 const series = getRowSeries(row.account);
                 const annual26 = sumOrNull(series.monthly);
+                const yoyText = formatYoYByAnnual(annual26, series.annual2025);
                 const isGroupCollapsed = row.isGroup && collapsed.has(row.account);
                 const accountLabel = ACCOUNT_LABEL_OVERRIDES[row.account] ?? row.account;
                 const isProfitFocusRow = ['매출총이익', '영업이익', '영업이익률'].includes(row.account);
@@ -1124,12 +1252,51 @@ export default function PLForecastTab() {
                     <td className={`border-b border-r border-slate-200 px-3 py-2.5 text-right font-medium text-slate-800 ${isProfitFocusRow ? 'bg-sky-100' : 'bg-slate-50'}`}>
                       {formatValue(annual26, row.format)}
                     </td>
-                    <td className={`border-b border-slate-200 px-3 py-2.5 text-right text-slate-400 ${isProfitFocusRow ? 'bg-sky-100' : 'bg-slate-50'}`}>-</td>
+                    <td className={`border-b border-slate-200 px-3 py-2.5 text-right text-slate-500 ${isProfitFocusRow ? 'bg-sky-100' : 'bg-slate-50'}`}>{yoyText}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-slate-200 bg-white/85 px-4 py-3 text-xs text-slate-600 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setLogicGuideCollapsed((prev) => !prev)}
+            className="flex w-full items-center justify-between text-left"
+          >
+            <span className="font-semibold text-slate-700">반영 로직 안내</span>
+            <span className="text-slate-500">{logicGuideCollapsed ? '펼치기' : '접기'}</span>
+          </button>
+          {!logicGuideCollapsed && (
+            <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
+                <div>1. `m월` CSV 존재 여부 확인</div>
+                <div className="mt-0.5">파일: `보조파일(simu)/pl_brand_actual_K/2026-mm.csv`</div>
+                <div className="mt-1">2. `Tag매출` 계산</div>
+                <div className="mt-0.5">`Tag(대리상,m) = CSV값 있으면 CSV, 없으면 계획값`</div>
+                <div className="mt-0.5">`Tag(직영,m) = CSV값 있으면 CSV, 없으면 계획값`</div>
+                <div className="mt-0.5">`Tag(의류,m) = Tag(대리상,m) × [계획의류(m)/(계획의류(m)+계획ACC(m))]`</div>
+                <div className="mt-0.5">`Tag(ACC,m) = Tag(대리상,m) - Tag(의류,m)`</div>
+                <div className="mt-0.5">`Tag(총,m) = Tag(대리상,m) + Tag(직영,m)`</div>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
+                <div>3. `실판매출` 계산</div>
+                <div className="mt-0.5">`실판(대리상,m) = CSV값 있으면 CSV, 없으면 [Tag(의류,m)×의류출고율 + Tag(ACC,m)×ACC출고율]`</div>
+                <div className="mt-0.5">`실판(직영,m) = CSV값 있으면 CSV, 없으면 Tag(직영,m)×직영출고율`</div>
+                <div className="mt-0.5">`실판(의류,m) = 실판(대리상,m) × [계획실판의류(m)/(계획실판의류(m)+계획실판ACC(m))]`</div>
+                <div className="mt-0.5">`실판(ACC,m) = 실판(대리상,m) - 실판(의류,m)`</div>
+                <div className="mt-0.5">`실판(총,m) = 실판(대리상,m) + 실판(직영,m)`</div>
+                <div className="mt-1">4. 출고율(브랜드별 고정)</div>
+                <div className="mt-0.5">의류: MLB 42%, MLB KIDS 42%, DISCOVERY 45%</div>
+                <div className="mt-0.5">ACC: MLB 47%, MLB KIDS 42%, DISCOVERY 45%</div>
+                <div className="mt-0.5">직영: 10%</div>
+                <div className="mt-1">5. 비용계정(매출원가~기타(영업비))</div>
+                <div className="mt-0.5">`계정(m) = CSV값 있으면 CSV, 없으면 기존 계획값`</div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50/85 shadow-sm">
@@ -1158,8 +1325,9 @@ export default function PLForecastTab() {
                   </div>
                   {otbLoading && <div className="text-xs text-slate-500">OTB 불러오는 중...</div>}
                   {retailLoading && <div className="text-xs text-slate-500">직영 매출 불러오는 중...</div>}
-                  {(otbError || retailError) && (
-                    <div className="text-xs text-red-500">{otbError || retailError}</div>
+                  {brandActualLoading && <div className="text-xs text-slate-500">실적 CSV 불러오는 중...</div>}
+                  {(otbError || retailError || brandActualError) && (
+                    <div className="text-xs text-red-500">{otbError || retailError || brandActualError}</div>
                   )}
                 </div>
               </div>
