@@ -317,6 +317,27 @@ export default function InventoryDashboard() {
   const [growthRate, setGrowthRate] = useState<number>(5);
   const [growthRateHq, setGrowthRateHq] = useState<number>(10);
 
+  const publishDealerAccSellIn = useCallback((nextMap: Record<'MLB' | 'MLB KIDS' | 'DISCOVERY', number>) => {
+    if (typeof window === 'undefined') return;
+    const payload = {
+      values: nextMap,
+      updatedAt: Date.now(),
+    };
+    localStorage.setItem('inventory_dealer_acc_sellin', JSON.stringify(payload));
+    window.dispatchEvent(new CustomEvent('inventory-dealer-acc-sellin-updated', { detail: payload }));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const payload = {
+      growthRate,
+      growthRateHq,
+      updatedAt: Date.now(),
+    };
+    localStorage.setItem('inventory_growth_params', JSON.stringify(payload));
+    window.dispatchEvent(new CustomEvent('inventory-growth-updated', { detail: payload }));
+  }, [growthRate, growthRateHq]);
+
   // 湲곗〈 Sell-in/Sell-out ???곗씠??
   const [data, setData] = useState<InventoryApiResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -919,6 +940,36 @@ export default function InventoryDashboard() {
   const hqTableData = shouldUseTopTableOnly
     ? (topTableData?.hq ?? null)
     : (topTableData?.hq ?? data?.hq ?? null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || year !== 2026 || !dealerTableData) return;
+    if (brand !== 'MLB' && brand !== 'MLB KIDS' && brand !== 'DISCOVERY') return;
+
+    const accRow = dealerTableData.rows.find((r) => r.key === 'ACC합계');
+    if (!accRow) return;
+
+    const currentRaw = localStorage.getItem('inventory_dealer_acc_sellin');
+    let currentValues: Record<'MLB' | 'MLB KIDS' | 'DISCOVERY', number> = {
+      MLB: 0,
+      'MLB KIDS': 0,
+      DISCOVERY: 0,
+    };
+    try {
+      const parsed = currentRaw ? JSON.parse(currentRaw) : null;
+      if (parsed?.values) {
+        currentValues = {
+          MLB: Number(parsed.values.MLB) || 0,
+          'MLB KIDS': Number(parsed.values['MLB KIDS']) || 0,
+          DISCOVERY: Number(parsed.values.DISCOVERY) || 0,
+        };
+      }
+    } catch {
+      // ignore parse errors and overwrite with fresh value below
+    }
+
+    const nextValues = { ...currentValues, [brand]: accRow.sellInTotal };
+    publishDealerAccSellIn(nextValues);
+  }, [year, brand, dealerTableData, publishDealerAccSellIn]);
 
   // 2026 YOY: 전년(2025) 테이블 구성 → 재고자산합계 sellIn/sellOut/hqSales 추출
   const prevYearTableData = useMemo(() => {

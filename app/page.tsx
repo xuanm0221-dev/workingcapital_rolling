@@ -16,6 +16,7 @@ import BSAnalysis from '@/components/BSAnalysis';
 import ExecutiveSummary from '@/components/ExecutiveSummary';
 import { TableRow, CreditData, CreditRecoveryData, TabType, ExecutiveSummaryData } from '@/lib/types';
 import InventoryDashboard from '@/components/inventory/InventoryDashboard';
+import PLForecastTab from '@/components/pl-forecast/PLForecastTab';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<number>(5);
@@ -185,7 +186,7 @@ export default function Home() {
     { id: 'supra', label: 'SUPRA' },
   ];
 
-  const tabs = ['경영요약', '손익계산서', '재무상태표', '현금흐름표', '여신사용현황', '재고자산'];
+  const tabs = ['경영요약', '손익계산서', '재무상태표', '현금흐름표', '여신사용현황', '재고자산', 'PL(FY26 FCST)'];
   const tabTypes: TabType[] = ['SUMMARY', 'PL', 'BS', 'CF', 'CREDIT', 'INVENTORY'];
 
   // 데이터 로딩
@@ -772,6 +773,7 @@ export default function Home() {
 
         {/* 재고자산 */}
         {activeTab === 5 && <InventoryDashboard />}
+        {activeTab === 6 && <PLForecastTab />}
       </div>
     </main>
   );
