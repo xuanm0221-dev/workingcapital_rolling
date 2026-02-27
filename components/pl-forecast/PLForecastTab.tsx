@@ -91,6 +91,11 @@ interface BrandActualApiResponse {
   error?: string;
 }
 
+interface OpexForecastApiResponse {
+  brands: Record<SalesBrand, Record<string, (number | null)[]>>;
+  error?: string;
+}
+
 const INVENTORY_DEALER_ACC_SELLIN_KEY = 'inventory_dealer_acc_sellin';
 
 interface DealerAccSellInPayload {
@@ -352,7 +357,7 @@ function readInventoryGrowthParams(): InventoryGrowthParams {
 
 export default function PLForecastTab() {
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set(['Tag매출', '매출원가 합계', '직접비', '영업비']));
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set(['Tag매출', '실판매출', '매출원가 합계', '직접비', '영업비']));
   const [logicGuideCollapsed, setLogicGuideCollapsed] = useState<boolean>(true);
   const [monthlyInputs, setMonthlyInputs] = useState<MonthlyInputs>(emptyMonthlyInputs);
   const [salesSectionOpen, setSalesSectionOpen] = useState<boolean>(false);
@@ -385,6 +390,13 @@ export default function PLForecastTab() {
     MLB: { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
     'MLB KIDS': { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
     DISCOVERY: { tag: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, sales: { dealer: new Array(12).fill(null), direct: new Array(12).fill(null) }, accounts: {} },
+  });
+  const [opexForecastLoading, setOpexForecastLoading] = useState<boolean>(false);
+  const [opexForecastError, setOpexForecastError] = useState<string | null>(null);
+  const [opexForecastByBrand, setOpexForecastByBrand] = useState<Record<SalesBrand, Record<string, (number | null)[]>>>({
+    MLB: {},
+    'MLB KIDS': {},
+    DISCOVERY: {},
   });
 
   useEffect(() => {
@@ -485,6 +497,37 @@ export default function PLForecastTab() {
       }
     };
     fetchBrandActual();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchOpexForecast = async () => {
+      setOpexForecastLoading(true);
+      setOpexForecastError(null);
+      try {
+        const res = await fetch('/api/pl-forecast/opex-forecast?year=2026', { cache: 'no-store' });
+        const json = (await res.json()) as OpexForecastApiResponse;
+        if (!res.ok) throw new Error(json?.error || '영업비 계획 데이터를 불러오지 못했습니다.');
+        if (!mounted) return;
+        setOpexForecastByBrand(
+          json.brands ?? {
+            MLB: {},
+            'MLB KIDS': {},
+            DISCOVERY: {},
+          },
+        );
+      } catch (err) {
+        if (mounted) {
+          setOpexForecastError(err instanceof Error ? err.message : '영업비 계획 데이터를 불러오지 못했습니다.');
+        }
+      } finally {
+        if (mounted) setOpexForecastLoading(false);
+      }
+    };
+    fetchOpexForecast();
     return () => {
       mounted = false;
     };
@@ -758,7 +801,8 @@ export default function PLForecastTab() {
         nextArr[monthIndex] = null;
       } else {
         const parsed = Number(raw.replace(/,/g, ''));
-        nextArr[monthIndex] = Number.isFinite(parsed) ? parsed : nextArr[monthIndex];
+        // PL table input unit is CNY K; internal calculations use base CNY.
+        nextArr[monthIndex] = Number.isFinite(parsed) ? parsed * 1000 : nextArr[monthIndex];
       }
       next[brand][account] = nextArr;
       return next;
@@ -772,8 +816,9 @@ export default function PLForecastTab() {
 
     const brandKey = activeBrand as ForecastLeafBrand;
     const editable = RAW_ACCOUNTS.includes(row.account) && !row.isGroup && !row.isCalculated;
+    const isActualLockedMonth = monthIndex === 0; // 1월은 실적월로 고정
 
-    if (!editable) {
+    if (!editable || isActualLockedMonth) {
       return <span>{formatValue(getRowSeries(row.account).monthly[monthIndex], row.format)}</span>;
     }
 
@@ -782,7 +827,7 @@ export default function PLForecastTab() {
       <input
         type="text"
         inputMode="numeric"
-        value={value === null ? '' : String(value)}
+        value={value === null ? '' : String(Math.round(value / 1000))}
         onChange={(e) => updateInput(brandKey, row.account, monthIndex, e.target.value)}
         className="w-full rounded-md border border-transparent bg-white/80 px-1.5 py-1 text-right outline-none transition-all focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-100"
       />
@@ -1068,11 +1113,34 @@ export default function PLForecastTab() {
             changed = true;
           }
         }
+
+        const opexForecast = opexForecastByBrand[salesBrand] ?? {};
+        for (const account of OPERATING_EXPENSE_ACCOUNTS) {
+          const forecastSeries = opexForecast[account];
+          if (!forecastSeries) continue;
+          const actualSeries = accountOverrides[account] ?? new Array(12).fill(null);
+          const current = next[forecastBrand][account] ?? new Array(12).fill(null);
+          const merged = [...current];
+          let localChanged = false;
+          for (let i = 1; i < 12; i += 1) {
+            if (actualSeries[i] !== null && actualSeries[i] !== undefined) continue;
+            const fv = forecastSeries[i] ?? null;
+            if (fv === null) continue;
+            if ((merged[i] ?? null) !== fv) {
+              merged[i] = fv;
+              localChanged = true;
+            }
+          }
+          if (localChanged) {
+            next[forecastBrand][account] = merged;
+            changed = true;
+          }
+        }
       });
 
       return changed ? next : prev;
     });
-  }, [tagSalesMonthlyByBrand, salesActualByBrand, brandActualByBrand]);
+  }, [tagSalesMonthlyByBrand, salesActualByBrand, brandActualByBrand, opexForecastByBrand]);
 
   const visibleSalesRows = useMemo(() => {
     return salesRows.filter((row) => {
@@ -1326,8 +1394,9 @@ export default function PLForecastTab() {
                   {otbLoading && <div className="text-xs text-slate-500">OTB 불러오는 중...</div>}
                   {retailLoading && <div className="text-xs text-slate-500">직영 매출 불러오는 중...</div>}
                   {brandActualLoading && <div className="text-xs text-slate-500">실적 CSV 불러오는 중...</div>}
-                  {(otbError || retailError || brandActualError) && (
-                    <div className="text-xs text-red-500">{otbError || retailError || brandActualError}</div>
+                  {opexForecastLoading && <div className="text-xs text-slate-500">영업비 계획 CSV 불러오는 중...</div>}
+                  {(otbError || retailError || brandActualError || opexForecastError) && (
+                    <div className="text-xs text-red-500">{otbError || retailError || brandActualError || opexForecastError}</div>
                   )}
                 </div>
               </div>
