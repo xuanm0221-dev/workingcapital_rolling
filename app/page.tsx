@@ -187,6 +187,10 @@ export default function Home() {
   ];
 
   const tabs = ['경영요약', '손익계산서', '재무상태표', '현금흐름표', '여신사용현황', '재고자산', 'PL(FY26 FCST)'];
+  const tabGroups = [
+    { id: 'group1', label: '그룹1', tabIndexes: [0, 1, 2, 3, 4] },
+    { id: 'group2', label: '그룹2', tabIndexes: [5, 6] },
+  ];
   const tabTypes: TabType[] = ['SUMMARY', 'PL', 'BS', 'CF', 'CREDIT', 'INVENTORY'];
 
   // 데이터 로딩
@@ -517,7 +521,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* 상단 탭 */}
-      <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+      <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} groups={tabGroups} />
 
       {/* 내용 - 상단 탭 높이만큼 패딩 추가 */}
       <div className="p-0 pt-16">
